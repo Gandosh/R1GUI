@@ -1,0 +1,12 @@
+# Build outputs and local machine state
+build/
+out/
+*.user
+.vs/
+.vscode/
+Goal/evidence/*.local.*
+tools/build/*.local.cmd
+
+# Read-only reference checkouts and throwaway artifacts (never build inputs)
+reference/
+scratch/
