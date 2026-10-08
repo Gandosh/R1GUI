@@ -1,0 +1,2210 @@
+{
+  "source": "OpenPencil",
+  "commit": "dd3161e44",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "widgets": {
+    "dark/menubar-item": {
+      "rect": {
+        "x": 4,
+        "y": 36,
+        "width": 35.90625,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(136, 136, 136)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(136, 136, 136)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "4px",
+        "paddingRight": "8px",
+        "paddingBottom": "4px",
+        "paddingLeft": "8px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(53, 53, 53)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "4px",
+            "paddingRight": "8px",
+            "paddingBottom": "4px",
+            "paddingLeft": "8px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "dark/segmented-control": {
+      "rect": {
+        "x": 11,
+        "y": 73,
+        "width": 117.09375,
+        "height": 22
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "lineHeight": "16.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgb(52, 64, 84)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(224, 224, 224)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "6px",
+        "paddingBottom": "0px",
+        "paddingLeft": "6px",
+        "gap": "4px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "400",
+            "lineHeight": "16.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(52, 64, 84)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "6px",
+            "paddingBottom": "0px",
+            "paddingLeft": "6px",
+            "gap": "4px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "dark/page-row": {
+      "rect": {
+        "x": 4,
+        "y": 132.5,
+        "width": 250.203125,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgb(53, 53, 53)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(224, 224, 224)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "4px",
+        "paddingRight": "8px",
+        "paddingBottom": "4px",
+        "paddingLeft": "8px",
+        "gap": "6px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(53, 53, 53)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "4px",
+            "paddingRight": "8px",
+            "paddingBottom": "4px",
+            "paddingLeft": "8px",
+            "gap": "6px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "dark/tab-design": {
+      "rect": {
+        "x": 1189.796875,
+        "y": 48.5,
+        "width": 59.359375,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "600",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(224, 224, 224)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "4px",
+        "paddingRight": "10px",
+        "paddingBottom": "4px",
+        "paddingLeft": "10px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "4px",
+            "paddingRight": "10px",
+            "paddingBottom": "4px",
+            "paddingLeft": "10px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "dark/tab-code": {
+      "rect": {
+        "x": 1253.15625,
+        "y": 48.5,
+        "width": 66.3125,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(136, 136, 136)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(136, 136, 136)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "4px",
+        "paddingRight": "10px",
+        "paddingBottom": "4px",
+        "paddingLeft": "10px",
+        "gap": "4px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "4px",
+            "paddingRight": "10px",
+            "paddingBottom": "4px",
+            "paddingLeft": "10px",
+            "gap": "4px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "dark/share-button": {
+      "rect": {
+        "x": 1357.140625,
+        "y": 6,
+        "width": 76.859375,
+        "height": 28
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(255, 255, 255)",
+        "backgroundColor": "rgb(59, 130, 246)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(255, 255, 255)",
+        "borderTopLeftRadius": "6px",
+        "paddingTop": "0px",
+        "paddingRight": "12px",
+        "paddingBottom": "0px",
+        "paddingLeft": "12px",
+        "gap": "6px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "500",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(255, 255, 255)",
+            "backgroundColor": "oklab(0.623066 -0.0332245 -0.185038 / 0.9)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(255, 255, 255)",
+            "borderTopLeftRadius": "6px",
+            "paddingTop": "0px",
+            "paddingRight": "12px",
+            "paddingBottom": "0px",
+            "paddingLeft": "12px",
+            "gap": "6px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "dark/toolbar-button": {
+      "rect": {
+        "x": 552.5,
+        "y": 847,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(255, 255, 255)",
+        "backgroundColor": "rgb(59, 130, 246)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(255, 255, 255)",
+        "borderTopLeftRadius": "8px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(255, 255, 255)",
+            "backgroundColor": "rgb(59, 130, 246)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(255, 255, 255)",
+            "borderTopLeftRadius": "8px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "dark/toolbar-button-active-theme": {
+      "rect": {
+        "x": 1127.796875,
+        "y": 847,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgb(53, 53, 53)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(224, 224, 224)",
+        "borderTopLeftRadius": "6px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(53, 53, 53)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "6px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "dark/icon-button-panel": {
+      "rect": {
+        "x": 1346,
+        "y": 213,
+        "width": 26,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(136, 136, 136)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(53, 53, 53)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "dark/icon-button-small": {
+      "rect": {
+        "x": 1262.890625,
+        "y": 276,
+        "width": 20,
+        "height": 20
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(136, 136, 136)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "dark/number-field-x": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 181,
+        "width": 114.09375,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgb(51, 51, 51)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "ew-resize"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(59, 59, 59)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "ew-resize"
+          }
+        }
+      ]
+    },
+    "dark/number-field-width": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 273,
+        "width": 114.09375,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgb(51, 51, 51)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "ew-resize"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(59, 59, 59)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "ew-resize"
+          }
+        }
+      ]
+    },
+    "dark/number-field-opacity": {
+      "rect": {
+        "x": 1313.890625,
+        "y": 363,
+        "width": 114.109375,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgb(51, 51, 51)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "ew-resize"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(59, 59, 59)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "ew-resize"
+          }
+        }
+      ]
+    },
+    "dark/select-trigger": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 363,
+        "width": 114.09375,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgb(51, 51, 51)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "6px",
+        "paddingBottom": "0px",
+        "paddingLeft": "6px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(59, 59, 59)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "6px",
+            "paddingBottom": "0px",
+            "paddingLeft": "6px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "dark/paint-field": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 534,
+        "width": 174.203125,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgb(30, 30, 30)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgb(58, 58, 58)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "auto"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(30, 30, 30)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgb(58, 58, 58)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "auto"
+          }
+        }
+      ]
+    },
+    "dark/panel-header-rectangle": {
+      "rect": {
+        "x": 1181.796875,
+        "y": 81,
+        "width": 258.203125,
+        "height": 43
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(58, 58, 58)",
+        "borderTopLeftRadius": "0px",
+        "paddingTop": "8px",
+        "paddingRight": "12px",
+        "paddingBottom": "8px",
+        "paddingLeft": "12px",
+        "gap": "6px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "auto"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(58, 58, 58)",
+            "borderTopLeftRadius": "0px",
+            "paddingTop": "8px",
+            "paddingRight": "12px",
+            "paddingBottom": "8px",
+            "paddingLeft": "12px",
+            "gap": "6px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "auto"
+          }
+        }
+      ]
+    },
+    "dark/panel-section-title": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 256,
+        "width": 234.203125,
+        "height": 11
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "600",
+        "lineHeight": "11px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(224, 224, 224)",
+        "borderTopLeftRadius": "0px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "600",
+            "lineHeight": "11px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "0px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "dark/panel-field-label": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 348,
+        "width": 114.09375,
+        "height": 11
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "lineHeight": "11px",
+        "letterSpacing": "normal",
+        "color": "rgb(136, 136, 136)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(136, 136, 136)",
+        "borderTopLeftRadius": "0px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "400",
+            "lineHeight": "11px",
+            "letterSpacing": "normal",
+            "color": "rgb(136, 136, 136)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(136, 136, 136)",
+            "borderTopLeftRadius": "0px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "dark/layer-row-selected": {
+      "rect": {
+        "x": 4,
+        "y": 375.296875,
+        "width": 250.203125,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(224, 224, 224)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(224, 224, 224)",
+        "borderTopLeftRadius": "0px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "auto"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "0px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "auto"
+          }
+        }
+      ]
+    },
+    "dark/section-add-button": {
+      "rect": {
+        "x": 1402,
+        "y": 500,
+        "width": 26,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "14px",
+        "letterSpacing": "normal",
+        "color": "rgb(136, 136, 136)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(136, 136, 136)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "14px",
+            "fontWeight": "400",
+            "lineHeight": "14px",
+            "letterSpacing": "normal",
+            "color": "rgb(224, 224, 224)",
+            "backgroundColor": "rgb(53, 53, 53)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(224, 224, 224)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/menubar-item": {
+      "rect": {
+        "x": 4,
+        "y": 36,
+        "width": 35.90625,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(107, 114, 128)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(107, 114, 128)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "4px",
+        "paddingRight": "8px",
+        "paddingBottom": "4px",
+        "paddingLeft": "8px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(238, 241, 245)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "4px",
+            "paddingRight": "8px",
+            "paddingBottom": "4px",
+            "paddingLeft": "8px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/segmented-control": {
+      "rect": {
+        "x": 11,
+        "y": 73,
+        "width": 117.09375,
+        "height": 22
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "lineHeight": "16.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgb(229, 231, 235)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(32, 33, 36)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "6px",
+        "paddingBottom": "0px",
+        "paddingLeft": "6px",
+        "gap": "4px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "400",
+            "lineHeight": "16.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(229, 231, 235)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "6px",
+            "paddingBottom": "0px",
+            "paddingLeft": "6px",
+            "gap": "4px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/page-row": {
+      "rect": {
+        "x": 4,
+        "y": 132.5,
+        "width": 250.203125,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgb(238, 241, 245)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(32, 33, 36)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "4px",
+        "paddingRight": "8px",
+        "paddingBottom": "4px",
+        "paddingLeft": "8px",
+        "gap": "6px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(238, 241, 245)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "4px",
+            "paddingRight": "8px",
+            "paddingBottom": "4px",
+            "paddingLeft": "8px",
+            "gap": "6px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/tab-design": {
+      "rect": {
+        "x": 1189.796875,
+        "y": 48.5,
+        "width": 59.359375,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "600",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(32, 33, 36)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "4px",
+        "paddingRight": "10px",
+        "paddingBottom": "4px",
+        "paddingLeft": "10px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "4px",
+            "paddingRight": "10px",
+            "paddingBottom": "4px",
+            "paddingLeft": "10px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "light/tab-code": {
+      "rect": {
+        "x": 1253.15625,
+        "y": 48.5,
+        "width": 66.3125,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(107, 114, 128)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(107, 114, 128)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "4px",
+        "paddingRight": "10px",
+        "paddingBottom": "4px",
+        "paddingLeft": "10px",
+        "gap": "4px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "4px",
+            "paddingRight": "10px",
+            "paddingBottom": "4px",
+            "paddingLeft": "10px",
+            "gap": "4px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "light/share-button": {
+      "rect": {
+        "x": 1357.140625,
+        "y": 6,
+        "width": 76.859375,
+        "height": 28
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "500",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(255, 255, 255)",
+        "backgroundColor": "rgb(37, 99, 235)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(255, 255, 255)",
+        "borderTopLeftRadius": "6px",
+        "paddingTop": "0px",
+        "paddingRight": "12px",
+        "paddingBottom": "0px",
+        "paddingLeft": "12px",
+        "gap": "6px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "500",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(255, 255, 255)",
+            "backgroundColor": "oklab(0.54613 -0.0266538 -0.213537 / 0.9)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(255, 255, 255)",
+            "borderTopLeftRadius": "6px",
+            "paddingTop": "0px",
+            "paddingRight": "12px",
+            "paddingBottom": "0px",
+            "paddingLeft": "12px",
+            "gap": "6px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/toolbar-button": {
+      "rect": {
+        "x": 552.5,
+        "y": 847,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(255, 255, 255)",
+        "backgroundColor": "rgb(37, 99, 235)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(255, 255, 255)",
+        "borderTopLeftRadius": "8px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(255, 255, 255)",
+            "backgroundColor": "rgb(37, 99, 235)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(255, 255, 255)",
+            "borderTopLeftRadius": "8px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/toolbar-button-active-theme": {
+      "rect": {
+        "x": 1127.796875,
+        "y": 847,
+        "width": 32,
+        "height": 32
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(107, 114, 128)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(107, 114, 128)",
+        "borderTopLeftRadius": "6px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(238, 241, 245)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "6px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "light/icon-button-panel": {
+      "rect": {
+        "x": 1346,
+        "y": 213,
+        "width": 26,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(107, 114, 128)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(238, 241, 245)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/icon-button-small": {
+      "rect": {
+        "x": 1262.890625,
+        "y": 276,
+        "width": 20,
+        "height": 20
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(107, 114, 128)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/number-field-x": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 181,
+        "width": 114.09375,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgb(240, 241, 243)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "ew-resize"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(231, 233, 237)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "ew-resize"
+          }
+        }
+      ]
+    },
+    "light/number-field-width": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 273,
+        "width": 114.09375,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgb(240, 241, 243)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "ew-resize"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(231, 233, 237)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "ew-resize"
+          }
+        }
+      ]
+    },
+    "light/number-field-opacity": {
+      "rect": {
+        "x": 1313.890625,
+        "y": 363,
+        "width": 114.109375,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgb(240, 241, 243)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "ew-resize"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(231, 233, 237)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "ew-resize"
+          }
+        }
+      ]
+    },
+    "light/select-trigger": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 363,
+        "width": 114.09375,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgb(240, 241, 243)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "6px",
+        "paddingBottom": "0px",
+        "paddingLeft": "6px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(231, 233, 237)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgba(0, 0, 0, 0)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "6px",
+            "paddingBottom": "0px",
+            "paddingLeft": "6px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "light/paint-field": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 534,
+        "width": 174.203125,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgb(255, 255, 255)",
+        "borderTopWidth": "1px",
+        "borderTopColor": "rgb(216, 220, 227)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "auto"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(255, 255, 255)",
+            "borderTopWidth": "1px",
+            "borderTopColor": "rgb(216, 220, 227)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "auto"
+          }
+        }
+      ]
+    },
+    "light/panel-header-rectangle": {
+      "rect": {
+        "x": 1181.796875,
+        "y": 81,
+        "width": 258.203125,
+        "height": 43
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(216, 220, 227)",
+        "borderTopLeftRadius": "0px",
+        "paddingTop": "8px",
+        "paddingRight": "12px",
+        "paddingBottom": "8px",
+        "paddingLeft": "12px",
+        "gap": "6px",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "auto"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(216, 220, 227)",
+            "borderTopLeftRadius": "0px",
+            "paddingTop": "8px",
+            "paddingRight": "12px",
+            "paddingBottom": "8px",
+            "paddingLeft": "12px",
+            "gap": "6px",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "auto"
+          }
+        }
+      ]
+    },
+    "light/panel-section-title": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 256,
+        "width": 234.203125,
+        "height": 11
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "600",
+        "lineHeight": "11px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(32, 33, 36)",
+        "borderTopLeftRadius": "0px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "600",
+            "lineHeight": "11px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "0px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    },
+    "light/panel-field-label": {
+      "rect": {
+        "x": 1193.796875,
+        "y": 348,
+        "width": 114.09375,
+        "height": 11
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "11px",
+        "fontWeight": "400",
+        "lineHeight": "11px",
+        "letterSpacing": "normal",
+        "color": "rgb(107, 114, 128)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(107, 114, 128)",
+        "borderTopLeftRadius": "0px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "default"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "11px",
+            "fontWeight": "400",
+            "lineHeight": "11px",
+            "letterSpacing": "normal",
+            "color": "rgb(107, 114, 128)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(107, 114, 128)",
+            "borderTopLeftRadius": "0px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "default"
+          }
+        }
+      ]
+    },
+    "light/layer-row-selected": {
+      "rect": {
+        "x": 4,
+        "y": 375.296875,
+        "width": 250.203125,
+        "height": 24
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "19.5px",
+        "letterSpacing": "normal",
+        "color": "rgb(32, 33, 36)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(32, 33, 36)",
+        "borderTopLeftRadius": "0px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "auto"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "13px",
+            "fontWeight": "400",
+            "lineHeight": "19.5px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "0px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "auto"
+          }
+        }
+      ]
+    },
+    "light/section-add-button": {
+      "rect": {
+        "x": 1402,
+        "y": 500,
+        "width": 26,
+        "height": 26
+      },
+      "style": {
+        "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "14px",
+        "letterSpacing": "normal",
+        "color": "rgb(107, 114, 128)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderTopWidth": "0px",
+        "borderTopColor": "rgb(107, 114, 128)",
+        "borderTopLeftRadius": "4px",
+        "paddingTop": "0px",
+        "paddingRight": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "gap": "normal",
+        "boxShadow": "none",
+        "opacity": "1",
+        "textTransform": "none",
+        "cursor": "pointer"
+      },
+      "states": [
+        {
+          "state": "hover",
+          "style": {
+            "fontFamily": "Inter, system-ui, -apple-system, sans-serif",
+            "fontSize": "14px",
+            "fontWeight": "400",
+            "lineHeight": "14px",
+            "letterSpacing": "normal",
+            "color": "rgb(32, 33, 36)",
+            "backgroundColor": "rgb(238, 241, 245)",
+            "borderTopWidth": "0px",
+            "borderTopColor": "rgb(32, 33, 36)",
+            "borderTopLeftRadius": "4px",
+            "paddingTop": "0px",
+            "paddingRight": "0px",
+            "paddingBottom": "0px",
+            "paddingLeft": "0px",
+            "gap": "normal",
+            "boxShadow": "none",
+            "opacity": "1",
+            "textTransform": "none",
+            "cursor": "pointer"
+          }
+        }
+      ]
+    }
+  }
+}

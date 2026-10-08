@@ -30,13 +30,13 @@ Evidence files are created when a slice is worked: `Goal/evidence/P<phase>_S<nn>
 
 ## Phase 1: Visual spec extraction
 
-- [ ] 1.1 [Export OpenPencil design tokens to one neutral tokens.json](Goal/evidence/P1_S01.md)
-- [ ] 1.2 [Widget catalogue widgets.md: states, sizes, behaviors for every widget](Goal/evidence/P1_S02.md)
-- [ ] 1.3 [Reference screenshot set from Storybook, per widget and state](Goal/evidence/P1_S03.md)
-- [ ] 1.4 [Icon pipeline decision and Lucide atlas/font build](Goal/evidence/P1_S04.md)
-- [ ] 1.5 [Font files and metrics captured for pixel-matching text](Goal/evidence/P1_S05.md)
-- [ ] 1.6 [Pixel-comparison method: diff tool and tolerance defined](Goal/evidence/P1_S06.md)
-- [ ] 1.7 [Preview: token and reference-screenshot viewer](Goal/evidence/P1_S07.md)
+- [x] 1.1 [Export OpenPencil design tokens to one neutral tokens.json](Goal/evidence/P1_S01.md)
+- [x] 1.2 [Widget catalogue widgets.md: states, sizes, behaviors for every widget](Goal/evidence/P1_S02.md)
+- [x] 1.3 [Reference screenshot set from Storybook, per widget and state](Goal/evidence/P1_S03.md)
+- [x] 1.4 [Icon pipeline decision and Lucide atlas/font build](Goal/evidence/P1_S04.md)
+- [x] 1.5 [Font files and metrics captured for pixel-matching text](Goal/evidence/P1_S05.md)
+- [x] 1.6 [Pixel-comparison method: diff tool and tolerance defined](Goal/evidence/P1_S06.md)
+- [x] 1.7 [Preview: token and reference-screenshot viewer](Goal/evidence/P1_S07.md)
 
 **P1 owner gate: PENDING** — [phase close record](Goal/evidence/P1_close.md)
 

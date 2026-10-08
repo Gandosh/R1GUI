@@ -7,7 +7,7 @@ if(NOT Vulkan_FOUND)
   return()
 endif()
 
-add_library(ui-render STATIC vulkan/Renderer.cpp)
+add_library(ui-render STATIC vulkan/Renderer.cpp vulkan/GpuResources.cpp)
 add_library(r1ui::render ALIAS ui-render)
 target_include_directories(ui-render PUBLIC include)
 target_compile_definitions(ui-render PRIVATE VK_USE_PLATFORM_WIN32_KHR)

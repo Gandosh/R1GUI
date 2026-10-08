@@ -1,6 +1,6 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the Win32 implementation of r1ui::platform::Window (class registration, window proc,
-//   per-monitor-v2 DPI awareness, size/mouse/key state).
+//   per-monitor-v2 DPI awareness, size/mouse/key state, bounded key and click queues).
 // Why: first backend for Windows-first delivery; behind the neutral Window.h interface.
 // Callers: any module via Window.h. Calls: user32/kernel32 only.
 // Lifetime: Impl owns the HWND and destroys it in the Window destructor; the window proc
@@ -11,6 +11,8 @@
 #include <windowsx.h>
 
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 #include "r1ui/core/CheckedCast.h"
 
@@ -43,6 +45,15 @@ struct Window::Impl {
   bool escape = false;
   float mouseX = 0.0f;
   float mouseY = 0.0f;
+  std::vector<KeyEvent> keyQueue;
+  std::vector<MouseClick> clickQueue;
+
+  // Appends to a queue, dropping the oldest entry once the bound is reached.
+  template <class T>
+  static void push(std::vector<T>& queue, const T& item) {
+    if (queue.size() >= kMaxQueuedEvents) queue.erase(queue.begin());
+    queue.push_back(item);
+  }
 
   static LRESULT CALLBACK proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     auto* self = reinterpret_cast<Impl*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
@@ -57,8 +68,14 @@ struct Window::Impl {
           self->mouseX = static_cast<float>(GET_X_LPARAM(lp));
           self->mouseY = static_cast<float>(GET_Y_LPARAM(lp));
           return 0;
+        case WM_LBUTTONDOWN:
+          self->mouseX = static_cast<float>(GET_X_LPARAM(lp));
+          self->mouseY = static_cast<float>(GET_Y_LPARAM(lp));
+          push(self->clickQueue, MouseClick{self->mouseX, self->mouseY});
+          return 0;
         case WM_KEYDOWN:
           if (wp == VK_ESCAPE) self->escape = true;
+          if (wp <= 0xFF) push(self->keyQueue, KeyEvent{static_cast<uint32_t>(wp)});
           return 0;
         case WM_CLOSE:
           self->closed = true;
@@ -127,6 +144,8 @@ bool Window::consumeResized() {
 float Window::mouseX() const { return impl_->mouseX; }
 float Window::mouseY() const { return impl_->mouseY; }
 bool Window::escapePressed() const { return impl_->escape; }
+std::vector<KeyEvent> Window::takeKeyEvents() { return std::exchange(impl_->keyQueue, {}); }
+std::vector<MouseClick> Window::takeMouseClicks() { return std::exchange(impl_->clickQueue, {}); }
 void Window::setTitle(const std::string& utf8Title) {
   SetWindowTextW(impl_->hwnd, widen(utf8Title).c_str());
 }

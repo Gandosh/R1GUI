@@ -6,10 +6,32 @@
 // Invariants: all calls happen on the thread that created the window (the UI thread).
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace r1ui::platform {
+
+// Windows virtual-key codes for the keys the toolkit reacts to (stable across backends: other
+// backends translate their native codes to these values).
+namespace keys {
+inline constexpr uint32_t kTab = 0x09;
+inline constexpr uint32_t kEscape = 0x1B;
+inline constexpr uint32_t kLeft = 0x25;
+inline constexpr uint32_t kRight = 0x27;
+inline constexpr uint32_t kT = 0x54;
+}  // namespace keys
+
+struct KeyEvent {
+  uint32_t virtualKey = 0;  // key-down (including auto-repeat)
+};
+
+struct MouseClick {
+  float x = 0.0f;  // client-space physical pixels at the time of the left-button press
+  float y = 0.0f;
+};
 
 struct WindowDesc {
   std::string title = "R1GUI";  // UTF-8
@@ -22,6 +44,8 @@ struct NativeHandle {
   void* window = nullptr;
   void* instance = nullptr;
 };
+
+inline constexpr size_t kMaxQueuedEvents = 256;
 
 class Window {
  public:
@@ -39,6 +63,11 @@ class Window {
   float mouseX() const;      // client-space physical pixels
   float mouseY() const;
   bool escapePressed() const;
+
+  // Hands over and clears the events received since the last call, oldest first. Each queue
+  // holds at most kMaxQueuedEvents; the oldest events are dropped beyond that.
+  std::vector<KeyEvent> takeKeyEvents();
+  std::vector<MouseClick> takeMouseClicks();
   void setTitle(const std::string& utf8Title);
   NativeHandle nativeHandle() const;
 

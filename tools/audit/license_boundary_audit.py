@@ -17,7 +17,8 @@ SCAN_DIRS = ["source", "tests", "examples", "tools"]
 CODE_SUFFIXES = {".h", ".hpp", ".cpp", ".c", ".cc", ".inl"}
 TEXT_SUFFIXES = CODE_SUFFIXES | {".txt", ".cmake", ".json", ".py", ".cmd", ".md"}
 COPYLEFT = re.compile(r"(GPL|LGPL|AGPL)[-_ ]?(v?\d|-or-later|-only)|GNU (Lesser |Affero )?General Public", re.I)
-FORBIDDEN_PATH = re.compile(r"(?<![\w.])(\.\./)*(reference|scratch)[/\\]", re.I)
+# tests/reference holds our own committed reference images and is allowed; a bare reference/ or scratch/ is not.
+FORBIDDEN_PATH = re.compile(r"(?<![\w.])(?<!tests/)(\.\./)*(reference|scratch)[/\\]", re.I)
 HEADER = "// Copyright (c) 2026 R1GUI. All rights reserved. Proprietary."
 SELF = pathlib.Path(__file__).resolve()
 
