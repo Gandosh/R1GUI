@@ -23,7 +23,7 @@ Evidence files are created when a slice is worked: `Goal/evidence/P<phase>_S<nn>
 - [x] 0.11 [Buildable empty skeleton: source/, tests/, examples/, tools/ per the workspace layout](Goal/evidence/P0_S11.md)
 - [x] 0.12 [Developer wrappers: tools/build, tools/run (detached, ctest tiers, sanitize)](Goal/evidence/P0_S12.md)
 - [x] 0.13 [Audit tools: license boundary and provenance log](Goal/evidence/P0_S13.md)
-- [ ] 0.14 [CI builds the skeleton on Windows](Goal/evidence/P0_S14.md)
+- [x] 0.14 [Local clean-build check replaces hosted CI; GitHub is storage only (owner, 2026-10-09)](Goal/evidence/P0_S14.md)
 - [x] 0.15 [Preview: minimal Vulkan window opens, resizes and closes cleanly](Goal/evidence/P0_S15.md)
 
 **P0 owner gate: PENDING** — [phase close record](Goal/evidence/P0_close.md)

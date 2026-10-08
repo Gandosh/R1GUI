@@ -1,6 +1,6 @@
 # Phase 0 close record
 
-**Status:** TECHNICAL PASS except 0.14; owner gate PENDING   **Date:** 2026-10-09
+**Status:** TECHNICAL PASS; owner gate PENDING   **Date:** 2026-10-09
 
 ## Slices
 | Slice | Status | Evidence |
@@ -14,7 +14,7 @@
 | 0.8 OpenPencil MIT | TECHNICAL PASS | [P0_S08](P0_S08.md) |
 | 0.9 Repo and license | OWNER ACCEPTED | [P0_S09](P0_S09.md) |
 | 0.10-0.13 Repo, skeleton, wrappers, audit | TECHNICAL PASS | [S10](P0_S10.md) [S11](P0_S11.md) [S12](P0_S12.md) [S13](P0_S13.md) |
-| 0.14 CI | BLOCKED (billing lock) | [P0_S14](P0_S14.md) |
+| 0.14 Local clean-build check (no hosted CI) | TECHNICAL PASS (MSVC pass; clang-cl skipped) | [P0_S14](P0_S14.md) |
 | 0.15 Vulkan preview | TECHNICAL PASS | [P0_S15](P0_S15.md) |
 
 ## Launch the preview
@@ -26,10 +26,10 @@
 | Vulkan, Windows first, own Win32, CMake+Ninja+C++20+MSVC, FreeType+HarfBuzz, proprietary repo here, UE source via separate reader | 2026-10-09 |
 
 ## Accepted risks / open items
-- CI never ran: the first run on GitHub was refused because the account has a billing issue. Owner clears it or names another CI host.
+- No hosted CI by owner decision (GitHub is storage only); the local clean check is the gate. clang-cl pass skipped until clang-cl is installed.
 - Pushed: `main` at https://github.com/Gandosh/R1GUI (first commit 39ae6d5).
 - No sanitizer preset yet (`sanitize.cmd` is a placeholder); no leak check of the preview.
-- Vulkan SDK is installed machine-wide, not vendored; CI pins the same version.
+- Vulkan SDK is installed machine-wide, not vendored.
 - GPU choice in the preview is "first discrete" (currently the RTX 4080).
 
 ## Build notes
