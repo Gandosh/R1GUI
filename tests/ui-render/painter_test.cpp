@@ -234,6 +234,22 @@ void packingTexture() {
   expect(p.list().batches[0].textureId == 7 && p.list().batches[1].textureId == 9, "batches carry texture ids");
 }
 
+void textureCropFollowsClampedDestination() {
+  // A destination beyond the coordinate limit is clamped; the texture window is cropped with it
+  // instead of being stretched over the clamped rectangle.
+  Painter p;
+  p.begin(100, 100);
+  p.drawTexture({7, TextureKind::Color}, {-1.0e6f, 0.0f, 2.0e6f, 10.0f}, {0.0f, 0.0f, 1.0f, 1.0f});
+  p.drawTexture({7, TextureKind::Color}, {10.0f, 0.0f, 20.0f, 10.0f}, {0.0f, 0.0f, 1.0f, 1.0f});
+  p.end();
+  const auto& tex = p.list().tex;
+  expect(tex.size() == 2, "both quads recorded");
+  // x range [-65536, 65536] of [-1e6, 1e6]: u from (1e6-65536)/2e6 to (1e6+65536)/2e6.
+  expect(near(tex[0].uv[0], 0.467232f, 1e-5f) && near(tex[0].uv[2], 0.532768f, 1e-5f), "u window cropped with the destination");
+  expect(tex[0].uv[1] == 0.0f && tex[0].uv[3] == 1.0f, "v unchanged when only x was clamped");
+  expect(tex[1].uv[0] == 0.0f && tex[1].uv[2] == 1.0f, "an unclamped quad keeps its uv exactly");
+}
+
 void packingLine() {
   Painter p;
   p.begin(100, 100);
@@ -313,28 +329,45 @@ void batchingClipCulling() {
 
 // ---- painter: limits and hostile input -------------------------------------------------------
 
-void limitIsAnError() {
+void limitDegradesInsteadOfThrowing() {
   Painter p(8);
   p.begin(100, 100);
   for (int i = 0; i < 8; ++i) p.fillRect({0, 0, 5, 5}, kRed);
   bool threw = false;
   try {
     p.fillRect({0, 0, 5, 5}, kRed);
-  } catch (const PaintLimitError&) {
+    p.border({0, 0, 5, 5}, {}, 1.0f, kRed);
+    p.shadow({0, 0, 5, 5}, {}, ShadowSpec{0, 0, 4, 0, kRed});
+    p.line(0, 0, 9, 9, 1.0f, kRed);
+    p.drawTexture(TextureRef{7, TextureKind::Coverage}, {0, 0, 5, 5}, {0, 0, 1, 1});
+  } catch (...) {
     threw = true;
   }
-  expect(threw, "the 9th instance throws PaintLimitError");
-  expect(p.stats().instances == 8, "earlier instances stay valid");
+  expect(!threw, "draws past the limit do not throw");
+  expect(p.stats().instances == 8 && p.stats().dropped == 5, "earlier instances stay valid and the rest is counted");
   p.end();
-  Painter big(kMaxInstancesPerFrame * 4);
-  big.begin(10, 10);  // the constructor clamps the larger request to kMaxInstancesPerFrame
-  bool capped = false;
-  try {
-    for (uint32_t i = 0; i <= kMaxInstancesPerFrame; ++i) big.fillRect({0, 0, 5, 5}, kRed);
-  } catch (const PaintLimitError&) {
-    capped = true;
+  p.begin(100, 100);
+  expect(p.stats().dropped == 0, "the drop counter is per frame");
+  p.fillRect({0, 0, 5, 5}, kRed);
+  p.end();
+
+  // 200 000 glyph quads (a long text view) fit in one frame: the old 65 536 cap ended the app.
+  Painter glyphs;
+  glyphs.begin(2000, 2000);
+  const TextureRef atlas{3, TextureKind::Coverage};
+  for (uint32_t i = 0; i < 200000; ++i) {
+    glyphs.drawTexture(atlas, {static_cast<float>(i % 1900), static_cast<float>((i / 1900) % 1900), 6, 10}, {0, 0, 0.01f, 0.01f});
   }
-  expect(capped, "the documented maximum is enforced");
+  glyphs.end();
+  expect(glyphs.stats().texInstances == 200000 && glyphs.stats().dropped == 0, "200 000 glyph quads are recorded");
+  expect(glyphs.stats().drawCalls == 1, "and stay one draw call");
+
+  // The documented maximum is enforced by dropping, never by throwing.
+  Painter big(kMaxInstancesPerFrame * 4);  // the constructor clamps the larger request
+  big.begin(10, 10);
+  for (uint32_t i = 0; i < kMaxInstancesPerFrame + 10; ++i) big.fillRect({0, 0, 5, 5}, kRed);
+  big.end();
+  expect(big.stats().instances == kMaxInstancesPerFrame && big.stats().dropped == 10, "the documented maximum is enforced");
 }
 
 void hostileNumbers() {
@@ -409,9 +442,9 @@ int main(int argc, char** argv) {
        {"sdfBlurredBox", sdfBlurredBox},           {"sdfLine", sdfLine},
        {"packingFill", packingFill},               {"packingBorder", packingBorder},
        {"packingShadow", packingShadow},           {"packingTexture", packingTexture},
-       {"packingLine", packingLine},               {"opacityAndColour", opacityAndColour},
+       {"packingLine", packingLine}, {"textureCropFollowsClampedDestination", textureCropFollowsClampedDestination},               {"opacityAndColour", opacityAndColour},
        {"batchingMergesAdjacent", batchingMergesAdjacent}, {"batchingSplits", batchingSplits},
-       {"batchingClipCulling", batchingClipCulling}, {"limitIsAnError", limitIsAnError},
+       {"batchingClipCulling", batchingClipCulling}, {"limitDegradesInsteadOfThrowing", limitDegradesInsteadOfThrowing},
        {"hostileNumbers", hostileNumbers},         {"apiMisuse", apiMisuse},
        {"displayScale", displayScale}},
       argc, argv);

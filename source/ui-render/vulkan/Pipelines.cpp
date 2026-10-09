@@ -237,7 +237,11 @@ VkDescriptorSet Pipelines::allocateSet(VkImageView view) {
   alloc.descriptorSetCount = 1;
   alloc.pSetLayouts = &setLayout_;
   VkDescriptorSet set = VK_NULL_HANDLE;
-  check(vkAllocateDescriptorSets(device_, &alloc, &set), "vkAllocateDescriptorSets");
+  const VkResult allocated = vkAllocateDescriptorSets(device_, &alloc, &set);
+  if (allocated == VK_ERROR_OUT_OF_POOL_MEMORY || allocated == VK_ERROR_FRAGMENTED_POOL) {
+    throw PoolExhausted("The texture descriptor pool is exhausted");
+  }
+  check(allocated, "vkAllocateDescriptorSets");
   VkDescriptorImageInfo image{sampler_, view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
   VkWriteDescriptorSet write{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
   write.dstSet = set;

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <initializer_list>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 
@@ -96,6 +97,7 @@ void Painter::begin(uint32_t width, uint32_t height) {
   opacity_.assign(1, 1.0f);
   culled_ = 0;
   rejected_ = 0;
+  dropped_ = 0;
   active_ = true;
 }
 
@@ -115,6 +117,7 @@ PaintStats Painter::stats() const {
   s.instances = s.sdfInstances + s.texInstances;
   s.culled = culled_;
   s.rejected = rejected_;
+  s.dropped = dropped_;
   return s;
 }
 
@@ -137,10 +140,10 @@ bool Painter::visible(const Rect& bounds, IRect* scissor) {
 }
 
 template <class Instance>
-Instance& Painter::append(BatchKind kind, const IRect& scissor, uint64_t textureId) {
+Instance* Painter::append(BatchKind kind, const IRect& scissor, uint64_t textureId) {
   if (list_.sdf.size() + list_.tex.size() >= maxInstances_) {
-    throw PaintLimitError("Painter: more than " + std::to_string(maxInstances_) +
-                          " instances in one frame (kMaxInstancesPerFrame)");
+    ++dropped_;
+    return nullptr;
   }
   constexpr bool isSdf = std::is_same_v<Instance, SdfInstance>;
   auto& storage = [this]() -> auto& {
@@ -153,7 +156,7 @@ Instance& Painter::append(BatchKind kind, const IRect& scissor, uint64_t texture
   }
   ++list_.batches.back().count;
   storage.push_back(Instance{});
-  return storage.back();
+  return &storage.back();
 }
 
 void Painter::fillRect(const Rect& rect, const Color& color) { fillRoundedRect(rect, CornerRadii{}, color); }
@@ -173,7 +176,9 @@ void Painter::fillRoundedRect(const Rect& rect, const CornerRadii& radii, const 
   const Rect box = clampRect(rect);
   IRect scissor;
   if (!visible(box, &scissor)) return;
-  SdfInstance& inst = append<SdfInstance>(BatchKind::Sdf, scissor, 0);
+  SdfInstance* slot = append<SdfInstance>(BatchKind::Sdf, scissor, 0);
+  if (slot == nullptr) return;
+  SdfInstance& inst = *slot;
   setRect(inst.rect, box);
   setRadii(inst.radii, reference::normalizeRadii(box, radii));
   setColor(inst.color, color, alpha);
@@ -207,7 +212,9 @@ void Painter::border(const Rect& rect, const CornerRadii& radii, float width, co
   }
   IRect scissor;
   if (!visible(outer, &scissor)) return;
-  SdfInstance& inst = append<SdfInstance>(BatchKind::Sdf, scissor, 0);
+  SdfInstance* slot = append<SdfInstance>(BatchKind::Sdf, scissor, 0);
+  if (slot == nullptr) return;
+  SdfInstance& inst = *slot;
   setRect(inst.rect, outer);
   setRadii(inst.radii, outerRadii);
   setColor(inst.color, color, alpha);
@@ -246,7 +253,9 @@ void Painter::shadow(const Rect& rect, const CornerRadii& radii, const ShadowSpe
   const float sigma = std::clamp(spec.blur, 0.0f, kMaxBlur) * 0.5f;
   IRect scissor;
   if (!visible(inflate(shadowBox, 3.0f * sigma + 1.0f), &scissor)) return;
-  SdfInstance& inst = append<SdfInstance>(BatchKind::Sdf, scissor, 0);
+  SdfInstance* slot = append<SdfInstance>(BatchKind::Sdf, scissor, 0);
+  if (slot == nullptr) return;
+  SdfInstance& inst = *slot;
   setRect(inst.rect, shadowBox);
   setRadii(inst.radii, shadowRadii);
   setColor(inst.color, spec.color, alpha);
@@ -274,7 +283,9 @@ void Painter::line(float x0, float y0, float x1, float y1, float width, const Co
                     std::fabs(by - ay) + 2.0f * half};
   IRect scissor;
   if (!visible(bounds, &scissor)) return;
-  SdfInstance& inst = append<SdfInstance>(BatchKind::Sdf, scissor, 0);
+  SdfInstance* slot = append<SdfInstance>(BatchKind::Sdf, scissor, 0);
+  if (slot == nullptr) return;
+  SdfInstance& inst = *slot;
   inst.rect[0] = ax;
   inst.rect[1] = ay;
   inst.rect[2] = bx;
@@ -299,12 +310,20 @@ void Painter::drawTexture(const TextureRef& texture, const Rect& dst, const Rect
   const Rect box = clampRect(dst);
   IRect scissor;
   if (!visible(box, &scissor)) return;
-  TexInstance& inst = append<TexInstance>(BatchKind::Textured, scissor, texture.id);
+  // Clamping the destination crops it; the same part must be cut from the texture window, or an
+  // oversized quad would show a stretched texture instead of a cropped one.
+  const double uPerPx = static_cast<double>(uv.w) / static_cast<double>(dst.w);
+  const double vPerPx = static_cast<double>(uv.h) / static_cast<double>(dst.h);
+  const double u0 = static_cast<double>(uv.x) + (static_cast<double>(box.x) - static_cast<double>(dst.x)) * uPerPx;
+  const double v0 = static_cast<double>(uv.y) + (static_cast<double>(box.y) - static_cast<double>(dst.y)) * vPerPx;
+  TexInstance* slot = append<TexInstance>(BatchKind::Textured, scissor, texture.id);
+  if (slot == nullptr) return;
+  TexInstance& inst = *slot;
   setRect(inst.dst, box);
-  inst.uv[0] = uv.x;
-  inst.uv[1] = uv.y;
-  inst.uv[2] = uv.x + uv.w;
-  inst.uv[3] = uv.y + uv.h;
+  inst.uv[0] = static_cast<float>(u0);
+  inst.uv[1] = static_cast<float>(v0);
+  inst.uv[2] = static_cast<float>(u0 + static_cast<double>(box.w) * uPerPx);
+  inst.uv[3] = static_cast<float>(v0 + static_cast<double>(box.h) * vPerPx);
   setColor(inst.tint, tint, alpha);
   inst.params[0] = static_cast<float>(texture.kind == TextureKind::Coverage ? TexMode::Coverage : TexMode::Color);
 }

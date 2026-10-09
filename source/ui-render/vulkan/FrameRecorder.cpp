@@ -29,8 +29,12 @@ void upload(RenderDevice::Impl& device, GpuBuffer& buffer, uint32_t& capacity, c
   if (needed == 0) return;
   if (needed > capacity) {
     const uint32_t wanted = std::min(roundUpPow2(std::max(needed, kMinRingInstances)), kMaxInstancesPerFrame);
-    // The slot's previous frame has completed, so the old buffer can be released immediately.
+    // The slot's previous frame has completed, so the old buffer can be released immediately. The
+    // capacity is zeroed first: if the new allocation throws, the buffer is empty and the capacity
+    // says so, so the next frame allocates again instead of copying into a null mapping.
     buffer = GpuBuffer();
+    capacity = 0;
+    device.faultPoint(FaultSite::RingBuffer);
     buffer = GpuBuffer(device.device, device.memory, VkDeviceSize{wanted} * stride, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
     capacity = wanted;
@@ -63,27 +67,24 @@ std::vector<VkDescriptorSet> resolveTextures(RenderDevice::Impl& device, const P
     if (batch.kind != BatchKind::Textured) continue;
     const auto found = device.textures.find(batch.textureId);
     if (found == device.textures.end()) {
-      throw std::invalid_argument("endFrame: a drawn texture was destroyed before the frame ended");
+      // The texture was destroyed after it was drawn with: skip just this batch (renderFrame leaves
+      // batches without a set out) instead of failing every other draw of the frame.
+      ++device.staleTextureDraws;
+      continue;
     }
     sets[i] = found->second->gpu.set.handle();
   }
   return sets;
 }
 
-uint64_t renderFrame(RenderDevice::Impl& device, FrameSlot& slot, const PaintList& list,
-                     const std::vector<VkDescriptorSet>& sets, const FrameTarget& target,
-                     const std::function<void(VkCommandBuffer)>& afterPass, VkSemaphore waitBinary,
-                     VkSemaphore signalBinary) {
-  device.requireUsable();
-  if (list.width != target.extent.width || list.height != target.extent.height) {
-    throw std::logic_error("renderFrame: the painter was begun for a different target size");
-  }
-  upload(device, slot.sdfBuffer, slot.sdfCapacity, list.sdf.data(), core::checkedCast<uint32_t>(list.sdf.size()),
-         sizeof(SdfInstance));
-  upload(device, slot.texBuffer, slot.texCapacity, list.tex.data(), core::checkedCast<uint32_t>(list.tex.size()),
-         sizeof(TexInstance));
+namespace {
 
-  std::vector<PendingUpload> uploads = device.takeUploads();
+// Records the pending texture writes and the frame's draws into the slot's command buffer and
+// submits it. Throws on any failure before the submission; the caller owns the batch then.
+uint64_t recordAndSubmit(RenderDevice::Impl& device, FrameSlot& slot, const PaintList& list,
+                         const std::vector<VkDescriptorSet>& sets, const FrameTarget& target,
+                         const std::function<void(VkCommandBuffer)>& afterPass, VkSemaphore waitBinary,
+                         VkSemaphore signalBinary, UploadBatch& uploads) {
   VkCommandBuffer cmd = slot.commands;
   device.vk(vkResetCommandBuffer(cmd, 0), "vkResetCommandBuffer");
   VkCommandBufferBeginInfo begin{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
@@ -116,6 +117,7 @@ uint64_t renderFrame(RenderDevice::Impl& device, FrameSlot& slot, const PaintLis
     const Batch& batch = list.batches[i];
     const IRect clipped = intersect(batch.scissor, bounds);
     if (clipped.empty()) continue;
+    if (batch.kind == BatchKind::Textured && sets[i] == VK_NULL_HANDLE) continue;  // texture destroyed
     const VkRect2D scissor{{clipped.x, clipped.y}, {core::checkedCast<uint32_t>(clipped.w), core::checkedCast<uint32_t>(clipped.h)}};
     vkCmdSetScissor(cmd, 0, 1, &scissor);
     if (!kindBound || boundKind != batch.kind) {
@@ -139,7 +141,35 @@ uint64_t renderFrame(RenderDevice::Impl& device, FrameSlot& slot, const PaintLis
   if (afterPass) afterPass(cmd);
   device.vk(vkEndCommandBuffer(cmd), "vkEndCommandBuffer");
 
-  const uint64_t serial = device.submit(cmd, waitBinary, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, signalBinary);
+  device.faultPoint(FaultSite::BeforeSubmit);
+  return device.submit(cmd, waitBinary, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, signalBinary);
+}
+
+}  // namespace
+
+uint64_t renderFrame(RenderDevice::Impl& device, FrameSlot& slot, const PaintList& list,
+                     const std::vector<VkDescriptorSet>& sets, const FrameTarget& target,
+                     const std::function<void(VkCommandBuffer)>& afterPass, VkSemaphore waitBinary,
+                     VkSemaphore signalBinary) {
+  device.requireUsable();
+  if (list.width != target.extent.width || list.height != target.extent.height) {
+    throw std::logic_error("renderFrame: the painter was begun for a different target size");
+  }
+  upload(device, slot.sdfBuffer, slot.sdfCapacity, list.sdf.data(), core::checkedCast<uint32_t>(list.sdf.size()),
+         sizeof(SdfInstance));
+  upload(device, slot.texBuffer, slot.texCapacity, list.tex.data(), core::checkedCast<uint32_t>(list.tex.size()),
+         sizeof(TexInstance));
+
+  // From here until the submission succeeds, a failure must not lose the texture writes (glyph
+  // atlas pixels are consumed from the CPU side when queued): they go back to the device queue.
+  UploadBatch uploads = device.takeUploads();
+  uint64_t serial = 0;
+  try {
+    serial = recordAndSubmit(device, slot, list, sets, target, afterPass, waitBinary, signalBinary, uploads);
+  } catch (...) {
+    device.restoreUploads(std::move(uploads));
+    throw;
+  }
   slot.serial = serial;
   device.retireUploads(std::move(uploads));
   return serial;

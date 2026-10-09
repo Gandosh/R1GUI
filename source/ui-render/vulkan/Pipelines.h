@@ -14,12 +14,20 @@
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
+#include <stdexcept>
 
 
 namespace r1ui::render::detail {
 
 inline constexpr VkFormat kTargetFormat = VK_FORMAT_B8G8R8A8_UNORM;
 inline constexpr uint32_t kFramesInFlight = 2;
+
+// Thrown by Pipelines::allocateSet when the descriptor pool has no free set (live textures plus
+// retired sets the GPU may still use); the caller can reclaim retired sets and retry.
+class PoolExhausted : public std::runtime_error {
+ public:
+  using std::runtime_error::runtime_error;
+};
 
 class Pipelines {
  public:
@@ -36,6 +44,7 @@ class Pipelines {
   VkPipelineLayout texturedLayout() const { return texturedLayout_; }
 
   // Allocates a descriptor set sampling `view` (expected layout SHADER_READ_ONLY_OPTIMAL).
+  // Throws PoolExhausted when the pool is full.
   VkDescriptorSet allocateSet(VkImageView view);
   void freeSet(VkDescriptorSet set);
 
