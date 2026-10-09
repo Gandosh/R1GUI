@@ -51,7 +51,7 @@ bool sameStructure(const props::PanelModel& a, const props::PanelModel& b) {
 
 }  // namespace
 
-int64_t UiClock::nowMs() const { return static_cast<int64_t>(ui_->now()); }
+int64_t PropsUiClock::nowMs() const { return static_cast<int64_t>(ui_->now()); }
 
 // ---- one category ----------------------------------------------------------------------------------------------
 

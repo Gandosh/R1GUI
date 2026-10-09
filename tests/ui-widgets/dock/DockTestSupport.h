@@ -56,6 +56,14 @@ struct DockRig {
     }
   }
 
+  // The host detaches (and talks to the backend and the registry) when it is destroyed, and the context
+  // detaches every widget when it dies, so the host goes first while both still exist.
+  ~DockRig() {
+    if (host != nullptr && t.ui.alive(host->id())) t.ui.destroy(host->id());
+  }
+  DockRig(const DockRig&) = delete;
+  DockRig& operator=(const DockRig&) = delete;
+
   // Installs a main-area tree and lays everything out.
   void setRoot(dock::Node root) {
     dock::DockLayoutResult created = dock::DockLayout::create(registry.infos(), host->options().config, std::move(root));

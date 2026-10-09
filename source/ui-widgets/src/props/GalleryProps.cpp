@@ -157,7 +157,7 @@ struct PageState {
     return o;
   }
 
-  UiClock clock;
+  PropsUiClock clock;
   SampleVariables variables;
   SampleTransform transforms[2];
   SampleMaterial materials[2];

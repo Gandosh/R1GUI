@@ -78,7 +78,7 @@ A host implements `BindingProvider` (`resolve(source)`, `variables()`); the cont
 - Gestures: scrub, slider drag, colour picker gesture = `beginInteraction` .. `endInteraction` (one step); Escape cancels and restores. Typed text, selects, checkboxes, resets edit once. Right click on a row opens copy/paste/reset/copy-name.
 - Refresh: the panel listens to the context's `ChangeNotifier`. Any number of notices before the next tick cost one flush (`setTimer(0)`; nothing stays armed when idle). `Selection` forces a rebuild; other notices recompute the model and rebuild only if the visible rows changed, else refresh row widgets in place. While an interaction is open a structural change is deferred until it ends, so the scrubbed field is never destroyed under the pointer.
 - Search is live (no delay) and case-insensitive over label, stored name, category, group and tooltip, every word must match; matching categories open, advanced rows show, and the previous collapse state returns when the search is cleared. `PanelState` (collapse, search, advanced, modified-only) belongs to the host so it can be saved.
-- `UiClock` adapts `UiContext::now()` to `props::Clock`.
+- `PropsUiClock` adapts `UiContext::now()` to `props::Clock`.
 
 Not implemented: pinning (give each pinned panel its own context), favourites, per-category advanced dropdown (one global toggle), the inline enable-condition checkbox (rule 65), shift-click copy/paste, category/group copy/paste menus (headless API exists), multi-line text and password masking while typing (a single-line `TextInput`), array and struct rows, the value-column divider, Escape clearing the search box.
 

@@ -495,7 +495,7 @@ void stepGrouping() {
   // With mergeSteps the arrow-key notches of one field inside the window are one undo step; without it each is its own.
   for (const bool merge : {true, false}) {
     r1test::FieldRig rig;
-    UiClock clock(rig.ui);
+    PropsUiClock clock(rig.ui);
     rig.ui.setTime(1234);
     R1_EXPECT(clock.nowMs() == 1234);
     ContextOptions options;
