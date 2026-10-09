@@ -1,27 +1,28 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: implementation of TextEngine.h.
-// Invariants: the shaped-run cache is bounded (cleared when it reaches kMaxCachedRuns); the atlas
-//   texture always has the atlas's dimensions; glyph quads reference atlas pixels that were
+// Invariants: the shaped-run and fit caches are bounded (cleared when they reach their limit); the
+//   atlas texture always has the atlas's dimensions; glyph quads reference atlas pixels that were
 //   uploaded no later than the frame that draws them.
-// Callers: Scene.cpp, field widgets, modes, Bench.cpp.
-#include "TextEngine.h"
+// Callers: widgets, UiContext, the preview, calibration tests.
+#include "r1ui/widgets/text/TextEngine.h"
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <optional>
 #include <stdexcept>
 #include <utility>
 
 #include "r1ui/core/CheckedCast.h"
-#include "r1ui/text/GlyphQuads.h"
 
-namespace preview {
+namespace r1ui::widgets {
 
 namespace {
 
 constexpr size_t kMaxCachedRuns = 4096;
+constexpr size_t kMaxCachedFits = 2048;
 constexpr int kRegularWeight = 400;
-constexpr float kBoldBoost = 2.0f;
+constexpr float kMaxBoldStrength = 8.0f;
 
 r1ui::text::GlyphAtlas makeAtlas() {
   auto atlas = r1ui::text::GlyphAtlas::create();
@@ -35,18 +36,23 @@ size_t TextEngine::KeyHash::operator()(const Key& k) const {
   return std::hash<std::string>{}(k.text) ^ (std::hash<float>{}(k.pixelSize) * 0x9E3779B97F4A7C15ull);
 }
 
-TextEngine::TextEngine(r1ui::render::RenderDevice& device, const std::filesystem::path& fontDir)
-    : device_(device), atlas_(makeAtlas()) {
+size_t TextEngine::FitKeyHash::operator()(const FitKey& k) const {
+  return std::hash<std::string>{}(k.text) ^ (std::hash<float>{}(k.pixelSize) * 0x9E3779B97F4A7C15ull) ^
+         (std::hash<int32_t>{}(k.widthQ) * 0xC2B2AE3D27D4EB4Full);
+}
+
+TextEngine::TextEngine(TextureFactory& textures, const std::filesystem::path& fontDir) : atlas_(makeAtlas()) {
   if (!library_.ready()) throw std::runtime_error("the font library could not be initialised");
   const std::filesystem::path file = fontDir / "Inter-Regular.ttf";
   auto loaded = library_.loadFromFile(file.string(), kRegularWeight);
   if (!loaded.ok()) throw std::runtime_error("Cannot load the font " + file.string() + ": " + loaded.error().message);
   regular_ = loaded.value();
-  const r1ui::text::Status added = family_.addFace(regular_);
-  if (!added.ok()) throw std::runtime_error("Cannot use the font " + file.string() + ": " + added.error().message);
-  texture_ = std::make_unique<r1ui::render::Texture>(device_, r1ui::core::checkedCast<uint32_t>(atlas_.width()),
-                                                     r1ui::core::checkedCast<uint32_t>(atlas_.height()),
-                                                     r1ui::render::TextureFormat::R8Coverage);
+  texture_ = textures.createCoverage(r1ui::core::checkedCast<uint32_t>(atlas_.width()), r1ui::core::checkedCast<uint32_t>(atlas_.height()));
+}
+
+void TextEngine::setBoldStrength(float strength) {
+  if (!std::isfinite(strength) || strength < 0.0f || strength > kMaxBoldStrength) throw std::invalid_argument("bold strength out of range");
+  boldStrength_ = strength;
 }
 
 const r1ui::text::ShapedRun* TextEngine::shaped(std::string_view utf8, float pixelSize) {
@@ -74,6 +80,24 @@ const r1ui::text::FontMetrics& TextEngine::metrics(float pixelSize) {
 
 float TextEngine::baselineInBox(float pixelSize, float boxHeight) { return metrics(pixelSize).baselineInBox(boxHeight); }
 
+const FittedText& TextEngine::fit(std::string_view utf8, float pixelSize, float maxWidth) {
+  const float width = measure(utf8, pixelSize);
+  if (!(maxWidth >= 0.0f) || width <= maxWidth) {
+    lastFit_ = {std::string(utf8), width, false};
+    return lastFit_;
+  }
+  // Quantised so sub-pixel jitter of a layout width does not defeat the cache.
+  const int32_t widthQ = static_cast<int32_t>(std::min(maxWidth, 1.0e6f) * 64.0f);
+  FitKey key{std::string(utf8), pixelSize, widthQ};
+  const auto found = fits_.find(key);
+  if (found != fits_.end()) return found->second;
+  auto result = r1ui::text::truncateWithEllipsis(*regular_, pixelSize, utf8, maxWidth);
+  FittedText fitted;
+  if (result.ok()) fitted = {std::move(result.value().text), result.value().width, result.value().truncated};
+  if (fits_.size() >= kMaxCachedFits) fits_.clear();
+  return fits_.emplace(std::move(key), std::move(fitted)).first->second;
+}
+
 void TextEngine::beginFrame() { atlas_.beginFrame(); }
 
 void TextEngine::draw(r1ui::render::Painter& painter, std::string_view utf8, float pixelSize, int weight, float penX,
@@ -81,13 +105,11 @@ void TextEngine::draw(r1ui::render::Painter& painter, std::string_view utf8, flo
   if (utf8.empty()) return;
   const r1ui::text::ShapedRun* run = shaped(utf8, pixelSize);
   if (run == nullptr) return;
-  const r1ui::text::ResolvedFace face = family_.resolve(weight, pixelSize, r1ui::text::BoldMode::Synthetic);
-  if (!face.font) return;
   quads_.clear();
   r1ui::text::QuadParams params;
   params.pixelSize = pixelSize;
-  params.emboldenPx = face.emboldenPx * kBoldBoost;
-  const auto stats = r1ui::text::buildGlyphQuads(atlas_, *face.font, *run, params, penX, baselineY, quads_);
+  params.emboldenPx = weight >= kSyntheticBoldFromWeight ? r1ui::text::defaultEmboldenPx(pixelSize) * boldStrength_ : 0.0f;
+  const auto stats = r1ui::text::buildGlyphQuads(atlas_, *regular_, *run, params, penX, baselineY, quads_);
   if (!stats.ok()) return;
   if (stats.value().atlasFull) overflow_ = true;
   const r1ui::render::TextureRef ref = texture_->ref();
@@ -119,4 +141,4 @@ bool TextEngine::consumeAtlasOverflow() {
   return true;
 }
 
-}  // namespace preview
+}  // namespace r1ui::widgets

@@ -32,6 +32,7 @@ add_subdirectory(source/ui-dock)
 add_subdirectory(source/ui-platform)
 add_subdirectory(source/ui-text)
 add_subdirectory(source/ui-render)
+add_subdirectory(source/ui-widgets)
 add_subdirectory(examples/preview)
 
 if(BUILD_TESTING)

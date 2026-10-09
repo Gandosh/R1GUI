@@ -1,9 +1,8 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: a small SVG subset parser and rasteriser for stroke icons (the Lucide set under
 //   assets/icons/lucide): it turns one SVG file into 8-bit coverage at a requested pixel size.
-// Why: the preview draws icons as tinted coverage quads (docs/spec/icons.md); the full rasteriser
-//   tool is a later slice, this is the smallest implementation that renders the icons the panel uses.
-// Callers: IconSet (preview), tests/preview. Calls: nothing outside the standard library.
+// Why: the toolkit draws icons as tinted coverage quads (docs/spec/icons.md); this is the smallest implementation that renders the icons the UI uses.
+// Callers: IconCache, tests/ui-widgets/icons. Calls: nothing outside the standard library.
 // Supported subset: <svg viewBox stroke-width>, <path d> (M L H V C S Q T A Z, absolute and
 //   relative), <circle>, <ellipse>, <rect (with rx/ry)>, <line>, <polyline>, <polygon>. Strokes
 //   are round-capped and round-joined (distance to the flattened outline), elements with
@@ -22,7 +21,7 @@
 #include <string_view>
 #include <vector>
 
-namespace preview {
+namespace r1ui::widgets {
 
 inline constexpr size_t kMaxSvgBytes = 64 * 1024;
 inline constexpr size_t kMaxSvgElements = 64;
@@ -61,4 +60,4 @@ SvgParseResult parseSvg(std::string_view text);
 // size outside [kMinIconPixels, kMaxIconPixels].
 std::vector<uint8_t> rasterizeIcon(const SvgIcon& icon, int size);
 
-}  // namespace preview
+}  // namespace r1ui::widgets

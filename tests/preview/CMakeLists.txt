@@ -12,6 +12,4 @@ function(r1ui_preview_test name source test label)
   set_tests_properties(${test} PROPERTIES LABELS "${label}" TIMEOUT 180)
 endfunction()
 
-r1ui_preview_test(preview-svg-png-test svg_png_test.cpp preview.svg_png fast)
-r1ui_preview_test(preview-text-gpu-test text_gpu_test.cpp preview.text_gpu gpu)
 r1ui_preview_test(preview-scene-test scene_test.cpp preview.scene gpu)

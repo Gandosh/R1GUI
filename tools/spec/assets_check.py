@@ -28,6 +28,10 @@ def main():
     dark, light = tokens["themes"]["dark"], tokens["themes"]["light"]
     if set(dark) != set(light):
         problems.append(f"theme key mismatch: {sorted(set(dark) ^ set(light))}")
+    for name in ("danger", "primary", "border-strong", "panel-secondary"):
+        for theme in ("dark", "light"):
+            if name not in tokens["themes"][theme]:
+                problems.append(f"missing widget colour {theme}.{name}")
     for theme, colors in tokens["themes"].items():
         for name, value in colors.items():
             if not HEX.match(value):

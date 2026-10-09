@@ -8,10 +8,9 @@
 #include <vector>
 
 #include "Assets.h"
-#include "IconSet.h"
-#include "PngWriter.h"
+#include "Toolkit.h"
 #include "Scene.h"
-#include "TextEngine.h"
+#include "r1ui/widgets/image/Png.h"
 #include "r1ui/render/OffscreenTarget.h"
 #include "r1ui/render/RenderDevice.h"
 
@@ -22,8 +21,9 @@ void renderPanelShot(const std::filesystem::path& directory, r1ui::theme::ThemeI
   auto tokens = std::make_shared<const r1ui::theme::Tokens>(loadTokens(paths));
   r1ui::render::RenderDevice device;
   r1ui::render::OffscreenTarget target(device, kShotWidth, kShotHeight);
-  TextEngine text(device, paths.fonts());
-  IconSet icons(device, paths.icons());
+  GpuTextureFactory textures(device);
+  TextEngine text(textures, paths.fonts());
+  IconSet icons(textures, {paths.icons(), paths.customIcons()});
   Scene scene(tokens, text, icons, {});
   if (theme != scene.theme().id()) scene.theme().set(theme);
   scene.setViewport(static_cast<int>(kShotWidth), static_cast<int>(kShotHeight), 1.0f);
@@ -39,7 +39,7 @@ void renderPanelShot(const std::filesystem::path& directory, r1ui::theme::ThemeI
 
   const std::string name = r1ui::theme::themeName(scene.theme().id());
   std::filesystem::create_directories(directory);
-  writePng(directory / ("scene_" + name + ".png"), kShotWidth, kShotHeight, pixels);
+  r1ui::widgets::image::writePng(directory / ("scene_" + name + ".png"), kShotWidth, kShotHeight, pixels);
 
   const auto panel = scene.panelRect();
   std::vector<uint8_t> crop;
@@ -49,7 +49,7 @@ void renderPanelShot(const std::filesystem::path& directory, r1ui::theme::ThemeI
     crop.insert(crop.end(), pixels.begin() + static_cast<std::ptrdiff_t>(from),
                 pixels.begin() + static_cast<std::ptrdiff_t>(from + size_t{kPanelCropWidth} * 4));
   }
-  writePng(directory / ("panel_" + name + ".png"), kPanelCropWidth, kPanelCropHeight, crop);
+  r1ui::widgets::image::writePng(directory / ("panel_" + name + ".png"), kPanelCropWidth, kPanelCropHeight, crop);
 }
 
 }  // namespace preview

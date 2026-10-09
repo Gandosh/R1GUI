@@ -82,7 +82,7 @@ SceneBuilder::WidgetId SceneBuilder::numberField(WidgetId parent, const NumberSp
   }
   text(field, spec.value, "text.value", StyleBuilder().grow().build());
   if (spec.suffix != nullptr) text(field, spec.suffix, "text.muted", StyleBuilder().marginRight(trailing ? 4 : 2).fixed().build());
-  if (spec.variableButton) iconButton(field, "diamond", true);
+  if (spec.variableButton) iconButton(field, "apply-variable", true);
   if (spec.chevronButton) iconButton(field, "chevron-down", true);
   return field;
 }
@@ -139,7 +139,7 @@ SceneBuilder::WidgetId SceneBuilder::paintField(WidgetId parent) {
   text(field, "D4D4D4", "text.hex", StyleBuilder().grow().build());
   text(field, "100", "text.value", StyleBuilder().fixed().build());
   text(field, "%", "text.muted", StyleBuilder().fixed().build());
-  iconButton(field, "diamond", true);
+  iconButton(field, "apply-variable", true);
   return field;
 }
 

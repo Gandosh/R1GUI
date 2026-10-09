@@ -68,6 +68,40 @@ constexpr StyleRuleEntry kBuiltin[] = {
     {"button.accent", State::kNone, StyleProperty::FontWeight, "weight:medium"},
     {"button.accent", State::kHover, StyleProperty::Background, "color:accent@0.9"},
     {"button.accent", State::kDisabled, StyleProperty::Opacity, "number:0.5"},
+
+    // Text roles of the Label widget: colour from Foreground, size and line height as in
+    // docs/spec/widgets.md and the measured reference (12 px / 16 px body, 11 px / 11 px captions and
+    // headings, semibold for headings).
+    {"label.body", State::kNone, StyleProperty::Foreground, "color:surface"},
+    {"label.body", State::kNone, StyleProperty::FontSize, "fontSize:xs"},
+    {"label.body", State::kNone, StyleProperty::LineHeight, "number:16"},
+    {"label.body", State::kDisabled, StyleProperty::Opacity, "number:0.5"},
+    {"label.muted", State::kNone, StyleProperty::Foreground, "color:muted"},
+    {"label.muted", State::kNone, StyleProperty::FontSize, "fontSize:xs"},
+    {"label.muted", State::kNone, StyleProperty::LineHeight, "number:16"},
+    {"label.muted", State::kDisabled, StyleProperty::Opacity, "number:0.5"},
+    {"label.caption", State::kNone, StyleProperty::Foreground, "color:muted"},
+    {"label.caption", State::kNone, StyleProperty::FontSize, "fontSize:11"},
+    {"label.caption", State::kNone, StyleProperty::LineHeight, "number:11"},
+    {"label.caption", State::kDisabled, StyleProperty::Opacity, "number:0.5"},
+    {"label.heading", State::kNone, StyleProperty::Foreground, "color:surface"},
+    {"label.heading", State::kNone, StyleProperty::FontSize, "fontSize:11"},
+    {"label.heading", State::kNone, StyleProperty::FontWeight, "weight:semibold"},
+    {"label.heading", State::kNone, StyleProperty::LineHeight, "number:11"},
+    {"label.heading", State::kDisabled, StyleProperty::Opacity, "number:0.5"},
+    {"label.title", State::kNone, StyleProperty::Foreground, "color:surface"},
+    {"label.title", State::kNone, StyleProperty::FontSize, "fontSize:xs"},
+    {"label.title", State::kNone, StyleProperty::FontWeight, "weight:semibold"},
+    {"label.title", State::kNone, StyleProperty::LineHeight, "number:16"},
+    {"label.title", State::kDisabled, StyleProperty::Opacity, "number:0.5"},
+    {"label.danger", State::kNone, StyleProperty::Foreground, "color:danger"},
+    {"label.danger", State::kNone, StyleProperty::FontSize, "fontSize:xs"},
+    {"label.danger", State::kNone, StyleProperty::LineHeight, "number:16"},
+
+    // Keyboard focus ring: a 1 px outline in the focus colour drawn over the widget's own bounds.
+    {"focus.ring", State::kNone, StyleProperty::BorderColor, "color:panel-focus"},
+    {"focus.ring", State::kNone, StyleProperty::BorderWidth, "number:1"},
+    {"focus.ring", State::kNone, StyleProperty::Radius, "radius:default"},
 };
 
 bool parseDouble(std::string_view text, double& out) {

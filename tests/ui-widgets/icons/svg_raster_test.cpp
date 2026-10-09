@@ -11,8 +11,8 @@
 #include <string>
 #include <vector>
 
-#include "PngWriter.h"
-#include "SvgRaster.h"
+#include "r1ui/widgets/image/Png.h"
+#include "r1ui/widgets/icons/SvgRaster.h"
 
 namespace {
 
@@ -44,20 +44,20 @@ uint32_t be32(const uint8_t* p) { return (uint32_t{p[0]} << 24) | (uint32_t{p[1]
 
 int main() {
   // A horizontal line of width 2 across the middle of a 24 px icon covers rows 11 and 12 fully.
-  const auto line = preview::parseSvg(svg("<path d=\"M2 12h20\"/>"));
+  const auto line = r1ui::widgets::parseSvg(svg("<path d=\"M2 12h20\"/>"));
   expect(line.ok, "a simple path parses");
-  const auto cov = preview::rasterizeIcon(line.icon, 24);
+  const auto cov = r1ui::widgets::rasterizeIcon(line.icon, 24);
   expect(cov[11 * 24 + 12] == 255 && cov[12 * 24 + 12] == 255, "the stroke centre rows are fully covered");
   expect(cov[5 * 24 + 12] == 0 && cov[18 * 24 + 12] == 0, "rows away from the stroke are empty");
   expect(cov[11 * 24 + 0] == 0, "the stroke starts one unit in (round cap reaches x = 1, not 0)");
   // Scaling: a 12 px render of the same icon has a 1 px thick line.
-  const auto half = preview::rasterizeIcon(line.icon, 12);
+  const auto half = r1ui::widgets::rasterizeIcon(line.icon, 12);
   expect(half[5 * 12 + 6] > 110 && half[5 * 12 + 6] < 145 && half[6 * 12 + 6] > 110 && half[6 * 12 + 6] < 145 && half[3 * 12 + 6] == 0, "scaled stroke: 1 px straddling two rows");
   // Circle and rect shapes, relative and arc commands.
-  expect(preview::parseSvg(svg("<circle cx=\"12\" cy=\"12\" r=\"10\"/>")).ok, "circle");
-  expect(preview::parseSvg(svg("<rect width=\"9\" height=\"6\" x=\"6\" y=\"14\" rx=\"2\"/>")).ok, "rect with radius");
-  expect(preview::parseSvg(svg("<path d=\"M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59Z\"/>")).ok, "arc with glued flags and close");
-  expect(preview::parseSvg(svg("<path d=\"M1 1a1 1 0 0110 2\"/>")).ok, "arc flags without separators");
+  expect(r1ui::widgets::parseSvg(svg("<circle cx=\"12\" cy=\"12\" r=\"10\"/>")).ok, "circle");
+  expect(r1ui::widgets::parseSvg(svg("<rect width=\"9\" height=\"6\" x=\"6\" y=\"14\" rx=\"2\"/>")).ok, "rect with radius");
+  expect(r1ui::widgets::parseSvg(svg("<path d=\"M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59Z\"/>")).ok, "arc with glued flags and close");
+  expect(r1ui::widgets::parseSvg(svg("<path d=\"M1 1a1 1 0 0110 2\"/>")).ok, "arc flags without separators");
 
   // Hostile input is rejected with a message and never draws.
   const char* bad[] = {"",
@@ -72,14 +72,14 @@ int main() {
                        "<svg viewBox=\"0 0 24 24\"><path d=\"M1 1L2 2\" fill=></svg>",
                        "<svg viewBox=\"0 0 24 24\"><!-- open",
                        "<svg viewBox=\"0 0 24 24\"><path d=\"M1 1 A 1 1 0 2 0 3 3\"/></svg>"};
-  for (const char* text : bad) expect(!preview::parseSvg(text).ok, text);
+  for (const char* text : bad) expect(!r1ui::widgets::parseSvg(text).ok, text);
   std::string many = "<svg viewBox=\"0 0 24 24\">";
   for (int i = 0; i < 200; ++i) many += "<path d=\"M1 1L2 2\"/>";
-  expect(!preview::parseSvg(many + "</svg>").ok, "too many elements");
-  expect(!preview::parseSvg(std::string(preview::kMaxSvgBytes + 1, ' ')).ok, "oversized file");
+  expect(!r1ui::widgets::parseSvg(many + "</svg>").ok, "too many elements");
+  expect(!r1ui::widgets::parseSvg(std::string(r1ui::widgets::kMaxSvgBytes + 1, ' ')).ok, "oversized file");
   bool threw = false;
   try {
-    preview::rasterizeIcon(line.icon, 2);
+    r1ui::widgets::rasterizeIcon(line.icon, 2);
   } catch (const std::invalid_argument&) {
     threw = true;
   }
@@ -91,14 +91,14 @@ int main() {
     if (entry.path().extension() != ".svg") continue;
     std::ifstream in(entry.path(), std::ios::binary);
     const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-    const auto parsed = preview::parseSvg(text);
+    const auto parsed = r1ui::widgets::parseSvg(text);
     if (!parsed.ok) {
       std::fprintf(stderr, "%s: %s\n", entry.path().string().c_str(), parsed.error.c_str());
       expect(false, "a shipped icon must parse");
       continue;
     }
     for (int size : {14, 24}) {
-      const auto pixels = preview::rasterizeIcon(parsed.icon, size);
+      const auto pixels = r1ui::widgets::rasterizeIcon(parsed.icon, size);
       size_t lit = 0;
       for (uint8_t v : pixels) lit += v > 0;
       expect(lit > 4, "a shipped icon draws something");
@@ -110,7 +110,7 @@ int main() {
   // PNG structure: signature, chunk CRCs, stored blocks reassemble to the filtered scanlines.
   std::vector<uint8_t> rgba(7 * 5 * 4);
   for (size_t i = 0; i < rgba.size(); ++i) rgba[i] = static_cast<uint8_t>(i * 13);
-  const std::vector<uint8_t> png = preview::encodePng(7, 5, rgba);
+  const std::vector<uint8_t> png = r1ui::widgets::image::encodePng(7, 5, rgba);
   const uint8_t signature[] = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n'};
   expect(png.size() > 8 && std::equal(signature, signature + 8, png.begin()), "PNG signature");
   size_t pos = 8;
@@ -136,12 +136,12 @@ int main() {
   expect(raw == 5 * (7 * 4 + 1), "scanline bytes");
   bool rejected = false;
   try {
-    preview::encodePng(0, 5, rgba);
+    r1ui::widgets::image::encodePng(0, 5, rgba);
   } catch (const std::invalid_argument&) {
     rejected = true;
   }
   expect(rejected, "a zero width is refused");
 
-  if (failures == 0) std::printf("svg_png_test: ok\n");
+  if (failures == 0) std::printf("svg_raster_test: ok\n");
   return failures == 0 ? 0 : 1;
 }

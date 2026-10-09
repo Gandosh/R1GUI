@@ -22,10 +22,9 @@
 
 #include "Assets.h"
 #include "DockSandbox.h"
-#include "IconSet.h"
+#include "Toolkit.h"
 #include "ModeViews.h"
 #include "Scene.h"
-#include "TextEngine.h"
 #include "r1ui/core/events/EventHandler.h"
 #include "r1ui/platform/Window.h"
 #include "r1ui/render/RenderDevice.h"
@@ -98,6 +97,7 @@ class PreviewApp final : private r1ui::core::events::GlobalKeyHandler {
   std::unique_ptr<r1ui::platform::Window> window_;
   std::unique_ptr<r1ui::render::RenderDevice> device_;
   std::unique_ptr<r1ui::render::WindowTarget> target_;
+  std::unique_ptr<GpuTextureFactory> textures_;
   std::unique_ptr<TextEngine> text_;
   std::unique_ptr<IconSet> icons_;
   std::unique_ptr<Scene> scene_;

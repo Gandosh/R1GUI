@@ -76,8 +76,9 @@ PreviewApp::PreviewApp(const AppOptions& options) : started_(Clock::now()), path
 
   device_ = std::make_unique<r1ui::render::RenderDevice>();
   target_ = std::make_unique<r1ui::render::WindowTarget>(*device_, *window_, r1ui::render::WindowTargetOptions{options.presentMode});
-  text_ = std::make_unique<TextEngine>(*device_, paths_.fonts());
-  icons_ = std::make_unique<IconSet>(*device_, paths_.icons());
+  textures_ = std::make_unique<GpuTextureFactory>(*device_);
+  text_ = std::make_unique<TextEngine>(*textures_, paths_.fonts());
+  icons_ = std::make_unique<IconSet>(*textures_, std::vector<std::filesystem::path>{paths_.icons(), paths_.customIcons()});
 
   SceneHost host;
   host.writeClipboard = [this](std::string_view text) { window_->setClipboardText(text); };

@@ -3,8 +3,8 @@
 //   the supersampled stroke/fill rasteriser declared in SvgRaster.h.
 // Invariants: every loop is bounded by the input size or by kMax* limits; every number is checked
 //   finite; a rejected file produces an error message and no partial icon.
-// Callers: IconSet.cpp, tests/preview/svg_raster_test.cpp.
-#include "SvgRaster.h"
+// Callers: IconCache.cpp, tests/ui-widgets/icons.
+#include "r1ui/widgets/icons/SvgRaster.h"
 
 #include <algorithm>
 #include <cmath>
@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace preview {
+namespace r1ui::widgets {
 
 namespace {
 
@@ -667,4 +667,4 @@ std::vector<uint8_t> rasterizeIcon(const SvgIcon& icon, int size) {
   return coverage;
 }
 
-}  // namespace preview
+}  // namespace r1ui::widgets

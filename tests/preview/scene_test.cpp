@@ -57,8 +57,9 @@ int main() {
   }
   auto tokens = std::make_shared<const r1ui::theme::Tokens>(std::move(*parsed.tokens));
   r1ui::render::RenderDevice device;
-  preview::TextEngine text(device, assets + "/fonts");
-  preview::IconSet icons(device, assets + "/icons/lucide");
+  r1ui::widgets::GpuTextureFactory textures(device);
+  preview::TextEngine text(textures, assets + "/fonts");
+  preview::IconSet icons(textures, {assets + "/icons/lucide", assets + "/icons/custom"});
   std::string clipboard;
   preview::SceneHost host;
   host.writeClipboard = [&](std::string_view s) { clipboard = std::string(s); };

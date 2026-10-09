@@ -39,7 +39,7 @@ void builtinRows(const std::string& path) {
   const StyleSheet& sheet = *created.sheet;
   Theme theme(tokens);
 
-  expect(sheet.keyCount() == 5 && sheet.hasKey("button.ghost") && !sheet.hasKey("button.nope"), "keys");
+  expect(sheet.keyCount() == 12 && sheet.hasKey("button.ghost") && !sheet.hasKey("button.nope"), "keys");
   expect(!sheet.resolve(theme, "no.such.key", State::kNone).has_value(), "unknown key resolves to nothing");
 
   // panel.background in both themes, switched without reloading.
@@ -139,7 +139,7 @@ void rejectedTables(const std::string& path) {
   extended.push_back({"tooltip.base", State::kNone, StyleProperty::LineHeight, "lineHeight:tight"});
   extended.push_back({"tooltip.base", State::kNone, StyleProperty::FontSize, "fontSize:sm"});
   const StyleSheetResult ok = StyleSheet::create(extended, tokens);
-  expect(ok.ok() && ok.sheet->keyCount() == 6, "extended table compiles");
+  expect(ok.ok() && ok.sheet->keyCount() == 13, "extended table compiles");
   if (ok.ok()) {
     Theme theme(std::make_shared<const Tokens>(tokens));
     const auto tip = ok.sheet->resolve(theme, "tooltip.base", State::kNone);

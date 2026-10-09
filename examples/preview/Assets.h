@@ -22,6 +22,7 @@ struct AssetPaths {
   std::filesystem::path tokens() const { return root / "assets" / "theme" / "tokens.json"; }
   std::filesystem::path fonts() const { return root / "assets" / "fonts"; }
   std::filesystem::path icons() const { return root / "assets" / "icons" / "lucide"; }
+  std::filesystem::path customIcons() const { return root / "assets" / "icons" / "custom"; }
   std::filesystem::path references() const { return root / "reference"; }
   std::filesystem::path layoutFile() const { return root / "layout.json"; }
 };

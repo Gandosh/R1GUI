@@ -12,11 +12,13 @@ Usage: python tools/spec/build_tokens.py
 import glob
 import json
 import math
+import os
 import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-OP = ROOT / "reference" / "OpenPencil"
+# The reference checkout is not versioned, so a secondary worktree points at the main one with R1UI_REFERENCE_ROOT.
+OP = pathlib.Path(os.environ.get("R1UI_REFERENCE_ROOT", ROOT / "reference")) / "OpenPencil"
 OUT = ROOT / "assets" / "theme" / "tokens.json"
 COMMIT = "dd3161e44"
 
@@ -38,6 +40,23 @@ def normalize_color(v):
     if m:
         return v.lower()
     raise ValueError("unsupported colour: " + v)
+
+
+def mix_hex(hex_color, target, amount):
+    """Moves each channel of #rrggbb towards `target` (0 = black, 255 = white) by `amount` of the way."""
+    channels = [int(hex_color[i:i + 2], 16) for i in (1, 3, 5)]
+    return rgb_to_hex(*[c + (target - c) * amount for c in channels])
+
+
+def add_widget_colors(colors):
+    """Colours OpenPencil's widget code names but its CSS never defines (danger, primary, border-strong).
+    danger = the error token, primary = accent, border-strong = border moved 8% towards white (dark) or
+    black (light). panel-secondary is kept even though OpenPencil's light build drops it."""
+    for theme, target in (("dark", 255), ("light", 0)):
+        c = colors[theme]
+        c["danger"] = c["error"]
+        c["primary"] = c["accent"]
+        c["border-strong"] = mix_hex(c["border"], target, 0.08)
 
 
 def oklch_to_hex(l, c, h):
@@ -81,6 +100,8 @@ def main():
     colors = {t: {k[len("color-"):]: normalize_color(v) for k, v in vs.items() if k.startswith("color-")}
               for t, vs in (("dark", dark), ("light", light))}
 
+    add_widget_colors(colors)
+
     palette = {}
     for k, v in root.items():
         m = re.fullmatch(r"oklch\(([\d.]+)%\s+([\d.]+)\s+([\d.]+)\)", v.strip())
@@ -100,7 +121,7 @@ def main():
             "sourceCommit": COMMIT,
             "generatedBy": "tools/spec/build_tokens.py",
             "units": "logical pixels at 100% scale unless stated; colours are sRGB #rrggbb or #rrggbbaa",
-            "note": "light theme omits panel-secondary-only overrides present in app.css that the build does not use",
+            "note": "danger, primary and border-strong are derived (build_tokens.py add_widget_colors): OpenPencil code names them but its CSS never defines them",
         },
         "themes": colors,
         "palette": palette,

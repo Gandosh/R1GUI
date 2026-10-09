@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "r1ui/dock/DockLayout.h"
-#include "TextEngine.h"
+#include "Toolkit.h"
 #include "r1ui/platform/Window.h"
 #include "r1ui/render/Painter.h"
 #include "r1ui/theme/Tokens.h"

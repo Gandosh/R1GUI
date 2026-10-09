@@ -27,9 +27,8 @@
 #include <string_view>
 #include <vector>
 
-#include "IconSet.h"
+#include "Toolkit.h"
 #include "NameField.h"
-#include "TextEngine.h"
 #include "UiNode.h"
 #include "r1ui/core/events/EventHandler.h"
 #include "r1ui/core/events/Router.h"

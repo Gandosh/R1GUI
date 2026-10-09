@@ -45,6 +45,7 @@ inline constexpr uint8_t kDisabled = 8;
 inline constexpr uint8_t kSelected = 16;
 inline constexpr uint8_t kMixed = 32;
 inline constexpr uint8_t kBound = 64;
+inline constexpr uint8_t kInvalid = 128;
 }  // namespace State
 
 enum class StyleProperty : uint8_t {

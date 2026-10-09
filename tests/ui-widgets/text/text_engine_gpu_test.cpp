@@ -13,8 +13,9 @@
 #include <string>
 #include <vector>
 
-#include "PngWriter.h"
-#include "TextEngine.h"
+#include "r1ui/widgets/image/Png.h"
+#include "r1ui/widgets/gpu/GpuTextures.h"
+#include "r1ui/widgets/text/TextEngine.h"
 #include "r1ui/render/OffscreenTarget.h"
 #include "r1ui/render/RenderDevice.h"
 #include "r1ui/text/Shaper.h"
@@ -33,7 +34,7 @@ void expect(bool ok, const char* what) {
 constexpr uint32_t kWidth = 640;
 constexpr uint32_t kHeight = 80;
 
-std::vector<uint8_t> drawString(r1ui::render::RenderDevice& device, preview::TextEngine& text, const std::string& value, float px, int weight) {
+std::vector<uint8_t> drawString(r1ui::render::RenderDevice& device, r1ui::widgets::TextEngine& text, const std::string& value, float px, int weight) {
   r1ui::render::OffscreenTarget target(device, kWidth, kHeight);
   expect(target.beginFrame({0, 0, 0, 1}), "begin");
   text.beginFrame();
@@ -55,13 +56,14 @@ uint64_t ink(const std::vector<uint8_t>& rgba) {
 int main() {
   const std::string assets = std::string(R1UI_ASSETS_DIR);
   r1ui::render::RenderDevice device;
-  preview::TextEngine text(device, assets + "/fonts");
+  r1ui::widgets::GpuTextureFactory textures(device);
+  r1ui::widgets::TextEngine text(textures, assets + "/fonts");
   const std::string value = "Rectangle Position 0123 Hamburgefonstiv";
   const std::vector<uint8_t> first = drawString(device, text, value, 24.0f, 400);
   char* dumpDir = nullptr;
   size_t dumpLength = 0;
   if (_dupenv_s(&dumpDir, &dumpLength, "R1UI_TEST_DUMP_DIR") == 0 && dumpDir != nullptr) {
-    preview::writePng(std::string(dumpDir) + "/text_probe.png", kWidth, kHeight, first);
+    r1ui::widgets::image::writePng(std::string(dumpDir) + "/text_probe.png", kWidth, kHeight, first);
     std::free(dumpDir);
   }
 

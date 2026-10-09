@@ -86,7 +86,7 @@ void realFile(const std::string& path) {
          "more metrics");
   expect(t.widgetMetricText("iconButton", "sm.text") == "sm", "text metric");
   expect(!t.widgetMetric("field", "nope").has_value() && !t.widgetMetric("_source", "x").has_value(), "unknown metric");
-  expect(t.colorCount() == 34, "colours unaffected");
+  expect(t.colorCount() == 37, "colours unaffected");
 }
 
 void missingSections() {

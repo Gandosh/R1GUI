@@ -13,22 +13,18 @@ add_library(r1gui-preview-core STATIC
   Assets.cpp
   Bench.cpp
   DockSandbox.cpp
-  IconSet.cpp
   ModeViews.cpp
   NameField.cpp
   PanelBuild.cpp
   PanelShot.cpp
-  PngWriter.cpp
   PreviewApp.cpp
   RawImage.cpp
   Scene.cpp
   SceneBuild.cpp
   ScenePaint.cpp
-  SvgRaster.cpp
-  TextEngine.cpp
   UiStyle.cpp)
 target_include_directories(r1gui-preview-core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(r1gui-preview-core PUBLIC r1ui::platform r1ui::render r1ui::theme r1ui::dock r1ui::core r1ui::text r1ui_options
+target_link_libraries(r1gui-preview-core PUBLIC r1ui::platform r1ui::render r1ui::theme r1ui::dock r1ui::core r1ui::text r1ui::widgets_gpu r1ui_options
                       psapi shell32)
 
 add_executable(r1gui-preview WIN32 main.cpp)
@@ -38,13 +34,14 @@ set(PREVIEW_OUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # ---- Copied assets: tokens, fonts, icons -------------------------------------------------
 file(GLOB PREVIEW_FONT_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/assets/fonts/*)
-file(GLOB PREVIEW_ICON_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/assets/icons/lucide/*)
+file(GLOB PREVIEW_ICON_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/assets/icons/lucide/* ${CMAKE_SOURCE_DIR}/assets/icons/custom/*)
 set(PREVIEW_ASSET_STAMP ${PREVIEW_OUT}/assets/assets.stamp)
 add_custom_command(
   OUTPUT ${PREVIEW_ASSET_STAMP}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/assets/theme/tokens.json ${PREVIEW_OUT}/assets/theme/tokens.json
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/fonts ${PREVIEW_OUT}/assets/fonts
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/icons/lucide ${PREVIEW_OUT}/assets/icons/lucide
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/icons/custom ${PREVIEW_OUT}/assets/icons/custom
   COMMAND ${CMAKE_COMMAND} -E touch ${PREVIEW_ASSET_STAMP}
   DEPENDS ${CMAKE_SOURCE_DIR}/assets/theme/tokens.json ${PREVIEW_FONT_FILES} ${PREVIEW_ICON_FILES}
   COMMENT "Copying tokens, fonts and icons next to the preview")

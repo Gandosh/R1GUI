@@ -37,13 +37,21 @@ void testRealFile(const std::string& path) {
     return;
   }
   const Tokens& t = *r.tokens;
-  expect(t.colorCount() == 34, "34 colours in each theme");
-  expect(t.colorNames().size() == 34 && t.colorNames().front() == "panel", "file order kept");
+  expect(t.colorCount() == 37, "37 colours in each theme (34 from OpenPencil plus danger, primary, border-strong)");
+  expect(t.colorNames().size() == 37 && t.colorNames().front() == "panel", "file order kept");
   expect(t.color(ThemeId::Dark, "panel") == Color{0x2a, 0x2a, 0x2a, 255}, "dark panel is #2a2a2a");
   expect(t.color(ThemeId::Light, "panel") == Color{255, 255, 255, 255}, "light panel is #ffffff");
+  // Colours OpenPencil's widget code names but its CSS never defines (derived in build_tokens.py).
+  for (const ThemeId theme : {ThemeId::Dark, ThemeId::Light}) {
+    expect(t.color(theme, "danger") == t.color(theme, "error"), "danger is the error token");
+    expect(t.color(theme, "primary") == t.color(theme, "accent"), "primary is the accent token");
+    expect(t.color(theme, "panel-secondary").has_value(), "panel-secondary is kept");
+  }
+  expect(r1ui::theme::toHex(*t.color(ThemeId::Dark, "border-strong")) == "#4a4a4a", "dark border-strong is lighter than border");
+  expect(r1ui::theme::toHex(*t.color(ThemeId::Light, "border-strong")) == "#c7cad1", "light border-strong is darker than border");
   expect(t.color(ThemeId::Dark, "warning-bg")->a == 0x1a, "alpha channel parsed");
   expect(!t.color(ThemeId::Dark, "no-such-colour").has_value(), "unknown name");
-  expect(!t.colorAt(ThemeId::Light, 34).has_value(), "index past the end");
+  expect(!t.colorAt(ThemeId::Light, 37).has_value(), "index past the end");
   expect(r1ui::theme::toHex(*t.color(ThemeId::Dark, "panel")) == "#2a2a2a", "toHex opaque");
   expect(r1ui::theme::toHex(*t.color(ThemeId::Dark, "warning-bg")) == "#f59e0b1a", "toHex alpha");
   for (size_t i = 0; i < t.colorCount(); ++i) {
