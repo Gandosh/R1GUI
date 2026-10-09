@@ -121,7 +121,12 @@ WindowChanges NativeWindow::processEvents(uint64_t nowMs) {
         ui_->handlePlatformEvent(e);
         break;
       case ET::FocusGained:
-        changes.focused = true;
+      case ET::FocusLost:
+        // The host hides the window of a dragged sole tab and the OS moves the focus away from it.
+        // A context that heard "window inactive" would cancel the pointer interaction, i.e. the
+        // drag the hiding was part of; a hidden window's activation is nobody's business.
+        if (!shown) break;
+        if (e.type == ET::FocusGained) changes.focused = true;
         ui_->handlePlatformEvent(e);
         break;
       default: ui_->handlePlatformEvent(e); break;
