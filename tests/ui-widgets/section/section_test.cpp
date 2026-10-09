@@ -184,7 +184,15 @@ void testActionButton() {
   again.setSize(std::nan(""), 5);
   again.setIcon("no-such-icon-name");
   t.layout();
-  paintOnce(t);  // an unknown icon is reported by the icon cache, not a crash of the widget layer
+  bool threw = false;
+  try {
+    paintOnce(t);
+  } catch (const std::runtime_error&) {
+    threw = true;  // an unknown icon is reported by the icon cache (the shell shows it), never a crash
+  }
+  R1_EXPECT(threw);
+  again.setIcon("x");
+  paintOnce(t);
 }
 
 void testPanelHeader() {
