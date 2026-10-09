@@ -31,7 +31,6 @@
 namespace r1ui::widgets::native {
 
 struct NativeWindowInit {
-  FloatId id = 0;
   const FloatRequest* request = nullptr;
   platform::Window* owner = nullptr;
   render::RenderDevice* device = nullptr;
@@ -58,7 +57,6 @@ class NativeWindow {
   NativeWindow(const NativeWindow&) = delete;
   NativeWindow& operator=(const NativeWindow&) = delete;
 
-  FloatId id() const { return id_; }
   platform::Window& window() { return *window_; }
   const platform::Window& window() const { return *window_; }
   UiContext& ui() const { return *ui_; }  // the context is owned, not part of this object's constness
@@ -73,7 +71,6 @@ class NativeWindow {
   bool shown = true;             // false after setVisible(false)
   dock::Rect content;            // last known content rectangle, screen logical
   double expectedScale = 0.0;    // scale a host-driven move announced (0 = none): that DPI event is not the user's
-  bool lost = false;             // the OS destroyed the window; the listener was told
 
   // Client size in logical pixels (0 x 0 while minimized).
   dock::Point clientLogical() const;
@@ -82,9 +79,6 @@ class NativeWindow {
   // ---- events and frames ----
   // Hands the window's queued events to its context and reports what happened to the window itself.
   WindowChanges processEvents(uint64_t nowMs);
-  // Pushes the chrome description and the viewport to the platform window and the context.
-  void syncViewport();
-  void syncChrome();
   void applyTitle();
   bool needsFrame() const;
   // Lays out and draws one frame when needed; false when nothing was presented.
@@ -95,8 +89,10 @@ class NativeWindow {
 
  private:
   void applyCursor();
+  // Pushes the OS client size and scale to the context and the chrome description to the platform window.
+  void syncViewport();
+  void syncChrome();
 
-  FloatId id_;
   FrameMetrics frame_;
   std::unique_ptr<platform::Window> window_;
   std::unique_ptr<render::WindowTarget> target_;

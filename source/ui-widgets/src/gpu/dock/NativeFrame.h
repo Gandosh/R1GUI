@@ -44,7 +44,6 @@ class NativeFrame : public WidgetObject {
   void setTitle(std::string title);
   void setMaximized(bool maximized);
   void setResizable(bool resizable);
-  bool maximized() const { return maximized_; }
 
   // The regions the platform needs, in physical pixels for the current client width and scale. The
   // maximize button exists only for a resizable window.

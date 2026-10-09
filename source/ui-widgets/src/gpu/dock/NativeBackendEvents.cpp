@@ -62,7 +62,6 @@ void NativeFloatingBackend::processEvents(uint64_t nowMs) {
 void NativeFloatingBackend::reportLost(FloatId window) {
   NativeWindow* w = find(window);
   if (w == nullptr) return;
-  w->lost = true;
   table_.retire(window);
   if (listener_ != nullptr) listener_->onFloatLost(window);
 }

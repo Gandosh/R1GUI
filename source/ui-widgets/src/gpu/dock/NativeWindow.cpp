@@ -43,7 +43,7 @@ int ceilToInt(double v) { return static_cast<int>(std::ceil(std::clamp(v, 1.0, 3
 }  // namespace
 
 NativeWindow::NativeWindow(const NativeWindowInit& init)
-    : id_(init.id), frame_(init.frame), services_(init.services) {
+    : frame_(init.frame), services_(init.services) {
   const FloatRequest& request = *init.request;
   title = request.title;
   minContent = init.minContent;

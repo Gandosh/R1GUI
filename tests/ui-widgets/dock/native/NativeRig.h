@@ -52,6 +52,20 @@ inline HWND hwndOf(platform::Window* w) { return w != nullptr ? static_cast<HWND
 
 class NativeRig {
  public:
+  // Every rig checks on teardown that the Vulkan validation layer (active in Debug trees) said nothing,
+  // counting the messages of the teardown itself (windows, targets and textures go first).
+  ~NativeRig() {
+    loop.reset();
+    ui.reset();
+    backend.reset();
+    target.reset();
+    services.reset();
+    textures.reset();
+    if (device) r1test::report(device->validationMessageCount() == 0, "no validation-layer message during the rig's life", __FILE__, __LINE__);
+  }
+  NativeRig(const NativeRig&) = delete;
+  NativeRig& operator=(const NativeRig&) = delete;
+
   // Null (with `skipReason`) when the machine cannot run native window tests.
   static std::unique_ptr<NativeRig> create(std::string& skipReason, bool scriptedPointer = true) {
     try {

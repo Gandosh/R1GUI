@@ -58,7 +58,7 @@ Pure tests with several layouts (one monitor, 150 %, this machine's 3440x1440 + 
 1. `main.pumpEvents()` dispatches the thread's whole message queue; each window records its own events.
 2. `processMain(now)`, then `backend.processEvents(now)` (floating windows' events, listener calls, lost windows, pointer sampling), then `backend.collectGarbage()`.
 3. Draw the main window when it needs a frame, then every floating window that needs one (one after the other, each with its own swapchain and atlas consumer).
-4. When nothing was drawn and `block` is set, `waitForEvents(min(timers of every context, pointer-tracking interval, maxWaitMs))` (`MsgWaitForMultipleObjectsEx`): an idle application uses no CPU (the dock integration test measures 0 ms of CPU over 700 ms of blocking steps).
+4. When nothing was drawn and `block` is set, `waitForEvents(min(timers of every context, pointer-tracking interval, maxWaitMs))` (`MsgWaitForMultipleObjectsEx`): an idle application uses next to no CPU (the dock integration test measures 0 to 16 ms of CPU over 700 ms of blocking steps and fails above 100 ms).
 
 **OS move/size loop.** While Windows runs its own loop (title-bar drag, edge resize) `pumpEvents` does not return. Every window calls the live callback on size changes and a ~60 Hz timer; AppLoop's `liveStep` does the same work as a step minus pumping, minus freeing windows (the OS still uses the one that called) and never nests (`busy_`, `inLive_`). Errors thrown there are stored and rethrown by the next `step`.
 
@@ -86,7 +86,7 @@ A tab drag starts in the window whose strip was pressed: that platform window ha
 
 ## 7. Monitors, DPI, display changes
 
-* `WM_DPICHANGED`: the platform applies the OS's suggested rectangle and posts `DpiChanged`; `NativeWindow` sets the new viewport and scale (the context re-lays out), invalidates the swapchain and refreshes the chrome; the backend reports `onFloatScaleChanged` unless a host move announced that scale. The logical size is kept because the OS suggestion scales the physical size by the DPI ratio; the new content rectangle is read back and reported with `onFloatMoved` when it differs.
+* `WM_DPICHANGED`: the platform applies the OS's suggested rectangle and posts `DpiChanged`; `NativeWindow` sets the new viewport and scale (the context re-lays out), invalidates the swapchain and refreshes the chrome; the backend reports `onFloatScaleChanged` unless a host move announced that scale. The logical size is kept by design (the OS suggestion scales the physical size by the DPI ratio; never observed here, both monitors are at 100 %); the new content rectangle is read back and reported with `onFloatMoved` when it differs.
 * D8 (follow the operating system while a window straddles two monitors): the window's DPI is whatever the OS assigns; the backend never overrides it.
 * `WM_DISPLAYCHANGE` (new `EventType::DisplayChanged`, seen by every window): the monitor list is re-read and every window that no longer overlaps a monitor's work area by 100 logical px (`kVisibleMarginLogical`, the dock's `MonitorSet` rule and the platform's `clampToVisible`) is moved back and reported with `onFloatMoved`. The same clamp is applied when a window is created. The application calls `onDisplayChanged()` when the main window sees the event.
 * `monitorAt(point)` returns the OS device name (new `MonitorInfo::name`, e.g. `\\.\DISPLAY2`), stored with the layout (spec 04 rule 4).

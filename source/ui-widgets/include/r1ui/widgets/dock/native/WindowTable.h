@@ -33,9 +33,6 @@ class WindowTable {
     while (!live_.empty()) live_.pop_back();          // topmost first
   }
 
-  // The id the next add() will give (so a window can be built knowing its id).
-  FloatId nextId() const { return next_; }
-
   // Takes ownership; the window is on top. The id is never reused and never 0 (the main window).
   FloatId add(std::unique_ptr<W> window) {
     const FloatId id = next_++;

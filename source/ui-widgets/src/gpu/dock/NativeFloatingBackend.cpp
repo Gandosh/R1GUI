@@ -143,7 +143,6 @@ FloatCreateResult NativeFloatingBackend::createWindow(const FloatRequest& reques
   const platform::Rect outer = outerPhysical(content, -1, monitor, s);
 
   native::NativeWindowInit init;
-  init.id = table_.nextId();
   init.request = &request;
   init.owner = &main_;
   init.device = &device_;

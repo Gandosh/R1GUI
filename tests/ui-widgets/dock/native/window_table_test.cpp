@@ -37,11 +37,10 @@ struct FakeWindow {
 
 void ids_and_stacking() {
   WindowTable<FakeWindow> table;
-  R1_EXPECT(table.nextId() == 1, "the main window is 0, floating windows start at 1");
   const FloatId a = table.add(std::make_unique<FakeWindow>("a"));
   const FloatId b = table.add(std::make_unique<FakeWindow>("b"));
   const FloatId c = table.add(std::make_unique<FakeWindow>("c"));
-  R1_EXPECT(a == 1 && b == 2 && c == 3);
+  R1_EXPECT(a == 1 && b == 2 && c == 3, "the main window is 0, floating windows start at 1");
   R1_EXPECT(table.order() == std::vector<FloatId>({a, b, c}), "new windows are on top");
   bool changed = false;
   R1_EXPECT(table.raise(a, &changed) && changed && table.order() == std::vector<FloatId>({b, c, a}));
