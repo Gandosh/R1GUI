@@ -93,6 +93,12 @@ struct CustomizeFixture {
     for (const Spec& s : specs) declare(s.id, s.label, s.icon, s.category, s.kind, s.chord);
   }
 
+  // The widgets built from the controller go first (the controller must outlive them).
+  ~CustomizeFixture() {
+    t.ui.overlays().closeAll();
+    t.ui.tree().forEachChild(t.ui.root(), [&](WidgetId child) { t.ui.destroy(child); });
+  }
+
   CommandServices services() { return {registry, overrides, keymap, router}; }
 
   void declare(const std::string& id, const std::string& label, const std::string& icon, const std::string& category, cmd::CommandKind kind, cmd::ChordSequence chord) {

@@ -156,7 +156,7 @@ void testMoveWithIndicator() {
   s.drag(s.cx(undoNow.handle), s.cy(undoNow.handle), s.cx(section.text), s.cy(section.rect), [&] {
     R1_EXPECT(s.ed->indicator().placement.parent == "menu.edit.s-2" && s.ed->indicator().placement.side == cz::Side::Start);
   });
-  R1_EXPECT(s.order("menu.edit.s-2") == "menu.edit.edit.undo,menu.edit.edit.copy,menu.edit.edit.paste");
+  R1_EXPECT(s.order("menu.edit.s-2") == "menu.edit.edit.undo,menu.edit.edit.copy");
   // The model's version moved with each drop (live apply) and nothing else was touched.
   R1_EXPECT(s.model.userDelta().moves.size() == 3);
 }

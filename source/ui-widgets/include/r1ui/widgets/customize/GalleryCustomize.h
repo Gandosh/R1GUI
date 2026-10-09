@@ -40,6 +40,7 @@ class GalleryCustomizePage : public WidgetObject {
   CustomizeController& controller() const;
   commands::customize::Customization& model() const;
   commands::CommandRegistry& registry() const;
+  CommandServices services() const;
   CommandUiSync& sync() const;
   CustomizableMenuBar& menuBar() const;
   CustomizableToolbar& mainToolbar() const;

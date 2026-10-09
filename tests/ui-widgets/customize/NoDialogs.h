@@ -18,7 +18,8 @@ inline const bool kDialogsSuppressed = [] {
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
   _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #ifdef _DEBUG
-  for (const int type : {_CRT_WARN, _CRT_ERROR, _CRT_ASSERT}) {
+  const int types[] = {_CRT_WARN, _CRT_ERROR, _CRT_ASSERT};
+  for (const int type : types) {
     _CrtSetReportMode(type, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(type, _CRTDBG_FILE_STDERR);
   }

@@ -170,6 +170,7 @@ GalleryCustomizePage::~GalleryCustomizePage() = default;
 CustomizeController& GalleryCustomizePage::controller() const { return state_->controller; }
 cz::Customization& GalleryCustomizePage::model() const { return state_->model; }
 cmd::CommandRegistry& GalleryCustomizePage::registry() const { return state_->registry; }
+CommandServices GalleryCustomizePage::services() const { return state_->services(); }
 CommandUiSync& GalleryCustomizePage::sync() const { return state_->sync; }
 CustomizableMenuBar& GalleryCustomizePage::menuBar() const { return *ui().objectAs<CustomizableMenuBar>(state_->menuBar); }
 CustomizableToolbar& GalleryCustomizePage::mainToolbar() const { return *ui().objectAs<CustomizableToolbar>(state_->mainToolbar); }
