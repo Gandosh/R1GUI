@@ -386,8 +386,14 @@ void waitAndLiveCallback() {
   Window w(borderlessDesc());
   settle(w);
   while (w.waitForEvents(0)) pumpAll(w);  // drain whatever the OS queued at startup
-  const DWORD t0 = GetTickCount();
-  expect(!w.waitForEvents(60) && GetTickCount() - t0 >= 40, "an idle wait times out instead of returning at once");
+  // Real desktop input may arrive at any time, so an idle timeout is looked for over a few tries.
+  bool timedOut = false;
+  for (int attempt = 0; attempt < 20 && !timedOut; ++attempt) {
+    const DWORD t0 = GetTickCount();
+    timedOut = !w.waitForEvents(60) && GetTickCount() - t0 >= 40;
+    pumpAll(w);
+  }
+  expect(timedOut, "an idle wait times out instead of returning at once");
   post(w, WM_NULL, 0, 0);
   expect(w.waitForEvents(2000), "a posted message wakes the wait");
   pumpAll(w);
