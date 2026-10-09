@@ -168,7 +168,11 @@ void UiContext::endAnimationPass() {
   for (auto& [key, tween] : tweens_) {
     if (tween.scheduled && !tween.running) {
       tween.scheduled = false;
-      if (moving.count(key.widget) == 0) invalidator_.cancelAnimation(key.widget);
+      // A widget that drives its own frames (a blinking caret) keeps its animation request when a
+      // colour transition ends.
+      const WidgetObject* owner = object(key.widget);
+      const bool ownFrames = owner != nullptr && owner->wantsContinuousFrames();
+      if (moving.count(key.widget) == 0 && !ownFrames) invalidator_.cancelAnimation(key.widget);
     }
   }
 }

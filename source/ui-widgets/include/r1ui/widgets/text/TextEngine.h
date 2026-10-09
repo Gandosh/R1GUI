@@ -62,19 +62,20 @@ class TextEngine {
   TextEngine(TextureFactory& textures, const std::filesystem::path& fontDir);
 
   // Width of `utf8` in pixels at `pixelSize` (advances do not depend on the weight).
-  float measure(std::string_view utf8, float pixelSize, int weight = 400);
+  // `tabular` shapes digits with the OpenType tnum feature (equal advances) like number fields do.
+  float measure(std::string_view utf8, float pixelSize, int weight = 400, bool tabular = false);
   const r1ui::text::FontMetrics& metrics(float pixelSize);
   // Distance from the top of a line box of `boxHeight` pixels to the baseline of text at `pixelSize`,
   // computed the way the reference browser does (whole-pixel ascent and descent, floored half-leading).
   float baselineInBox(float pixelSize, float boxHeight);
   // `utf8` shortened with an ellipsis to fit `maxWidth` pixels (unchanged when it fits). The result
   // is cached; the reference stays valid until the next fit() call.
-  const FittedText& fit(std::string_view utf8, float pixelSize, float maxWidth);
+  const FittedText& fit(std::string_view utf8, float pixelSize, float maxWidth, bool tabular = false);
 
   void beginFrame();
   // Draws the text with its pen start at (penX, baselineY). Missing glyphs are skipped.
   void draw(r1ui::render::Painter& painter, std::string_view utf8, float pixelSize, int weight, float penX,
-            float baselineY, const r1ui::render::Color& tint);
+            float baselineY, const r1ui::render::Color& tint, bool tabular = false);
   void uploadAtlas();
   bool consumeAtlasOverflow();
 
@@ -92,6 +93,7 @@ class TextEngine {
   struct Key {
     std::string text;
     float pixelSize;
+    bool tabular;
     friend bool operator==(const Key&, const Key&) = default;
   };
   struct KeyHash {
@@ -101,13 +103,14 @@ class TextEngine {
     std::string text;
     float pixelSize;
     int32_t widthQ;  // maxWidth in 1/64 px
+    bool tabular;
     friend bool operator==(const FitKey&, const FitKey&) = default;
   };
   struct FitKeyHash {
     size_t operator()(const FitKey& k) const;
   };
   // Synthetic bold changes outlines, not advances, so runs are shared by all weights.
-  const r1ui::text::ShapedRun* shaped(std::string_view utf8, float pixelSize);
+  const r1ui::text::ShapedRun* shaped(std::string_view utf8, float pixelSize, bool tabular);
 
   r1ui::text::FontLibrary library_;
   r1ui::text::FontHandle regular_;

@@ -50,6 +50,7 @@ struct ShapedRun {
 struct ShapeOptions {
   bool kerning = true;
   bool ligatures = true;
+  bool tabularNumbers = false;  // OpenType "tnum": digits share one advance (number fields)
 };
 
 // Shapes `utf8` at `pixelSize`. Errors: InvalidArgument (bad size), InputTooLarge, Internal.

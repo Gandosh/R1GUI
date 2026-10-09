@@ -141,6 +141,9 @@ class WidgetObject : public core::events::EventHandler {
   // Opacity applied to this widget and its whole subtree (the style sheet's Opacity row for a
   // disabled widget, a fade). The framework pushes it around paint, children and paintOver.
   virtual float paintOpacity() const { return 1.0f; }
+  // True while the widget asks the Invalidator for continuous frames itself (a blinking caret); the
+  // animation service then does not cancel that request when a colour transition of the widget ends.
+  virtual bool wantsContinuousFrames() const { return false; }
   virtual void paint(PaintContext& ctx) { (void)ctx; }
   // After the children (focus ring, scroll bars, overlays on the widget).
   virtual void paintOver(PaintContext& ctx) { (void)ctx; }
