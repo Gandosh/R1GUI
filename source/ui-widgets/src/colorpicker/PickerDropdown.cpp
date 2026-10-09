@@ -8,6 +8,7 @@
 
 #include <algorithm>
 
+#include "r1ui/widgets/popover/OverlayWatch.h"
 #include "r1ui/widgets/runtime/UiContext.h"
 
 namespace r1ui::widgets {
@@ -142,9 +143,17 @@ void PickerDropdown::open() {
     }
   };
   const OverlayHandle handle = ui().overlays().open(options);
+  if (!handle.valid()) return;
+  try {
+    for (size_t i = 0; i < items_.size(); ++i) ui().create<PickerMenuItem>(handle.host, self, static_cast<int>(i), items_[i]);
+    // The list follows its field when the field moves or is resized, and closes with it.
+    ui().create<OverlayWatch>(handle.host, handle.id, self, self);
+  } catch (...) {
+    ui().overlays().close(handle.id, DismissReason::Programmatic);
+    throw;
+  }
   overlay_ = handle.id;
   highlighted_ = selected_ >= 0 ? selected_ : 0;
-  for (size_t i = 0; i < items_.size(); ++i) ui().create<PickerMenuItem>(handle.host, self, static_cast<int>(i), items_[i]);
   requestPaint();
 }
 
