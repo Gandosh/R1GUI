@@ -72,6 +72,8 @@ class Invalidator {
   // ---- frame ----
   // True when a frame has something to do: pending layout, accumulated damage or an animation.
   bool needsFrame() const;
+  // True when a layout request is waiting (for example one issued by a layout callback).
+  bool layoutPending() const;
   // Runs pending layout (incrementally), clears paint-dirty bits and returns the damage.
   FrameResult runFrame(layout::MeasureProvider* provider);
 

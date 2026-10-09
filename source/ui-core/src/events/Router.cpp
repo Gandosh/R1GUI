@@ -221,7 +221,7 @@ void Router::validateCapture() {
   if (!capture_.valid()) return;
   if (!tree_.alive(capture_)) {
     capture_ = kNoWidget;
-  } else if (!isEffectivelyShown(tree_, capture_)) {
+  } else if (!isEffectivelyShown(tree_, capture_) || !isEffectivelyEnabled(tree_, capture_)) {
     endCapture();
   }
 }
