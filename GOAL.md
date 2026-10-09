@@ -105,7 +105,7 @@ Each widget is compared against its Phase 1 reference screenshots.
 ## Phase 5: Docking, commands, customization
 
 - [ ] 5.1 [ui-dock: dock tree, tabs, splits, drop targets](Goal/evidence/P5_S01.md)
-- [ ] 5.2 [ui-dock: floating panels as native windows, drag to second monitor](Goal/evidence/P5_S02.md)
+- [ ] 5.2 [ui-dock: floating panels as native windows with rounded corners, drag to second monitor (owner, 2026-10-09)](Goal/evidence/P5_S02.md)
 - [ ] 5.3 [ui-dock: layout serialization, versioned schema, validated load](Goal/evidence/P5_S03.md)
 - [ ] 5.4 [ui-dock: layout save, load and switch at runtime](Goal/evidence/P5_S04.md)
 - [ ] 5.5 [ui-commands: command registry (menu, toolbar, shortcut from one source)](Goal/evidence/P5_S05.md)

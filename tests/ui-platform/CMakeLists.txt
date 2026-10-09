@@ -14,7 +14,7 @@ foreach(name utf queue_dpi monitor_clamp chrome_hit)
 endforeach()
 
 add_executable(ui-platform-window-desktop-test window_desktop_test.cpp)
-target_link_libraries(ui-platform-window-desktop-test PRIVATE r1ui::platform r1ui_options)
+target_link_libraries(ui-platform-window-desktop-test PRIVATE r1ui::platform r1ui_options dwmapi)
 add_test(NAME ui-platform.window_desktop COMMAND ui-platform-window-desktop-test)
 set_tests_properties(ui-platform.window_desktop PROPERTIES LABELS "desktop" SKIP_REGULAR_EXPRESSION "SKIPPED")
 

@@ -10,6 +10,7 @@
 // Side effects: the clipboard is saved and restored around the clipboard case.
 #include <windows.h>
 #include <windowsx.h>
+#include <dwmapi.h>
 
 #include <cstdio>
 #include <initializer_list>
@@ -128,6 +129,11 @@ void borderlessGeometryAndOptions() {
   expect(!w.isMaximized() && !w.isMinimized(), "starts restored");
   expect(w.setWindowRect({150, 160, 500, 350}) && w.windowRect() == Rect{150, 160, 500, 350}, "setWindowRect moves and sizes");
   expect(!w.setWindowRect({0, 0, 0, 10}) && !w.setWindowRect({0, 0, 10, -1}), "empty rectangles are rejected");
+
+  // Owner decision: borderless windows ask the window manager for rounded corners (DWMWCP_ROUND).
+  DWORD corner = 0;
+  const HRESULT cornerResult = DwmGetWindowAttribute(handleOf(w), 33 /* DWMWA_WINDOW_CORNER_PREFERENCE */, &corner, sizeof(corner));
+  expect(!SUCCEEDED(cornerResult) || corner == 2, "borderless window requests rounded corners where the OS supports them");
 
   WindowDesc tool = borderlessDesc();
   tool.toolWindow = true;

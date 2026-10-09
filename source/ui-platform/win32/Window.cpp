@@ -111,6 +111,12 @@ Window::Window(const WindowDesc& desc) : impl_(std::make_unique<Impl>()) {
     // loses the shadow, so the result is not an error. SWP_FRAMECHANGED applies the new frame.
     const MARGINS margins{0, 0, 1, 0};
     DwmExtendFrameIntoClientArea(impl.hwnd, &margins);
+    // Owner decision: detached and main windows have rounded corners (about 8 px) on Windows 11, drawn by
+    // the window manager, which squares them again when the window is maximized or snapped. Older
+    // Windows versions ignore the attribute and stay square; failure is not an error.
+    constexpr DWORD kCornerPreference = 33;  // DWMWA_WINDOW_CORNER_PREFERENCE
+    constexpr DWORD kRound = 2;              // DWMWCP_ROUND
+    DwmSetWindowAttribute(impl.hwnd, kCornerPreference, &kRound, sizeof(kRound));
     SetWindowPos(impl.hwnd, nullptr, 0, 0, 0, 0,
                  SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
   }
