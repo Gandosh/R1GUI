@@ -96,14 +96,11 @@ void testLiveState() {
 
   // A hidden command takes no space and the bar closes ranks.
   const double widthWith = f.t.ui.absRect(bar.id()).w;
-  f.registry.add([] {
-    cmd::CommandDef d;
-    d.id = "hide.me";
-    d.label = "Hide me";
-    d.icon = "hand";
-    return d;
-  }());
-  // (a command that is not visible is hidden by its predicate)
+  cmd::CommandDef plain;
+  plain.id = "hide.me";
+  plain.label = "Hide me";
+  plain.icon = "hand";
+  f.registry.add(plain);
   bool visible = true;
   cmd::CommandDef maybe;
   maybe.id = "maybe";
@@ -214,7 +211,10 @@ void testSettledToolbarCostsNoFrames() {
   f.t.layout();
   f.t.ui.frame();
   R1_EXPECT(!f.t.ui.needsFrame());
+  const uint64_t before = f.sync.refreshCount();
   for (int i = 0; i < 5; ++i) f.sync.refresh();
+  f.registry.touch();  // a registry change refreshes at once, without the host asking
+  R1_EXPECT(f.sync.refreshCount() == before + 6);
   R1_EXPECT(!f.t.ui.needsFrame());  // nothing changed, nothing was invalidated
 }
 

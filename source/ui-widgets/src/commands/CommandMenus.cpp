@@ -1,5 +1,5 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: implementation of CommandMenus.h and of the small helpers of CommandServices.h.
+// Owns: implementation of CommandMenus.h.
 // Invariants: a built row's id is the command id and its callbacks only call the router; the refresh
 //   touches a row only when something it shows differs (an idle open menu requests no frames).
 // Callers: hosts, the gallery, tests.
@@ -16,14 +16,6 @@ namespace r1ui::widgets {
 
 namespace cmd = commands;
 using core::tree::WidgetId;
-
-// ---- CommandServices helpers --------------------------------------------------------------------
-
-uint64_t UiClock::nowMs() const { return ui_.now(); }
-
-std::string commandTooltip(const CommandServices& services, const cmd::CommandDef& command, std::string_view base) {
-  return tooltipWithShortcut(base.empty() ? std::string_view(command.label) : base, services.keymap.displayText(command.id));
-}
 
 // ---- entries ------------------------------------------------------------------------------------
 

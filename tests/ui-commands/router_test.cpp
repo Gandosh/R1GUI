@@ -268,6 +268,17 @@ void testExecuteAndGuards() {
   f.reg.add(bare);
   R1_EXPECT(f.router.execute("bare").status == ExecuteResult::Status::NotHandled);
 
+  // A momentary command asked to Invoke (a menu click) gets Press and Release back to back.
+  std::vector<ExecutePhase> clickPhases;
+  CommandDef hold = makeCommand("hold", "Hold");
+  hold.kind = CommandKind::Momentary;
+  hold.execute = [&](const ExecuteArgs& args) {
+    clickPhases.push_back(args.phase);
+    return ExecuteResult::handled();
+  };
+  f.reg.add(hold);
+  R1_EXPECT(f.router.execute("hold", ExecuteSource::Menu).isHandled() && clickPhases == (std::vector<ExecutePhase>{ExecutePhase::Press, ExecutePhase::Release}));
+
   // The source and phase reach the command.
   ExecuteSource seenSource = ExecuteSource::Api;
   CommandDef src = makeCommand("src", "Src");

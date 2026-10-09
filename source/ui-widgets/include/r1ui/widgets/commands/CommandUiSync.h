@@ -6,9 +6,10 @@
 //   chords change through the overrides. A binding cannot poll itself (nothing may keep a timer armed
 //   on a settled screen), so the host calls refresh() once per frame (cheap) and the registry version
 //   triggers an immediate refresh.
-// Callers: the host (construct, call refresh() per frame), bindCommandToolbar and the editor (attach
-//   refreshers). Calls: CommandServices, refreshOpenCommandMenus.
-// Lifetime: bindings keep a weak reference to the hub, so destroying the sync first is safe (the
+// Callers: the host (construct, call refresh() per frame), bindCommandToolbar and the gallery page
+//   (attach refreshers). Calls: CommandServices, refreshOpenCommandMenus.
+// Lifetime: the sync must be destroyed before the UiContext it was given (it refreshes open menus
+//   through it). Bindings keep a weak reference to the hub, so destroying the sync first is safe (the
 //   bindings simply stop refreshing); a refresher is detached by its owner's destructor. refresh() is
 //   not re-entrant: a refresh requested while one runs is ignored (the running one already sees the
 //   latest state because refreshers re-read everything).
