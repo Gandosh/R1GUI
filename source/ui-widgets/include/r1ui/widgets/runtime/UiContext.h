@@ -178,6 +178,13 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   bool keyDown(core::events::Key key, uint8_t modifiers = 0, bool repeat = false);
   bool keyUp(core::events::Key key, uint8_t modifiers = 0);
   bool textInput(char32_t codePoint, uint8_t modifiers = 0);
+  // Moves keyboard focus to `id` from application code (program focus shows no focus ring; pass\r\n  // FocusReason::Keyboard to show it). Unlike
+  // calling router().focus() directly, this runs inside a dispatch frame, so a blur handler that
+  // destroys its own widget cannot free it while the router is still using it. False (focus
+  // unchanged) when the widget is not focusable.
+  bool focusWidget(core::tree::WidgetId id, core::events::FocusReason reason = core::events::FocusReason::Program);
+  // Removes keyboard focus (the same guard).
+  void clearFocus();
   // Cursor wanted at the current pointer position.
   Cursor cursor() const;
   // Last pointer position in logical pixels (valid once the pointer has been seen).

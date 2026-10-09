@@ -112,8 +112,6 @@ void TooltipContent::onAttached() {
   core::layout::Style& s = style();
   s.hasMeasure = true;
   s.flexShrink = 0.0;
-  // The host's border has no layout effect: keep it out of the text box (box 26 px for one line).
-  for (int e = 0; e < 4; ++e) s.margin[e] = core::layout::Length::px(1.0);
   node().flags.hitTestTransparent = true;
 }
 

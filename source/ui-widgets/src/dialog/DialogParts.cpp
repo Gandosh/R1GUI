@@ -250,7 +250,6 @@ void DialogContent::onAttached() {
   s.alignItems = core::layout::Align::Stretch;
   s.flexShrink = 1.0;
   s.minHeight = core::layout::Length::px(0);
-  for (int e = 0; e < 4; ++e) s.margin[e] = core::layout::Length::px(1.0);  // the host's 1 px border
 }
 
 void DialogContent::onKeyDown(Event& e) {

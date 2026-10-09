@@ -144,6 +144,10 @@ class WidgetObject : public core::events::EventHandler {
   // True while the widget asks the Invalidator for continuous frames itself (a blinking caret); the
   // animation service then does not cancel that request when a colour transition of the widget ends.
   virtual bool wantsContinuousFrames() const { return false; }
+  // True for a widget that consumes typed characters while it has focus (text fields, type-ahead
+  // lists). The UiContext then keeps unmodified letters, digits and space away from the
+  // application's global shortcuts.
+  virtual bool wantsTextInput() const { return false; }
   virtual void paint(PaintContext& ctx) { (void)ctx; }
   // After the children (focus ring, scroll bars, overlays on the widget).
   virtual void paintOver(PaintContext& ctx) { (void)ctx; }

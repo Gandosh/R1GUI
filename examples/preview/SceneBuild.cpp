@@ -1,7 +1,7 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: the shared widget-creation helper of SceneBuilder and the window structure: root, title
-//   bar (app title, mode name, mode squares, minimise/maximise/close), body with the panel column
-//   and the canvas area. The properties panel itself is built in PanelBuild.cpp.
+// Owns: the shell's widget creation helper and the window structure: root, title bar (app title,
+//   mode name, mode squares, minimise/maximise/close) and the body, the area below the title bar
+//   that the modes fill.
 // Callers: Scene constructor (via SceneBuilder::build).
 #include <stdexcept>
 
@@ -9,7 +9,6 @@
 
 namespace preview {
 
-namespace layout = r1ui::core::layout;
 namespace tree = r1ui::core::tree;
 
 namespace {
@@ -29,8 +28,7 @@ SceneBuilder::WidgetId SceneBuilder::add(WidgetId parent, Node node, const Style
   tree::Widget* widget = s_.tree_.get(created.id);
   widget->style = style;
   widget->userData = s_.nodes_.size();
-  widget->flags.focusable = node.kind == NodeKind::TextField;
-  if (interactive || node.kind == NodeKind::TextField) widget->handler = s_.handler_.get();
+  if (interactive) widget->handler = s_.handler_.get();
   s_.nodes_.push_back(std::move(node));
   return created.id;
 }
@@ -88,17 +86,6 @@ void SceneBuilder::build() {
   buildTitleBar(s_.ids_.titleBar);
 
   s_.ids_.body = add(s_.ids_.root, Node{}, StyleBuilder().row().grow().build());
-
-  Node panel;
-  panel.style = "panel.background";
-  s_.ids_.panel = add(s_.ids_.body, std::move(panel), StyleBuilder().column().width(kPanelWidth).fixed().clip().build());
-  s_.tree_.get(s_.ids_.panel)->handler = s_.handler_.get();  // receives the wheel for scrolling
-  s_.panelContent_ = add(s_.ids_.panel, Node{}, StyleBuilder().column().fixed().build());
-  buildPanel(s_.panelContent_);
-
-  Node canvas;
-  canvas.style = "canvas";
-  add(s_.ids_.body, std::move(canvas), StyleBuilder().grow().build());
 }
 
 }  // namespace preview

@@ -109,7 +109,6 @@ void MenuPanel::onAttached() {
   s.flexShrink = 1.0;
   s.minHeight = core::layout::Length::px(0);
   if (minWidth_ > kBorderAndPadding) s.minWidth = core::layout::Length::px(minWidth_ - kBorderAndPadding);
-  for (int e = 0; e < 4; ++e) s.margin[e] = core::layout::Length::px(1.0);  // the host's 1 px border
   setFocusable(true);
 
   list_ = ui().create<MenuList>(id()).id();

@@ -93,8 +93,10 @@ void OverlayHost::onAttached() {
   s.alignItems = core::layout::Align::Stretch;
   if (surface_ != OverlaySurface::None) {
     const theme::ResolvedStyle& rs = ui().services().resolve(styleKey(), 0);
-    s.padding[core::layout::kLeft] = s.padding[core::layout::kRight] = rs.paddingX;
-    s.padding[core::layout::kTop] = s.padding[core::layout::kBottom] = rs.paddingY;
+    // The border is drawn inside the box but has no layout effect, so it is part of the padding:
+    // content placed in the host never has to add a pixel of its own.
+    s.padding[core::layout::kLeft] = s.padding[core::layout::kRight] = rs.paddingX + rs.border.width;
+    s.padding[core::layout::kTop] = s.padding[core::layout::kBottom] = rs.paddingY + rs.border.width;
   }
   node().flags.hitTestTransparent = !interactive_;
   ui().invalidator().setVisible(id(), false);  // shown by the manager once placed

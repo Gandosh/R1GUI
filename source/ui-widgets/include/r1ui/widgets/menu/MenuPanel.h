@@ -71,6 +71,7 @@ class MenuPanel final : public WidgetObject {
   void onDetached() override { listener_.reset(); }
   void paintOver(PaintContext& ctx) override;
   void onKeyDown(Event& e) override;
+  bool wantsTextInput() const override { return true; }
   void onTextInput(Event& e) override;
   void onPointerWheel(Event& e) override;
   void onPointerEnter(Event& e) override;

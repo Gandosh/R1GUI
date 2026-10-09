@@ -97,6 +97,7 @@ class Select : public WidgetObject {
   void onStateChanged(uint16_t previous) override;
   void onPointerDown(Event& e) override;
   void onKeyDown(Event& e) override;
+  bool wantsTextInput() const override { return true; }
   void onTextInput(Event& e) override;
 
  private:

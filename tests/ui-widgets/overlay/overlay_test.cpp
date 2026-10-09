@@ -75,8 +75,8 @@ void testPlacement() {
   const layout::Rect host = ui.absRect(h.host);
   R1_EXPECT(ui.tree().get(h.host)->flags.visible);
   R1_EXPECT(host.x == 50 && host.y == 60);                       // below the anchor, left edges aligned
-  R1_EXPECT(host.w == 120 + 8 && host.h == 30 + 8);              // content plus the menu padding of 4 on each side
-  R1_EXPECT(ui.absRect(item.id()).x == 54 && ui.absRect(item.id()).y == 64);
+  R1_EXPECT(host.w == 120 + 10 && host.h == 30 + 10);            // content plus the menu padding of 4 and the 1 px border on each side
+  R1_EXPECT(ui.absRect(item.id()).x == 55 && ui.absRect(item.id()).y == 65);  // the border is part of the host's padding
   R1_EXPECT(!ui.needsFrame());
 
   // Not clipped by ancestors: an overlay placed outside the (small) parent still paints and hits.

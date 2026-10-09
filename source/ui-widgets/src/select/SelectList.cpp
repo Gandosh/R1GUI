@@ -72,8 +72,6 @@ void SelectList::onAttached() {
   s.hasMeasure = true;
   s.flexShrink = 0.0;
   s.maxHeight = core::layout::Length::px(kMaxHeight);
-  s.margin[core::layout::kLeft] = s.margin[core::layout::kRight] = s.margin[core::layout::kTop] = s.margin[core::layout::kBottom] =
-      core::layout::Length::px(1.0);  // the host's border is drawn inside its padding
   rebuildRows();
   if (const Select* sel = owner()) {
     const SelectModel& model = sel->model();
