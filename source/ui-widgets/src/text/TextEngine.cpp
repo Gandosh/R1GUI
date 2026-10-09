@@ -22,7 +22,11 @@ namespace {
 constexpr size_t kMaxCachedRuns = 4096;
 constexpr size_t kMaxCachedFits = 2048;
 constexpr int kRegularWeight = 400;
+constexpr int kMediumWeight = 500;
+constexpr int kBoldWeight = 600;
 constexpr float kMaxBoldStrength = 8.0f;
+
+float strengthAt(const WeightAnchor& anchor, float luminance) { return anchor.dark + (anchor.light - anchor.dark) * luminance; }
 
 r1ui::text::GlyphAtlas makeAtlas() {
   auto atlas = r1ui::text::GlyphAtlas::create();
@@ -50,11 +54,29 @@ TextEngine::TextEngine(TextureFactory& textures, const std::filesystem::path& fo
   texture_ = textures.createCoverage(r1ui::core::checkedCast<uint32_t>(atlas_.width()), r1ui::core::checkedCast<uint32_t>(atlas_.height()));
 }
 
-void TextEngine::setStrength(TextPolarity polarity, WeightStrength strength) {
-  for (const float v : {strength.bold, strength.regular}) {
-    if (!std::isfinite(v) || v < 0.0f || v > kMaxBoldStrength) throw std::invalid_argument("text weight strength out of range");
+float emboldenStrength(const WeightModel& model, float luminance, int weight) {
+  const float l = std::isnan(luminance) ? 0.0f : std::clamp(luminance, 0.0f, 1.0f);
+  const float regular = strengthAt(model.regular, l);
+  const float medium = strengthAt(model.medium, l);
+  const float bold = strengthAt(model.bold, l);
+  float strength = regular;
+  if (weight >= kBoldWeight) {
+    strength = bold;
+  } else if (weight >= kMediumWeight) {
+    strength = medium + (bold - medium) * static_cast<float>(weight - kMediumWeight) / static_cast<float>(kBoldWeight - kMediumWeight);
+  } else if (weight > kRegularWeight) {
+    strength = regular + (medium - regular) * static_cast<float>(weight - kRegularWeight) / static_cast<float>(kMediumWeight - kRegularWeight);
   }
-  strengths_[static_cast<size_t>(polarity)] = strength;
+  return std::max(strength, 0.0f);
+}
+
+void TextEngine::setWeightModel(const WeightModel& model) {
+  for (const WeightAnchor& anchor : {model.regular, model.medium, model.bold}) {
+    for (const float v : {anchor.dark, anchor.light}) {
+      if (!std::isfinite(v) || std::abs(v) > kMaxBoldStrength) throw std::invalid_argument("text weight strength out of range");
+    }
+  }
+  model_ = model;
 }
 
 const r1ui::text::ShapedRun* TextEngine::shaped(std::string_view utf8, float pixelSize, bool tabular) {
@@ -121,10 +143,10 @@ void TextEngine::draw(r1ui::render::Painter& painter, std::string_view utf8, flo
   quads_.clear();
   r1ui::text::QuadParams params;
   params.pixelSize = pixelSize;
-  // Text lighter than mid grey is light text on a dark surface (luminance of the straight sRGB tint).
+  // The strength follows the luminance of the straight sRGB tint (bright text on a dark surface is
+  // rendered heavier than dark text on a light one) and the weight.
   const float luminance = 0.2126f * tint.r + 0.7152f * tint.g + 0.0722f * tint.b;
-  const WeightStrength strength = strengths_[luminance >= 0.5f ? 0 : 1];
-  params.emboldenPx = r1ui::text::defaultEmboldenPx(pixelSize) * (weight >= kSyntheticBoldFromWeight ? strength.bold : strength.regular);
+  params.emboldenPx = r1ui::text::defaultEmboldenPx(pixelSize) * emboldenStrength(model_, luminance, weight);
   const auto stats = r1ui::text::buildGlyphQuads(atlas_, *regular_, *run, params, penX, baselineY, quads_);
   if (!stats.ok()) return;
   if (stats.value().atlasFull) overflow_ = true;

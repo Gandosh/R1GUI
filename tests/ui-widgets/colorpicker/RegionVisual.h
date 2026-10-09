@@ -15,14 +15,20 @@
 
 namespace r1test::visual {
 
-// `maxFraction` is the allowed share of failing pixels inside `areaPixels` (the screen profile's 0.03).
-inline bool expectRegionMatches(const BuildFn& build, const VisualSpec& spec, long long areaPixels, double maxFraction, const char* file, int line) {
+// The allowed share of failing pixels inside `areaPixels` is the profile's maxFailingFraction (read from
+// the tolerance file the harness uses, R1UI_TOLERANCE_FILE or tests/reference/tolerance.json).
+inline bool expectRegionMatches(const BuildFn& build, const VisualSpec& spec, long long areaPixels, const char* file, int line) {
   const auto result = r1ui::widgets::testing::compareWithReference(build, spec, paths());
+  std::string toleranceError;
+  const auto tolerance = r1ui::widgets::image::loadTolerance(r1ui::widgets::image::toleranceFilePath(paths().referenceDir), spec.profile, toleranceError);
+  const double maxFraction = tolerance ? tolerance->maxFailingFraction : 0.0;
   const double fraction = areaPixels > 0 ? static_cast<double>(result.metrics.failingPixels) / static_cast<double>(areaPixels) : 1.0;
-  const bool ok = result.error.empty() && result.metrics.error.empty() && fraction <= maxFraction;
-  std::printf("visual %-44s %-5s %-6s region %lld px: failing %zu (%.3f%% of region) max %d mean %.3f %s\n", spec.reference.c_str(),
+  const bool ok = tolerance && result.error.empty() && result.metrics.error.empty() && fraction <= maxFraction;
+  std::printf("visual %-44s %-5s %-6s region %lld px: failing %zu (%.3f%% of region) max %d mean %.3f %s%s\n", spec.reference.c_str(),
               spec.theme == r1ui::theme::ThemeId::Light ? "light" : "dark", spec.profile.c_str(), areaPixels, result.metrics.failingPixels, fraction * 100.0,
-              result.metrics.maxChannelDiff, result.metrics.meanDiff, ok ? "PASS" : "FAIL");
+              result.metrics.maxChannelDiff, result.metrics.meanDiff, ok ? "PASS" : "FAIL",
+              r1ui::widgets::image::sweepSuffix(result.metrics, static_cast<double>(areaPixels)).c_str());
+  if (!tolerance) std::fprintf(stderr, "  %s\n", toleranceError.c_str());
   if (!result.error.empty()) std::fprintf(stderr, "  %s\n", result.error.c_str());
   if (!ok) std::fprintf(stderr, "  render: %s\n  diff:   %s\n", result.renderPath.string().c_str(), result.diffPath.string().c_str());
   report(ok, spec.reference.c_str(), file, line);
@@ -31,5 +37,4 @@ inline bool expectRegionMatches(const BuildFn& build, const VisualSpec& spec, lo
 
 }  // namespace r1test::visual
 
-#define R1_EXPECT_REGION_MATCHES(build, spec, area, maxFraction) \
-  ::r1test::visual::expectRegionMatches((build), (spec), (area), (maxFraction), __FILE__, __LINE__)
+#define R1_EXPECT_REGION_MATCHES(build, spec, area) ::r1test::visual::expectRegionMatches((build), (spec), (area), __FILE__, __LINE__)

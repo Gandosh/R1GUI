@@ -58,7 +58,7 @@ int main() {
   r1ui::render::RenderDevice device;
   r1ui::widgets::GpuTextureFactory textures(device);
   r1ui::widgets::TextEngine text(textures, assets + "/fonts");
-  text.setStrength(r1ui::widgets::TextPolarity::LightText, {0.0f, 0.0f});  // measure the rasteriser, not the calibrated thickening
+  text.setWeightModel(r1ui::widgets::kNoThickening);  // measure the rasteriser, not the calibrated thickening
   const std::string value = "Rectangle Position 0123 Hamburgefonstiv";
   const std::vector<uint8_t> first = drawString(device, text, value, 24.0f, 400);
   char* dumpDir = nullptr;

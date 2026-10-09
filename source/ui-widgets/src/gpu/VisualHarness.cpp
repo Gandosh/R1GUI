@@ -133,7 +133,7 @@ VisualResult compareWithReference(const BuildFn& build, const VisualSpec& spec, 
     return result;
   }
   std::string error;
-  const auto tolerance = image::loadTolerance(paths.referenceDir / "tolerance.json", spec.profile, error);
+  const auto tolerance = image::loadTolerance(image::toleranceFilePath(paths.referenceDir), spec.profile, error);
   if (!tolerance) {
     result.error = error;
     return result;

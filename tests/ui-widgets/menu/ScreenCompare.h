@@ -99,7 +99,7 @@ inline Outcome compareCrop(const BuildFn& build, const Case& c) {
     return out;
   }
   std::string error;
-  const auto tolerance = image::loadTolerance(p.referenceDir / "tolerance.json", c.profile, error);
+  const auto tolerance = image::loadTolerance(image::toleranceFilePath(p.referenceDir), c.profile, error);
   if (!tolerance) {
     out.error = error;
     return out;

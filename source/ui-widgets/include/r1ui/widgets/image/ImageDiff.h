@@ -12,6 +12,7 @@
 // Failure behavior: a size mismatch or an unknown profile is reported in `error`, never thrown.
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <filesystem>
 #include <optional>
@@ -39,10 +40,18 @@ struct DiffMetrics {
   int boundsMinY = -1;
   int boundsMaxX = -1;
   int boundsMaxY = -1;
+  // Pixels by their largest channel difference (index 0..255): lets a report say how the failing
+  // fraction would change under any other channelTolerance without comparing again.
+  std::array<uint32_t, 256> histogram{};
   bool pass = false;
   std::string error;               // non-empty when the images could not be compared
   std::vector<uint8_t> failMask;   // width * height, 1 = failing pixel
 };
+
+// The tolerance file the visual tests read: the environment variable R1UI_TOLERANCE_FILE when it is
+// set and non-empty (to run the suite against a proposed profile set without editing the committed
+// one), else `referenceDir`/tolerance.json.
+std::filesystem::path toleranceFilePath(const std::filesystem::path& referenceDir);
 
 // Reads `profile` ("default" or a name under "profiles") from a tolerance.json file. nullopt (and
 // `error` set) when the file is unreadable, malformed or lacks the profile.
@@ -53,7 +62,12 @@ DiffMetrics compare(const Image& reference, const Image& candidate, const Tolera
 // Candidate dimmed to a third with failing pixels in red, like `imgdiff.py --diff`.
 Image makeDiffImage(const Image& candidate, const DiffMetrics& metrics);
 
-// One-line summary for test output.
+// With R1UI_DIFF_SWEEP set (to anything): " sweep t:percent ..." giving the share of failing pixels,
+// relative to `areaPixels`, at channel tolerances 0, 8, 16, ... 128 (what the share would be under any
+// other channelTolerance); the tolerance proposal tooling parses it. Empty when the variable is unset.
+std::string sweepSuffix(const DiffMetrics& metrics, double areaPixels);
+
+// One-line summary for test output, followed by sweepSuffix over the whole image.
 std::string describe(const DiffMetrics& metrics);
 
 }  // namespace r1ui::widgets::image

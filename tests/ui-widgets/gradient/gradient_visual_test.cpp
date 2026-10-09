@@ -85,8 +85,8 @@ int main() {
     auto ignore = outsidePopover();
     // The handle of the saturation / value square (see colorpicker_visual_test).
     ignore.push_back({937, 484 + 24 - 9 + 5, 18, 19});
-    R1_EXPECT_REGION_MATCHES(editorBuild(false), (VisualSpec{.reference = "screen-gradient-editor", .theme = theme, .profile = "screen", .ignore = ignore, .luminance = true}), kPopoverW * kPopoverH, 0.03);
-    R1_EXPECT_REGION_MATCHES(editorBuild(true), (VisualSpec{.reference = "screen-gradient-editor-stop-selected", .theme = theme, .profile = "screen", .ignore = ignore, .luminance = true}), kPopoverW * kPopoverH, 0.03);
+    R1_EXPECT_REGION_MATCHES(editorBuild(false), (VisualSpec{.reference = "screen-gradient-editor", .theme = theme, .profile = "screen", .ignore = ignore, .luminance = true}), kPopoverW * kPopoverH);
+    R1_EXPECT_REGION_MATCHES(editorBuild(true), (VisualSpec{.reference = "screen-gradient-editor-stop-selected", .theme = theme, .profile = "screen", .ignore = ignore, .luminance = true}), kPopoverW * kPopoverH);
 
     R1_EXPECT_MATCHES(barBuild(false, -1.0, 6.0, 6.0), (VisualSpec{.reference = "widget-gradient-bar-idle", .theme = theme, .profile = "icons"}));
     // The drag crop: the second stop (selected, white border) moved to 82 % of the bar.

@@ -89,7 +89,7 @@ void expectOpenList(r1ui::theme::ThemeId theme) {
   const r1ui::widgets::image::Image refColor = crop(*reference.image, kRegionX, kRegionY, kRegionW, kRegionH);
   const r1ui::widgets::image::Image oursColor = crop(rendered, 0, 0, kRegionW, kRegionH);
   std::string error;
-  const auto tolerance = r1ui::widgets::image::loadTolerance(paths.referenceDir / "tolerance.json", "screen", error);
+  const auto tolerance = r1ui::widgets::image::loadTolerance(r1ui::widgets::image::toleranceFilePath(paths.referenceDir), "screen", error);
   if (!tolerance) {
     r1test::report(false, error.c_str(), __FILE__, __LINE__);
     return;

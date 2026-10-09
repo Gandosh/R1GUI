@@ -45,8 +45,10 @@ int main() {
   const image::Image withMenu = renderWidget(menu, spec, paths);
   // Menu host: x 20.., y 30.. ; the surface is the panel colour, the window behind is `canvas`.
   const auto& theme = sharedServices(paths).theme();
-  R1_EXPECT(red(withMenu, 30, 36) == theme.color("panel")->r);
-  R1_EXPECT(red(base, 30, 36) == theme.color("canvas")->r);
+  // (30, 33) lies in the padding above the first label: (30, 36) is inside the glyphs of "Copy", whose ink
+  // depends on the calibrated text weight.
+  R1_EXPECT(red(withMenu, 30, 33) == theme.color("panel")->r);
+  R1_EXPECT(red(base, 30, 33) == theme.color("canvas")->r);
   // The shadow darkens the canvas a few pixels outside the menu (below it) compared with no menu.
   uint32_t shadowed = 0;
   for (uint32_t y = 62; y < 90; ++y) {

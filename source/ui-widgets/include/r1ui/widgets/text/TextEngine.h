@@ -13,9 +13,11 @@
 //   afterwards and consumeAtlasOverflow() reports that a repaint is needed.
 // Units: physical pixels everywhere in this class (callers multiply logical sizes by the display
 //   scale). Failure behavior: text that cannot be shaped measures as 0 wide and draws nothing.
-// Weight: faces are Regular only. Weights below kSyntheticBoldFromWeight draw unmodified; heavier
-//   weights thicken the outline by defaultEmboldenPx(size) * WeightStrength::bold, lighter ones by
-//   defaultEmboldenPx(size) * WeightStrength::regular (per text polarity). The strengths are calibrated against the reference crops (docs/dev/widgets.md, "Text weight").
+// Weight: faces are Regular only. Every weight thickens the outline by defaultEmboldenPx(size) *
+//   emboldenStrength(model, luminance of the tint, weight): a multiplier that is a smooth function of
+//   the text colour's luminance and of the weight (see WeightModel). The constants are fitted against
+//   the reference crops by tests/ui-widgets/text/text_calibration_visual_test.cpp
+//   (Goal/evidence/P4_calibration_notes.md, docs/dev/widgets.md "Text weight").
 #pragma once
 
 #include <cstdint>
@@ -35,19 +37,34 @@
 
 namespace r1ui::widgets {
 
-// Weights at or above this thicken the outline (browser behaviour for a family without a real bold).
-inline constexpr int kSyntheticBoldFromWeight = 600;
-// Calibrated multipliers of ui-text's default synthetic bold strength (docs/dev/widgets.md, "Text
-// weight"). Browsers enhance light text on a dark surface (heavier) and dark text on a light
-// surface (lighter) differently, so there is one pair per text polarity: `bold` for weights from
-// kSyntheticBoldFromWeight, `regular` for lighter weights. Polarity follows the tint's luminance.
-struct WeightStrength {
-  float bold;
-  float regular;
+// Multiplier of ui-text's default synthetic bold strength at the two ends of the text colour's
+// luminance range: `dark` for black text, `light` for white text. Browsers render light text on a dark
+// surface heavier and dark text on a light surface lighter than the plain outline, by an amount that
+// grows with the text's brightness, so the strength between the ends is linear in the luminance. An
+// end may be negative (the line is extrapolated); the strength actually used never is.
+struct WeightAnchor {
+  float dark;
+  float light;
 };
-inline constexpr WeightStrength kLightTextStrength{2.18f, 0.2f};
-inline constexpr WeightStrength kDarkTextStrength{1.0f, 0.1f};
-enum class TextPolarity : uint8_t { LightText, DarkText };
+// Anchors at the weights the reference UI uses: 400 (regular), 500 (medium) and 600 (semibold, which
+// the browser synthesises from Regular). Weights in between interpolate linearly; lighter than 400
+// and heavier than 600 use the nearest anchor.
+// There is no size term: the fit over 11, 12 and 14 px samples found a slope of 1% per px, below the
+// noise of the measurement (see the calibration test), because the multiplier is applied to
+// defaultEmboldenPx(size), which already scales with the size.
+struct WeightModel {
+  WeightAnchor regular;
+  WeightAnchor medium;
+  WeightAnchor bold;
+};
+// The fitted model (see the calibration notes).
+inline constexpr WeightModel kCalibratedWeights{{-0.66f, 1.07f}, {-0.13f, 0.83f}, {0.83f, 2.31f}};
+// No thickening at any weight, for tests that measure the bare rasteriser.
+inline constexpr WeightModel kNoThickening{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}};
+
+// The multiplier for text of straight-sRGB `luminance` (0.2126 R + 0.7152 G + 0.0722 B, clamped to
+// 0..1) and CSS `weight`. Never negative.
+float emboldenStrength(const WeightModel& model, float luminance, int weight);
 
 struct FittedText {
   std::string text;      // possibly shortened, ends with U+2026 when truncated
@@ -79,9 +96,10 @@ class TextEngine {
   void uploadAtlas();
   bool consumeAtlasOverflow();
 
-  WeightStrength strength(TextPolarity polarity) const { return strengths_[static_cast<size_t>(polarity)]; }
-  // Throws std::invalid_argument for a negative, non-finite or absurd (> 8) strength.
-  void setStrength(TextPolarity polarity, WeightStrength strength);
+  const WeightModel& weightModel() const { return model_; }
+  // Throws std::invalid_argument for a negative, non-finite or absurd (> 8) strength; the previous
+  // model stays in force then.
+  void setWeightModel(const WeightModel& model);
 
   // The editor shapes with this font; the face for weight 400.
   const r1ui::text::Font& regular() const { return *regular_; }
@@ -122,7 +140,7 @@ class TextEngine {
   std::unordered_map<float, r1ui::text::FontMetrics> metrics_;
   std::vector<r1ui::text::GlyphQuad> quads_;
   std::vector<uint8_t> scratch_;
-  WeightStrength strengths_[2] = {kLightTextStrength, kDarkTextStrength};
+  WeightModel model_ = kCalibratedWeights;
   bool overflow_ = false;
 };
 
