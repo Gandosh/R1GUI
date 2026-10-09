@@ -9,6 +9,7 @@
 // Callers: UiContext::tick / msUntilTick, widgets through UiContext::setTimer.
 #include <algorithm>
 #include <cstdint>
+#include <exception>
 #include <utility>
 
 #include "r1ui/widgets/runtime/UiContext.h"
@@ -48,7 +49,13 @@ bool UiContext::runDueTimers() {
     if (it == timers_.end()) continue;  // cancelled by an earlier callback
     std::function<void()> callback = std::move(it->callback);
     timers_.erase(it);
-    callback();
+    try {
+      callback();
+    } catch (const std::exception& e) {
+      noteFault(e.what());
+    } catch (...) {
+      noteFault(nullptr);
+    }
     ran = true;
   }
   return ran;

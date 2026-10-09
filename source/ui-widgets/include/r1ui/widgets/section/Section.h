@@ -78,6 +78,7 @@ class SectionHeader : public WidgetObject {
   void onClick(Event& e) override;
   void onKeyDown(Event& e) override;
   void onKeyUp(Event& e) override;
+  void onFocusOut(Event&) override { keyDown_ = false; }
   void setCollapsible(bool collapsible);
   void setOnToggle(std::function<void()> callback) { onToggle_ = std::move(callback); }
 

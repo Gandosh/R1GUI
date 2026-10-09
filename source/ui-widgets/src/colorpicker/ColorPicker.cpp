@@ -153,6 +153,14 @@ void ColorPicker::onAttached() {
   refreshParts();
 }
 
+// Parts that die with the picker close their own gestures first (children are detached before their
+// parent); anything still open here is closed so the host never keeps an undo transaction open.
+void ColorPicker::onDetached() {
+  if (gestureDepth_ <= 0) return;
+  gestureDepth_ = 0;
+  if (onEndInteraction) onEndInteraction();
+}
+
 SvSquare& ColorPicker::square() const { return partOf<SvSquare>(*this, square_); }
 ColorSliderRow& ColorPicker::hueRow() const { return partOf<ColorSliderRow>(*this, hue_); }
 ColorSliderRow& ColorPicker::alphaRow() const { return partOf<ColorSliderRow>(*this, alpha_); }

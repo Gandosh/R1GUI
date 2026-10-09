@@ -244,6 +244,10 @@ void Select::onKeyDown(Event& e) {
   switch (e.key) {
     case Key::Enter:
     case Key::Space:
+      // Holding the key must not reopen the list the repeat just chose from: only the first press acts.
+      e.markHandled();
+      if (!e.repeat) open();
+      return;
     case Key::Down:
     case Key::Up:
       e.markHandled();

@@ -85,6 +85,7 @@ struct FlyoutOpenOptions {
   Placement placement = Placement::BelowStart;
   double gap = 4.0;
   core::tree::WidgetId anchorWidget;
+  core::tree::WidgetId owner;  // the flyout closes when this widget is destroyed or hidden (the opening widget)
   int initialHighlight = -1;
   std::function<void(DismissReason)> onClosed;
 };

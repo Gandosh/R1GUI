@@ -131,7 +131,8 @@ void SectionHeader::onClick(Event& e) {
   // A click a child already used (a header action button) must not also toggle the section.
   if (!collapsible_ || e.button != Button::Left || !onToggle_ || e.handled) return;
   e.markHandled();
-  onToggle_();
+  const auto callback = onToggle_;  // a copy: the handler may replace the callback while it runs
+  callback();
 }
 
 void SectionHeader::onKeyDown(Event& e) {
@@ -144,7 +145,11 @@ void SectionHeader::onKeyUp(Event& e) {
   if (!collapsible_ || (e.key != Key::Space && e.key != Key::Enter) || e.target != id() || !keyDown_) return;
   keyDown_ = false;
   e.markHandled();
-  if (onToggle_) onToggle_();
+  // A copy is called: the handler may replace this callback (setOn...) while it runs.
+  if (onToggle_) {
+    const auto callback = onToggle_;
+    callback();
+  }
 }
 
 // ---- PropertySection ----------------------------------------------------------------------------

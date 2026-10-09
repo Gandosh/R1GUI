@@ -202,7 +202,11 @@ bool Button::click() {
 }
 
 void Button::activate() {
-  if (onClick_) onClick_();
+  // A copy is called: the handler may replace this callback (setOn...) while it runs.
+  if (onClick_) {
+    const auto callback = onClick_;
+    callback();
+  }
 }
 
 // ---- measure and paint ---------------------------------------------------------------------------

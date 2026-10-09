@@ -35,6 +35,7 @@ class SvSquare : public WidgetObject {
  public:
   const char* typeName() const override { return "SvSquare"; }
   void onAttached() override;
+  void onDetached() override;
   void paint(PaintContext& ctx) override;
   void paintOver(PaintContext& ctx) override;
   Cursor cursor() const override { return Cursor::Pointer; }
@@ -64,6 +65,7 @@ class SvSquare : public WidgetObject {
   double v_ = 0.0;
   color::Rgb fill_;
   bool dragging_ = false;
+  bool gestureOpen_ = false;  // onBegin was called and onEnd has not been (the widget may die in between)
   double startS_ = 0.0;
   double startV_ = 0.0;
 };
@@ -76,6 +78,7 @@ class ColorSliderTrack : public WidgetObject {
 
   const char* typeName() const override { return "ColorSliderTrack"; }
   void onAttached() override;
+  void onDetached() override;
   void paint(PaintContext& ctx) override;
   void paintOver(PaintContext& ctx) override;
   Cursor cursor() const override { return Cursor::Pointer; }
@@ -107,6 +110,7 @@ class ColorSliderTrack : public WidgetObject {
   double t_ = 0.0;
   color::Rgb base_;
   bool dragging_ = false;
+  bool gestureOpen_ = false;  // onBegin was called and onEnd has not been (the widget may die in between)
   double startT_ = 0.0;
 };
 

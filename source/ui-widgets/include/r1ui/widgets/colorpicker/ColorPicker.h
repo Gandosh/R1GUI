@@ -52,6 +52,7 @@ class ColorPicker : public WidgetObject {
   static std::span<const theme::StyleRuleEntry> styleRows();
   const char* typeName() const override { return "ColorPicker"; }
   void onAttached() override;
+  void onDetached() override;
   void paint(PaintContext& ctx) override;
   std::string_view accessibleName() const override;
 

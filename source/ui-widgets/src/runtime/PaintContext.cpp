@@ -25,9 +25,9 @@ render::Rect PaintContext::toPhysical(double x, double y, double w, double h) co
 
 float PaintContext::hairline() const { return std::max(1.0f, std::round(scale_)); }
 
-const theme::ResolvedStyle& PaintContext::resolve(std::string_view key, uint8_t state) const { return ui_.services().resolve(key, state); }
+theme::ResolvedStyle PaintContext::resolve(std::string_view key, uint8_t state) const { return ui_.services().resolve(key, state); }
 
-const theme::ResolvedStyle& PaintContext::style(std::string_view key) const { return resolve(key, widget_.styleState()); }
+theme::ResolvedStyle PaintContext::style(std::string_view key) const { return resolve(key, widget_.styleState()); }
 
 render::Color PaintContext::color(std::string_view token, double opacity) const { return ui_.services().color(token, opacity); }
 
@@ -77,10 +77,10 @@ float PaintContext::drawText(std::string_view text, const theme::TextStyle& ts, 
   return width;
 }
 
-void PaintContext::drawIcon(std::string_view name, double logicalSize, const render::Rect& box, const render::Color& tint) const {
+void PaintContext::drawIcon(std::string_view name, double logicalSize, const render::Rect& box, const render::Color& tint, std::string_view fallback) const {
   const int size = std::max(1, static_cast<int>(std::lround(logicalSize * static_cast<double>(scale_))));
   const float s = static_cast<float>(size);
-  ui_.icons().draw(painter_, name, box.x + (box.w - s) * 0.5f, box.y + (box.h - s) * 0.5f, size, tint);
+  ui_.icons().draw(painter_, name, box.x + (box.w - s) * 0.5f, box.y + (box.h - s) * 0.5f, size, tint, fallback);
 }
 
 void PaintContext::focusRing(const render::Rect& box, float radiusPhysical) const {

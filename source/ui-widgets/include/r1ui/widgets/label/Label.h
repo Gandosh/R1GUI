@@ -55,7 +55,7 @@ class Label : public WidgetObject {
   std::string_view accessibleName() const override;
 
  private:
-  const theme::ResolvedStyle& resolved() const;
+  theme::ResolvedStyle resolved() const;
 
   std::string text_;
   LabelRole role_;

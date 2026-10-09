@@ -103,7 +103,11 @@ bool IconButton::click() {
 }
 
 void IconButton::activate() {
-  if (onClick_) onClick_();
+  // A copy is called: the handler may replace this callback (setOn...) while it runs.
+  if (onClick_) {
+    const auto callback = onClick_;
+    callback();
+  }
 }
 
 float IconButton::paintOpacity() const { return static_cast<float>(ui().services().resolve("iconbtn", styleState()).opacity); }

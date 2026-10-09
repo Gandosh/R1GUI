@@ -105,7 +105,11 @@ void ScrollArea::applyOffset(double x, double y) {
   cs.margin[layout::kTop] = layout::Length::px(-y);
   ui().invalidator().requestLayout(content_);
   requestPaint();
-  if (onScroll_) onScroll_(*this);
+  // A copy is called: the handler may replace this callback (setOn...) while it runs.
+  if (onScroll_) {
+    const auto callback = onScroll_;
+    callback(*this);
+  }
 }
 
 bool ScrollArea::scrollTo(double x, double y) {

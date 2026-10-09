@@ -196,7 +196,7 @@ void MenuBar::itemKey(int index, Event& e) {
     case events::Key::Down:
     case events::Key::Enter:
     case events::Key::Space:
-      openMenu(index, true);
+      if (!e.repeat || e.key == events::Key::Down) openMenu(index, true);
       e.markHandled();
       return;
     default: return;

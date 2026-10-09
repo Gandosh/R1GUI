@@ -125,11 +125,12 @@ void testHostile() {
   b.setIcon("no-such-icon-in-assets");
   bool threw = false;
   try {
-    paintOnce(t);
-  } catch (const std::runtime_error&) {
+    paintOnce(t);  // an unknown icon is drawn as a placeholder square; painting never throws
+  } catch (const std::exception&) {
     threw = true;
   }
-  R1_EXPECT(threw);
+  R1_EXPECT(!threw);
+  R1_EXPECT(t.ui.icons().failedLoads() >= 1);
   b.setIcon("plus");
   paintOnce(t);
 

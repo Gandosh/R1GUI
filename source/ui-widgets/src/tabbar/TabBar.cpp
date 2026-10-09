@@ -50,6 +50,11 @@ constexpr theme::StyleRuleEntry kRows[] = {
 
 std::span<const theme::StyleRuleEntry> TabBar::styleRows() { return kRows; }
 
+void TabBar::onDetached() {
+  if (listOverlay_.valid()) ui().overlays().close(listOverlay_, DismissReason::Programmatic);
+  listOverlay_ = {};
+}
+
 void TabBar::onAttached() {
   style().height = layout::Length::px(kHeight);
   style().flexShrink = 0.0;
@@ -67,6 +72,31 @@ std::optional<size_t> TabBar::indexOf(TabId id) const {
     if (tabs_[i].id == id) return i;
   }
   return std::nullopt;
+}
+
+int TabBar::animationSlot(TabId id, int sub) {
+  auto it = animSlots_.find(id);
+  if (it == animSlots_.end()) {
+    int base = 0;
+    if (!freeAnimSlots_.empty()) {
+      base = freeAnimSlots_.back();
+      freeAnimSlots_.pop_back();
+    } else {
+      base = nextAnimSlot_;
+      nextAnimSlot_ += 2;
+    }
+    it = animSlots_.emplace(id, base).first;
+  }
+  return it->second + sub;
+}
+
+void TabBar::releaseAnimationSlots(TabId id) {
+  const auto it = animSlots_.find(id);
+  if (it == animSlots_.end()) return;
+  ui().releaseAnimation(this->id(), it->second);
+  ui().releaseAnimation(this->id(), it->second + 1);
+  freeAnimSlots_.push_back(it->second);
+  animSlots_.erase(it);
 }
 
 void TabBar::invalidateLayout() {
@@ -98,6 +128,7 @@ bool TabBar::removeTab(TabId id) {
   if (drag_.active || drag_.armed) endDrag(false);
   const bool wasActive = active_ && *active_ == id;
   tabs_.erase(tabs_.begin() + static_cast<std::ptrdiff_t>(*at));
+  releaseAnimationSlots(id);
   hover_ = {};
   middlePress_.reset();
   invalidateLayout();
@@ -122,6 +153,7 @@ bool TabBar::moveTab(TabId id, size_t newIndex) {
   const std::optional<size_t> at = indexOf(id);
   if (!at || newIndex >= tabs_.size()) return false;
   if (*at == newIndex) return false;
+  if (drag_.active || drag_.armed) endDrag(false);  // the drag holds indices that this move invalidates
   TabInfo info = std::move(tabs_[*at]);
   tabs_.erase(tabs_.begin() + static_cast<std::ptrdiff_t>(*at));
   tabs_.insert(tabs_.begin() + static_cast<std::ptrdiff_t>(newIndex), std::move(info));
@@ -194,39 +226,46 @@ void TabBar::requestClose(size_t index) {
   }
 }
 
+// The user callbacks (onActivate, onContext) may add, remove or reorder tabs, so a pressed tab is
+// kept by id and its index is looked up again after every callback; a tab that is gone ends the gesture.
 void TabBar::onPointerDown(Event& e) {
   const Hit hit = hitTest(e.x, e.y);
   setHover(hit);
   pressHit_ = hit;
+  const bool onTab = (hit.part == Part::Tab || hit.part == Part::Close) && hit.index < tabs_.size();
+  const TabId pressedTab = onTab ? tabs_[hit.index].id : 0;
   if (e.button == Button::Left) {
-    if (hit.part == Part::Tab) {
+    if (hit.part == Part::Tab && onTab) {
       activateByUser(hit.index);
       if (!ui().alive(id())) return;
+      const std::optional<size_t> now = indexOf(pressedTab);
       const Layout& L = layout();
-      drag_ = {};
-      drag_.armed = true;
-      drag_.index = hit.index < tabs_.size() ? hit.index : 0;
-      drag_.slot = drag_.index;
-      drag_.grab = e.x - ui().absRect(id()).x - L.x[drag_.index];
-      drag_.pointerX = e.x;
-      ui().router().capturePointer(id());
+      if (now && *now < L.x.size() && *now < L.w.size()) {
+        drag_ = {};
+        drag_.armed = true;
+        drag_.index = *now;
+        drag_.slot = *now;
+        drag_.grab = e.x - ui().absRect(id()).x - L.x[*now];
+        drag_.pointerX = e.x;
+        ui().router().capturePointer(id());
+      }
     }
     if (hit.part != Part::None) {
       ui().router().focus(id(), core::events::FocusReason::Pointer);
       e.markHandled();
     }
   } else if (e.button == Button::Middle) {
-    if (hit.part == Part::Tab || hit.part == Part::Close) {
-      middlePress_ = hit.index;
+    if (onTab) {
+      middlePress_ = pressedTab;
       e.markHandled();
     }
-  } else if (e.button == Button::Right && (hit.part == Part::Tab || hit.part == Part::Close)) {
+  } else if (e.button == Button::Right && onTab) {
     activateByUser(hit.index);
     if (!ui().alive(id())) return;
     e.markHandled();
-    if (onContext_ && hit.index < tabs_.size()) {
+    if (onContext_ && indexOf(pressedTab)) {
       auto callback = onContext_;
-      callback(tabs_[hit.index].id, e.x, e.y);
+      callback(pressedTab, e.x, e.y);
     }
   }
 }
@@ -237,11 +276,11 @@ void TabBar::onPointerUp(Event& e) {
     drag_.armed = false;
   } else if (e.button == Button::Middle && middlePress_) {
     const Hit hit = hitTest(e.x, e.y);
-    const size_t pressed = *middlePress_;
+    const TabId pressed = *middlePress_;
     middlePress_.reset();
-    if ((hit.part == Part::Tab || hit.part == Part::Close) && hit.index == pressed) {
+    if ((hit.part == Part::Tab || hit.part == Part::Close) && hit.index < tabs_.size() && tabs_[hit.index].id == pressed) {
       e.markHandled();
-      requestClose(pressed);
+      requestClose(hit.index);
     }
   }
 }
@@ -324,6 +363,7 @@ void TabBar::onDragStart(Event& e) {
 
 size_t TabBar::slotFor(double pointerX) const {
   const Layout& L = layout();
+  if (drag_.index >= L.w.size() || drag_.index >= L.x.size()) return drag_.index;
   const double barX = barRect().x;
   const double centre = pointerX - barX - drag_.grab + L.w[drag_.index] * 0.5;
   size_t slot = 0;
@@ -417,6 +457,7 @@ bool TabBar::openTabList() {
   options.placement = Placement::BelowEnd;
   options.gap = 2.0;
   options.anchorWidget = id();
+  options.owner = id();
   options.initialHighlight = active_ ? static_cast<int>(indexOf(*active_).value_or(0)) : -1;
   const core::tree::WidgetId self = id();
   UiContext* context = &ui();

@@ -40,7 +40,8 @@ bool outside(const core::layout::Rect& r, double viewW, double viewH) {
 
 void UiContext::paint(render::Painter& painter) {
   DispatchGuard guard(*this);
-  services_.text().beginFrame();
+  services_.text().beginFrame(*atlas_);
+  iconEpochAtPaint_ = services_.icons().resetEpoch();
   paintWidget(painter, root_);
   endAnimationPass();
 }
@@ -91,10 +92,12 @@ void UiContext::paintWidget(render::Painter& painter, WidgetId id) {
 }
 
 void UiContext::finishPaint() {
-  services_.text().uploadAtlas();
-  const bool textOverflow = services_.text().consumeAtlasOverflow();
-  const bool iconOverflow = services_.icons().consumeOverflow();
-  if (textOverflow || iconOverflow) repaintRequested_ = true;
+  services_.text().uploadAtlas(*atlas_);
+  const bool textReset = services_.text().consumeAtlasOverflow(*atlas_);
+  const uint64_t iconEpoch = services_.icons().resetEpoch();
+  const bool iconReset = iconEpoch != iconEpochAtPaint_;
+  iconEpochAtPaint_ = iconEpoch;
+  if (textReset || iconReset) repaintRequested_ = true;
 }
 
 // ---- animation ------------------------------------------------------------------------------------
@@ -153,6 +156,19 @@ void UiContext::animate(WidgetId widget, int slot, const float* target, int coun
     }
   }
   assign(out, t.current);
+}
+
+void UiContext::releaseAnimation(WidgetId widget, int slot) {
+  const auto it = tweens_.find(TweenKey{widget, slot});
+  if (it == tweens_.end()) return;
+  const bool held = it->second.scheduled;
+  tweens_.erase(it);
+  if (!held) return;
+  for (const auto& [key, tween] : tweens_) {
+    if (key.widget == widget && tween.running) return;  // another transition of the widget still needs frames
+  }
+  const WidgetObject* owner = object(widget);
+  if (owner == nullptr || !owner->wantsContinuousFrames()) invalidator_.cancelAnimation(widget);
 }
 
 void UiContext::endAnimationPass() {

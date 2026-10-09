@@ -25,7 +25,8 @@
 //   dismissOnOutsidePress is set, top first; a press that lands in the anchor widget only closes
 //   (no pass-through) so a trigger button can toggle its popup. Escape closes the top overlay, or
 //   every overlay flagged closeAllOnEscape (menu stacks) and clears focus before restoring it.
-// Invariants: ids are never reused; every method tolerates stale ids; close() may be called from
+// Invariants: ids are never reused; every method tolerates stale ids; an entry whose host was destroyed
+//   by its owner is closed (Programmatic) at the next input or frame hook; close() may be called from
 //   inside the popup's own event handlers (destruction of the widgets is deferred by UiContext).
 // Threading: UI thread only.
 #pragma once
@@ -71,6 +72,7 @@ struct OverlayOptions {
   bool modal = false;                      // blocks input behind it, traps focus unless trapFocus is false
   bool scrim = false;                      // modal only: paint the dimming layer (black at 50%)
   bool trapFocus = true;                   // only meaningful together with modal
+  bool allowGlobalShortcuts = false;       // modal only: application shortcuts keep working behind the dialog
   bool dismissOnOutsidePress = true;
   bool outsidePressPassesThrough = true;   // the dismissing press is also delivered (spec 10 rule 38)
   bool dismissOnEscape = true;
@@ -121,6 +123,9 @@ class OverlayManager {
   size_t count() const { return entries_.size(); }
   bool any() const { return !entries_.empty(); }
   bool anyModal() const;
+  // True while a modal overlay that has not opted in (allowGlobalShortcuts) is open: the context then
+  // withholds keys from the application's global shortcut handler.
+  bool blocksGlobalShortcuts() const;
   OverlayId topmost() const { return entries_.empty() ? OverlayId{} : OverlayId{entries_.back().id}; }
   // Overlays in stacking order, bottom first.
   std::vector<OverlayId> stack() const;
@@ -170,6 +175,7 @@ class OverlayManager {
   const Entry* find(OverlayId id) const;
   size_t indexOf(uint32_t id) const;
   void place(Entry& entry);
+  void reapDead();
   void restoreFocusFor(const Entry& entry, bool focusWasInside);
   bool trapping(const Entry& entry) const { return entry.options.modal && entry.options.trapFocus; }
 

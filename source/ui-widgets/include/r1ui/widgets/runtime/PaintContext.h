@@ -56,9 +56,9 @@ class PaintContext {
   float hairline() const;
 
   // ---- style and colour ----
-  const theme::ResolvedStyle& resolve(std::string_view key, uint8_t state) const;
+  theme::ResolvedStyle resolve(std::string_view key, uint8_t state) const;
   // The key resolved with the widget's own styleState().
-  const theme::ResolvedStyle& style(std::string_view key) const;
+  theme::ResolvedStyle style(std::string_view key) const;
   render::Color color(std::string_view token, double opacity = 1.0) const;
   render::Color color(const theme::Color& c, double opacity = 1.0) const;
 
@@ -76,7 +76,8 @@ class PaintContext {
   // physical pixels. See TextOptions.
   float drawText(std::string_view text, const theme::TextStyle& style, const render::Rect& box, const TextOptions& options = {}) const;
   // Icon of `logicalSize` px centred in `box`.
-  void drawIcon(std::string_view name, double logicalSize, const render::Rect& box, const render::Color& tint) const;
+  // `fallback`: icon drawn when `name` cannot be loaded (otherwise a placeholder square; never throws).
+  void drawIcon(std::string_view name, double logicalSize, const render::Rect& box, const render::Color& tint, std::string_view fallback = {}) const;
   // The focus ring ("focus.ring" style row) just outside-in on `box` (default box()).
   void focusRing(float radiusPhysical = -1.0f) const { focusRing(box(), radiusPhysical); }
   void focusRing(const render::Rect& box, float radiusPhysical = -1.0f) const;

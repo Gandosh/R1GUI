@@ -92,6 +92,7 @@ class TreeView : public WidgetObject {
   // ---- WidgetObject ----
   const char* typeName() const override { return "TreeView"; }
   void onAttached() override;
+  void onDetached() override;
   core::layout::MeasureResult measure(const core::layout::MeasureInput& input) override;
   float paintOpacity() const override;
   void paint(PaintContext& ctx) override;
@@ -201,7 +202,7 @@ class TreeView : public WidgetObject {
     onDrop_ = std::move(drop);
   }
 
-  // ---- time (called from paint; public for tests) ----
+  // ---- time (driven by a context timer while a drag or the slow-click rename needs it; public for tests) ----
   void advance(uint64_t nowMs);
 
   // ---- geometry for tests (window logical px) ----
@@ -301,6 +302,7 @@ class TreeView : public WidgetObject {
   bool pressedWasSelected_ = false;
   uint64_t lastAdvanceMs_ = 0;
   bool framesWanted_ = false;
+  uint32_t stepTimer_ = 0;  // the next advance() while framesWanted_
   std::string searchPrefix_;
   uint64_t searchMs_ = 0;
   mutable std::string tooltipScratch_;

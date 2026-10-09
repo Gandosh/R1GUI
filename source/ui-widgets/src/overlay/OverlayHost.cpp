@@ -102,10 +102,18 @@ void OverlayHost::onAttached() {
   ui().invalidator().setVisible(id(), false);  // shown by the manager once placed
 }
 
+// The fade asks for frames while it runs and gives the request back when it ends (or when animations
+// stop): an open tooltip must not keep the frame loop at display rate.
 float OverlayHost::paintOpacity() const {
-  if (fadeInMs_ <= 0.0 || !shown_ || !ui().animationsActive()) return 1.0f;
-  const double t = static_cast<double>(ui().now() - shownAtMs_) / fadeInMs_;
-  if (t >= 1.0) return 1.0f;
+  const double t = fadeInMs_ > 0.0 && shown_ && ui().animationsActive() ? static_cast<double>(ui().now() - shownAtMs_) / fadeInMs_ : 1.0;
+  if (t >= 1.0) {
+    if (animating_) {
+      animating_ = false;
+      ui().invalidator().cancelAnimation(id());
+    }
+    return 1.0f;
+  }
+  animating_ = true;
   ui().invalidator().requestAnimation(id());
   return static_cast<float>(std::max(0.0, t));
 }

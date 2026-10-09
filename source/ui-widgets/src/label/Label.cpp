@@ -24,7 +24,7 @@ const char* Label::styleKeyFor(LabelRole role) {
   return "label.body";
 }
 
-const theme::ResolvedStyle& Label::resolved() const { return ui().services().resolve(styleKeyFor(role_), styleState()); }
+theme::ResolvedStyle Label::resolved() const { return ui().services().resolve(styleKeyFor(role_), styleState()); }
 
 void Label::onAttached() {
   core::layout::Style& s = style();

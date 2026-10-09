@@ -63,17 +63,25 @@ OverlayHandle OverlayManager::open(const OverlayOptions& options) {
   entry.savedFocusVisible = ui_.router().focusVisible();
   entry.focusPending = options.focusOnOpen;
   const bool tooltip = options.surface == OverlaySurface::Tooltip;
-  if (options.modal) entry.blocker = ui_.create<OverlayBlocker>(layer_, options.scrim).id();
-  OverlayHost& host = ui_.create<OverlayHost>(layer_, options.surface, options.fadeInMs, options.interactive, options.shadow);
-  entry.host = host.id();
+  // Transactional: a failure while building the blocker or the host (node limit, style rows,
+  // allocation) must not leave an invisible full-window blocker eating every pointer event.
+  try {
+    if (options.modal) entry.blocker = ui_.create<OverlayBlocker>(layer_, options.scrim).id();
+    OverlayHost& host = ui_.create<OverlayHost>(layer_, options.surface, options.fadeInMs, options.interactive, options.shadow);
+    entry.host = host.id();
 
-  core::layout::Style& s = host.style();
-  if (options.matchAnchorWidth && options.anchor.w > 0) s.minWidth = core::layout::Length::px(options.anchor.w);
-  if (options.maxHeightFraction > 0.0) {
-    const double limit = ui_.viewportHeight() * std::min(options.maxHeightFraction, 1.0) - 2.0 * options.windowMargin;
-    if (limit > 0) s.maxHeight = core::layout::Length::px(limit);
+    core::layout::Style& s = host.style();
+    if (options.matchAnchorWidth && options.anchor.w > 0) s.minWidth = core::layout::Length::px(options.anchor.w);
+    if (options.maxHeightFraction > 0.0) {
+      const double limit = ui_.viewportHeight() * std::min(options.maxHeightFraction, 1.0) - 2.0 * options.windowMargin;
+      if (limit > 0) s.maxHeight = core::layout::Length::px(limit);
+    }
+    host.requestLayout();
+  } catch (...) {
+    if (entry.host.valid()) ui_.destroy(entry.host);
+    if (entry.blocker.valid()) ui_.destroy(entry.blocker);
+    throw;
   }
-  host.requestLayout();
   entries_.push_back(entry);
   if (!tooltip) ui_.tooltips().onModalOpened();  // any popup closes a visible tooltip (spec rule 8)
   return {OverlayId{entry.id}, entry.host};
@@ -84,8 +92,13 @@ void OverlayManager::restoreFocusFor(const Entry& entry, bool focusWasInside) {
   const WidgetId focused = ui_.router().focused();
   if (focused.valid() && !focusWasInside) return;  // a command moved focus elsewhere: it wins
   // The focus indication comes back only if it was showing when the overlay opened.
+  // The saved target may be gone (the overlay was opened from a menu that has closed since): fall back
+  // to the anchor widget, so focus never ends up nowhere after a chain of popups.
+  const core::events::FocusReason reason = entry.savedFocusVisible ? core::events::FocusReason::Keyboard : core::events::FocusReason::Program;
   if (entry.savedFocus.valid() && ui_.alive(entry.savedFocus)) {
-    ui_.router().focus(entry.savedFocus, entry.savedFocusVisible ? core::events::FocusReason::Keyboard : core::events::FocusReason::Program);
+    ui_.router().focus(entry.savedFocus, reason);
+  } else if (entry.options.anchorWidget.valid() && ui_.alive(entry.options.anchorWidget)) {
+    ui_.router().focus(entry.options.anchorWidget, reason);
   }
 }
 
@@ -129,7 +142,12 @@ void OverlayManager::setAnchor(OverlayId id, const core::layout::Rect& anchor) {
 bool OverlayManager::isOpen(OverlayId id) const { return find(id) != nullptr; }
 
 bool OverlayManager::anyModal() const {
-  return std::any_of(entries_.begin(), entries_.end(), [](const Entry& e) { return e.options.modal; });
+  return std::any_of(entries_.begin(), entries_.end(), [this](const Entry& e) { return e.options.modal && ui_.alive(e.host); });
+}
+
+bool OverlayManager::blocksGlobalShortcuts() const {
+  return std::any_of(entries_.begin(), entries_.end(),
+                     [this](const Entry& e) { return e.options.modal && !e.options.allowGlobalShortcuts && ui_.alive(e.host); });
 }
 
 std::vector<OverlayId> OverlayManager::stack() const {
@@ -160,7 +178,21 @@ bool OverlayManager::contains(OverlayId id, WidgetId widget) const {
 
 // ---- dismissal ----------------------------------------------------------------------------
 
+// An owner that destroys an overlay's host directly (ui.destroy) leaves an entry without a surface.
+// It is closed like any other overlay (blocker destroyed, focus restored, onClosed called) so it can
+// neither request placement forever nor take an Escape or an outside press meant for a live overlay.
+void OverlayManager::reapDead() {
+  for (size_t i = 0; i < entries_.size();) {
+    if (ui_.alive(entries_[i].host)) {
+      ++i;
+      continue;
+    }
+    close(OverlayId{entries_[i].id}, DismissReason::Programmatic);
+  }
+}
+
 OverlayManager::PressOutcome OverlayManager::pressOutside(WidgetId hit) {
+  reapDead();
   PressOutcome outcome;
   if (entries_.empty()) return outcome;
   const int inside = indexContaining(hit);
@@ -184,6 +216,7 @@ OverlayManager::PressOutcome OverlayManager::pressOutside(WidgetId hit) {
 }
 
 bool OverlayManager::escape(bool afterWidgets) {
+  reapDead();
   // Tooltips (non-interactive overlays) never take part in dismissal: look past them, otherwise a
   // visible tooltip would make Escape ignore the menu or dialog under it.
   const auto topmostInteractive = [this]() {
@@ -243,7 +276,7 @@ void OverlayManager::enforceFocusTrap() {
 // ---- placement ----------------------------------------------------------------------------
 
 bool OverlayManager::needsPlacement() const {
-  return std::any_of(entries_.begin(), entries_.end(), [](const Entry& e) { return !e.placed; });
+  return std::any_of(entries_.begin(), entries_.end(), [this](const Entry& e) { return !e.placed || !ui_.alive(e.host); });
 }
 
 void OverlayManager::place(Entry& entry) {
@@ -277,6 +310,7 @@ void OverlayManager::place(Entry& entry) {
 }
 
 bool OverlayManager::afterLayout() {
+  reapDead();
   bool placedAny = false;
   for (size_t i = 0; i < entries_.size(); ++i) {
     Entry& e = entries_[i];

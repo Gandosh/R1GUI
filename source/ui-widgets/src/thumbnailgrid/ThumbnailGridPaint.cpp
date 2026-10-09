@@ -9,7 +9,6 @@
 // Callers: UiContext paint traversal.
 #include <algorithm>
 #include <cmath>
-#include <stdexcept>
 
 #include "r1ui/widgets/runtime/UiContext.h"
 #include "r1ui/widgets/thumbnailgrid/ThumbnailGrid.h"
@@ -22,6 +21,7 @@ constexpr double kLabelPx = 11.0;
 constexpr double kTypePx = 10.0;
 constexpr double kStripHeight = 3.0;
 constexpr double kScrollbarWidth = 6.0;
+constexpr size_t kMaxWrapCache = 2048;
 
 render::Color rgb(const color::Rgb& c, float a = 1.0f) { return {static_cast<float>(c.r), static_cast<float>(c.g), static_cast<float>(c.b), a}; }
 
@@ -83,11 +83,7 @@ void ThumbnailGrid::paintTile(PaintContext& ctx, const thumbs::Metrics& m, size_
     painter.popClip();
   } else {
     const double iconSize = std::clamp(tr.w * 0.4, 12.0, 48.0);
-    try {
-      ctx.drawIcon(item.icon, iconSize, thumb, ctx.color("muted"));
-    } catch (const std::runtime_error&) {
-      ctx.drawIcon("file", iconSize, thumb, ctx.color("muted"));  // the model named an icon that does not exist
-    }
+    ctx.drawIcon(item.icon, iconSize, thumb, ctx.color("muted"), "file");  // "file" when the model names an icon that does not exist
   }
   // The type strip at the bottom of the thumbnail and the modified marker.
   const float strip = ctx.px(kStripHeight);
@@ -105,6 +101,17 @@ void ThumbnailGrid::paintTile(PaintContext& ctx, const thumbs::Metrics& m, size_
   const float lineH = ctx.px(14.0);
   const render::Color text = ctx.color("surface");
   const auto widthOf = [&](std::string_view s) { return engine.measure(s, size); };
+  // Bisection probes many throw-away substrings: measure them without caching, and remember the result per name.
+  const auto probeWidth = [&](std::string_view s) { return engine.measureTransient(s, size); };
+  const auto wrapped = [&](size_t maxLines, float maxWidth) -> const std::vector<std::string>& {
+    std::string key = item.name;
+    key.push_back('\0');
+    key += std::to_string(maxLines) + ':' + std::to_string(static_cast<long long>(maxWidth * 64.0f)) + ':' + std::to_string(static_cast<long long>(size * 64.0f));
+    const auto found = wrapCache_.find(key);
+    if (found != wrapCache_.end()) return found->second;
+    if (wrapCache_.size() >= kMaxWrapCache) wrapCache_.clear();
+    return wrapCache_.emplace(std::move(key), thumbs::wrapName(item.name, maxLines, maxWidth, probeWidth)).first->second;
+  };
   const auto drawLine = [&](const std::string& line, float x, float y, const render::Color& colour) { engine.draw(painter, line, size, 400, x, y + engine.baselineInBox(size, lineH), colour); };
   const auto highlight = [&](const std::string& line, float x, float y) {
     if (search_.empty()) return;
@@ -117,7 +124,7 @@ void ThumbnailGrid::paintTile(PaintContext& ctx, const thumbs::Metrics& m, size_
 
   if (m.mode == thumbs::ViewMode::Grid) {
     const int nameLines = m.labelLines == 1 ? 1 : 2;
-    std::vector<std::string> lines = thumbs::wrapName(item.name, static_cast<size_t>(nameLines), label.w, widthOf);
+    const std::vector<std::string>& lines = wrapped(static_cast<size_t>(nameLines), label.w);
     painter.pushClip(label);
     float y = label.y;
     for (const std::string& line : lines) {
@@ -134,7 +141,7 @@ void ThumbnailGrid::paintTile(PaintContext& ctx, const thumbs::Metrics& m, size_
     painter.popClip();
   } else {
     painter.pushClip(label);
-    const std::vector<std::string> lines = thumbs::wrapName(item.name, 1, label.w * 0.7f, widthOf);
+    const std::vector<std::string>& lines = wrapped(1, label.w * 0.7f);
     const float x = label.x;
     const float y = label.y + (label.h - lineH) * 0.5f;
     highlight(lines.front(), x, y);

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "r1ui/widgets/popover/OverlayWatch.h"
 #include "r1ui/widgets/runtime/UiContext.h"
 
 namespace r1ui::widgets {
@@ -214,11 +215,18 @@ OverlayHandle openFlyout(UiContext& ui, std::vector<FlyoutItem> items, std::func
   o.onClosed = options.onClosed;
   const OverlayHandle handle = ui.overlays().open(o);
   if (!handle.valid()) return {};
-  FlyoutList& list = ui.create<FlyoutList>(handle.host, std::move(items), std::move(onPick));
-  const OverlayId overlay = handle.id;
-  UiContext* context = &ui;
-  list.setCloseHook([context, overlay] { context->overlays().close(overlay); });
-  list.setHighlighted(options.initialHighlight);
+  try {
+    FlyoutList& list = ui.create<FlyoutList>(handle.host, std::move(items), std::move(onPick));
+    const OverlayId overlay = handle.id;
+    UiContext* context = &ui;
+    list.setCloseHook([context, overlay] { context->overlays().close(overlay); });
+    list.setHighlighted(options.initialHighlight);
+    // A flyout belongs to the widget that opened it: it must not outlive it.
+    if (options.owner.valid()) ui.create<OverlayWatch>(handle.host, handle.id, core::tree::WidgetId{}, options.owner);
+  } catch (...) {
+    ui.overlays().close(handle.id, DismissReason::Programmatic);  // no half-built popup is left open
+    throw;
+  }
   return handle;
 }
 

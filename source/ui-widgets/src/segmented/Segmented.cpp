@@ -130,7 +130,12 @@ void Segmented::selectByUser(int index) {
   if (index < 0 || index >= static_cast<int>(items_.size()) || index == selected_) return;
   selected_ = index;
   requestPaint();
-  if (onChange_) onChange_(index);  // may destroy this control: nothing is touched afterwards
+  // A copy is called: the handler may replace this callback (setOn...) while it runs, or destroy this
+  // control, so nothing is touched afterwards.
+  if (onChange_) {
+    const auto callback = onChange_;
+    callback(index);
+  }
 }
 
 // ---- measure and paint ---------------------------------------------------------------------------

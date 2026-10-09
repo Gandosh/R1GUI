@@ -160,6 +160,8 @@ class CurveGraph : public WidgetObject {
   // Screen position (widget-local logical px) of a key or a tangent handle, for tests.
   curve::Point keyPosition(uint32_t curveId, uint32_t keyId) const;
   bool handlePosition(uint32_t curveId, uint32_t keyId, bool outSide, curve::Point& out) const;
+  // Same for the key at `index` of `curve` (O(1); the id based overload searches the curve and the key).
+  bool handlePositionAt(const curve::Curve& curve, size_t index, bool outSide, curve::Point& out) const;
   size_t lastDrawnKeyCount() const { return drawnKeys_; }
   size_t lastDrawnPointCount() const { return drawnPoints_; }
 
@@ -275,6 +277,16 @@ class CurveGraph : public WidgetObject {
   mutable std::string tooltipScratch_;
 
   size_t drawnKeys_ = 0;
+  // Lowest and highest value of the selected keys (the dotted indicator lines), recomputed only when the
+  // selection or the key data changed: the scan is over every selected key, which is O(N) at 100000 keys.
+  uint64_t dataRevision_ = 1;  // bumped whenever key data may have changed (changedCurves, setCurves, restore)
+  struct IndicatorCache {
+    uint64_t selection = 0;
+    uint64_t data = 0;
+    bool any = false;
+    double lo = 0.0;
+    double hi = 0.0;
+  } indicators_;
   size_t drawnPoints_ = 0;
   std::vector<curve::Point> pointScratch_;
 };

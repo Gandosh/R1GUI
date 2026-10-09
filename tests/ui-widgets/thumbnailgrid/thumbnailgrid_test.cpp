@@ -109,9 +109,11 @@ struct Fixture {
     t.ui.finishPaint();
     painter.end();
   }
-  void settle() {  // paint until the filter has finished
+  void settle() {  // paint until the filter has finished; the selection callback follows at the next tick
     for (int i = 0; i < 2000 && grid->filtering(); ++i) paint();
     paint();
+    t.ui.setTime(t.ui.now() + 1);
+    t.ui.tick();
   }
   std::vector<uint64_t> selected() { return grid->selectedKeys(); }
 };

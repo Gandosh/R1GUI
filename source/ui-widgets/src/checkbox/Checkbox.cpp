@@ -64,7 +64,11 @@ void Checkbox::activate() {
   // A mixed box becomes checked (as the native control does); otherwise the value flips.
   const bool next = mixed() ? true : !checked();
   setChecked(next);
-  if (onChange_) onChange_(next);
+  // A copy is called: the handler may replace this callback (setOn...) while it runs.
+  if (onChange_) {
+    const auto callback = onChange_;
+    callback(next);
+  }
 }
 
 core::layout::MeasureResult Checkbox::measure(const core::layout::MeasureInput& input) {

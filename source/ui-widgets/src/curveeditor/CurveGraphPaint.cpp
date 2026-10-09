@@ -262,7 +262,7 @@ void CurveGraph::paintKeys(PaintContext& ctx, const curve::Mapping& m, const Cur
     const Key& k = c.keys[index];
     for (const bool out : {false, true}) {
       curve::Point p;
-      if (!handlePosition(c.id, k.id, out, p)) continue;
+      if (!handlePositionAt(c, index, out, p)) continue;
       const float kx = snapped(box.x + ctx.px(m.toX(k.time)));
       const float ky = snapped(box.y + ctx.px(m.toY(k.value)));
       const float hx = snapped(box.x + ctx.px(clampPx(p.x)));
@@ -299,19 +299,23 @@ void CurveGraph::paintIndicators(PaintContext& ctx, const curve::Mapping& m) {
   const float hair = ctx.hairline();
   // Value indicators: dotted lines at the lowest and highest selected key value (rule 28).
   if (settings_.valueIndicators && selection_.hasKeys()) {
-    bool any = false;
-    double lo = 0.0;
-    double hi = 0.0;
-    const curve::KeyLookup lookup(curves_);
-    for (const curve::Selected& s : selection_.items()) {
-      if (s.part != Part::Key) continue;
-      const size_t i = lookup.indexOf(s.curve, s.key);
-      if (i == curve::npos) continue;
-      const double v = lookup.curve(s.curve)->keys[i].value;
-      lo = any ? std::min(lo, v) : v;
-      hi = any ? std::max(hi, v) : v;
-      any = true;
+    if (indicators_.selection != selection_.revision() || indicators_.data != dataRevision_) {
+      IndicatorCache fresh{selection_.revision(), dataRevision_, false, 0.0, 0.0};
+      const curve::KeyLookup lookup(curves_);
+      for (const curve::Selected& s : selection_.items()) {
+        if (s.part != Part::Key) continue;
+        const size_t i = lookup.indexOf(s.curve, s.key);
+        if (i == curve::npos) continue;
+        const double v = lookup.curve(s.curve)->keys[i].value;
+        fresh.lo = fresh.any ? std::min(fresh.lo, v) : v;
+        fresh.hi = fresh.any ? std::max(fresh.hi, v) : v;
+        fresh.any = true;
+      }
+      indicators_ = fresh;
     }
+    const bool any = indicators_.any;
+    const double lo = indicators_.lo;
+    const double hi = indicators_.hi;
     if (any) {
       const render::Color dot = withAlpha(ctx.color("muted"), 0.8f);
       for (const double v : {lo, hi}) {
@@ -367,7 +371,7 @@ void CurveGraph::paint(PaintContext& ctx) {
   }
   const auto rank = [&](const Curve* c) {
     if (c->id == hoverCurve_) return 2;
-    return selection_.keysOf(c->id).empty() ? 0 : 1;
+    return selection_.hasCurve(c->id) ? 1 : 0;
   };
   std::stable_sort(order.begin(), order.end(), [&](const Curve* a, const Curve* b) { return rank(a) < rank(b); });
   for (const Curve* c : order) paintCurve(ctx, m, *c, rank(c) > 0);

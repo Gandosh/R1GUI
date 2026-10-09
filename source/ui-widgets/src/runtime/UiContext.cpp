@@ -40,7 +40,8 @@ UiContext::UiContext(Services& services, UiContextOptions options)
       router_(tree_, makeRoot(tree_), options.router),
       invalidator_(tree_),
       overlays_(*this),
-      tooltips_(*this) {
+      tooltips_(*this),
+      ownAtlas_(services.text()) {
   root_ = router_.root();
   invalidator_.setRoot(root_, 0.0, 0.0);
   router_.setGlobalKeyHandler(this);
@@ -111,12 +112,37 @@ core::layout::Rect UiContext::absRect(WidgetId id) const {
 }
 
 bool UiContext::reparent(WidgetId child, WidgetId newParent, WidgetId before) {
-  return invalidator_.reparent(child, newParent, before) == tree::TreeError::None;
+  if (invalidator_.reparent(child, newParent, before) != tree::TreeError::None) return false;
+  // Focus or hover may now sit in a subtree that the new parent hides or disables.
+  DispatchGuard guard(*this);
+  router_.sync();
+  return true;
 }
 
 bool UiContext::destroy(WidgetId id) {
   if (!tree_.alive(id) || id == root_) return false;
+  // Detach pass: children first, so a parent's onDetached still sees its children gone. An
+  // onDetached may itself destroy or create widgets of this subtree (a grid dropping its rename box,
+  // a panel closing its popup), so the subtree is collected again after every pass and each object
+  // is told once (WidgetObject::detached_): a re-entrant destroy() of a descendant does not repeat
+  // the hook, and the slot list below is built only from nodes that are still alive.
+  constexpr int kMaxDetachPasses = 8;
   std::vector<WidgetId> subtree;
+  for (int pass = 0; pass < kMaxDetachPasses; ++pass) {
+    subtree.clear();
+    tree_.forEachDescendant(id, [&](WidgetId d) { subtree.push_back(d); }, true);
+    bool ran = false;
+    for (size_t i = subtree.size(); i-- > 0;) {
+      WidgetObject* o = object(subtree[i]);
+      if (o == nullptr || o->detached_) continue;
+      o->detached_ = true;
+      ran = true;
+      o->onDetached();
+    }
+    if (!tree_.alive(id)) return true;  // a hook destroyed this very widget (through an ancestor)
+    if (!ran) break;
+  }
+  subtree.clear();
   tree_.forEachDescendant(id, [&](WidgetId d) { subtree.push_back(d); }, true);
   // Slots are read now: once the tree destroys the nodes the ids no longer resolve.
   std::vector<size_t> slots;
@@ -125,21 +151,27 @@ bool UiContext::destroy(WidgetId id) {
     const tree::Widget* w = tree_.get(d);
     if (w != nullptr && w->userData != 0 && w->userData <= objects_.size()) slots.push_back(static_cast<size_t>(w->userData - 1));
   }
-  // Children first, so a parent's onDetached still sees its children gone.
-  for (size_t i = subtree.size(); i-- > 0;) {
-    if (WidgetObject* o = object(subtree[i])) o->onDetached();
-  }
   const tree::TreeError error = invalidator_.destroy(id);
   if (error != tree::TreeError::None) return false;  // Busy: destroyed during layout, nothing changed
   for (const size_t slot : slots) {
+    if (!objects_[slot]) continue;  // freed by a nested destroy: never push a slot twice
     graveyard_.push_back(std::move(objects_[slot]));
     freeSlots_.push_back(core::checkedCast<uint32_t>(slot));
   }
+  forgetDestroyed();
   if (dispatchDepth_ == 0) {
     router_.sync();
     graveyard_.clear();
   }
   return true;
+}
+
+// Drops the per-widget bookkeeping of widgets that no longer exist: layout-callback registrations
+// (a widget that opted in and never opted out would otherwise leave an entry per instance) and the
+// animation tweens (they are also swept at the end of each paint).
+void UiContext::forgetDestroyed() {
+  std::erase_if(layoutCallbacks_, [&](WidgetId w) { return !tree_.alive(w); });
+  if (!tweens_.empty()) std::erase_if(tweens_, [&](const auto& entry) { return !tree_.alive(entry.first.widget); });
 }
 
 void UiContext::setLayoutCallback(WidgetId id, bool wants) {
@@ -225,9 +257,18 @@ FrameInfo UiContext::frame() {
 
 bool UiContext::tick() {
   DispatchGuard guard(*this);
-  const bool tooltip = tooltips_.tick();
+  // Timers first: a timer may destroy the widget a visible tooltip belongs to, and the tooltip manager
+  // must see that in the same tick.
   const bool timer = runDueTimers();
-  return tooltip || timer;
+  bool tooltip = false;
+  try {
+    tooltip = tooltips_.tick();
+  } catch (const std::exception& e) {
+    noteFault(e.what());
+  }
+  // A timer that ran but changed nothing (the overlay watch polling its anchor) must not make the
+  // host present a frame: whatever a callback changed has raised an invalidation by now.
+  return tooltip || (timer && needsFrame());
 }
 
 std::optional<uint64_t> UiContext::msUntilTick() const {

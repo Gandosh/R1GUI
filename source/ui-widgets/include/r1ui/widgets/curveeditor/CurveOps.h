@@ -36,13 +36,20 @@ struct Selected {
 
 class Selection {
  public:
-  void clear() { items_.clear(); }
+  void clear() {
+    items_.clear();
+    touched();
+  }
   bool empty() const { return items_.empty(); }
   size_t size() const { return items_.size(); }
   const std::vector<Selected>& items() const { return items_; }
   bool contains(const Selected& s) const;
   bool containsKey(uint32_t curve, uint32_t key) const { return contains({curve, key, Part::Key}); }
   bool add(const Selected& s);      // false when already selected
+  // Replaces the selection with these items (any order, duplicates allowed): one sort instead of
+  // one sorted insertion per item.
+  void assign(std::vector<Selected> items);
+  bool hasCurve(uint32_t curve) const;  // any item (key or handle) of this curve
   bool remove(const Selected& s);   // false when it was not selected
   void toggle(const Selected& s);
   void set(const Selected& s);      // only this item
@@ -56,10 +63,15 @@ class Selection {
   bool anyPartSelected(uint32_t curve, uint32_t key) const;
   // Drops items whose curve or key no longer exists (after an edit that removed data).
   void prune(const std::vector<Curve>& curves);
-  friend bool operator==(const Selection&, const Selection&) = default;
+  // Identifies the content: every change draws a new number from a process-wide counter, so equal
+  // revisions mean the same items (a copy keeps the number). For caches of data derived from the selection.
+  uint64_t revision() const { return revision_; }
+  friend bool operator==(const Selection& a, const Selection& b) { return a.items_ == b.items_; }
 
  private:
+  void touched();
   std::vector<Selected> items_;  // sorted, unique
+  uint64_t revision_ = 0;
 };
 
 // ---- lookup ----

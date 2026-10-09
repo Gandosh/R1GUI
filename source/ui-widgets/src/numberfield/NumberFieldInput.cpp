@@ -95,14 +95,16 @@ bool NumberField::commitValue(double value) {
   return fireEnd(false, true);
 }
 
-void NumberField::stepBy(double notches, uint8_t modifiers) {
-  if (mixed() || !enabled() || !std::isfinite(notches)) return;
+void NumberField::stepBy(double notches, uint8_t modifiers) { stepFrom(value_, notches, modifiers); }
+
+void NumberField::stepFrom(double base, double notches, uint8_t modifiers) {
+  if (mixed() || !enabled() || !std::isfinite(notches) || !std::isfinite(base)) return;
   const double step = (increment_ > 0.0 ? increment_ : baseStep()) * stepMultiplier(modifiers);
-  double next = value_ + notches * step;
+  double next = base + notches * step;
   // Soft range first, but never pull a value that lies beyond it back across the wrong direction.
   if (soft_) {
-    if (notches > 0.0) next = std::min(next, std::max(soft_->second, value_));
-    else next = std::max(next, std::min(soft_->first, value_));
+    if (notches > 0.0) next = std::min(next, std::max(soft_->second, base));
+    else next = std::max(next, std::min(soft_->first, base));
   }
   next = normalise(next);
   if (next == value_) return;
@@ -243,6 +245,12 @@ void NumberField::endScrub() {
   }
 }
 
+// A field destroyed in the middle of a scrub ends the gesture the host was told about (cancelled: the
+// value goes back to where the scrub began), so no undo transaction stays open.
+void NumberField::onDetached() {
+  if (scrubbing_) cancelScrub();
+}
+
 void NumberField::cancelScrub() {
   if (!scrubbing_) return;
   scrubbing_ = false;
@@ -380,8 +388,9 @@ void NumberField::onKeyDown(Event& e) {
         NumberParseOptions options;
         options.units = units;
         const std::optional<double> typed = parseNumber(lineEditor_.text(), options);
-        if (typed) value_ = normalise(*typed);  // a typed value is kept when stepping from it
-        stepBy(e.key == Key::Up ? 1.0 : -1.0, e.modifiers);
+        // Stepping starts from the typed value, and the result goes through the change protocol (begin,
+        // changed, end) like any other edit, so the host sees the typed value too.
+        stepFrom(typed ? normalise(*typed) : value_, e.key == Key::Up ? 1.0 : -1.0, e.modifiers);
         if (ui().alive(id())) refreshEditText();
         return;
       }

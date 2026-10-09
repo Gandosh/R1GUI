@@ -54,6 +54,7 @@ class OverlayHost final : public WidgetObject {
   bool interactive_;
   std::string shadow_;
   bool shown_ = false;
+  mutable bool animating_ = false;  // the fade holds an animation request (paintOpacity is const)
   uint64_t shownAtMs_ = 0;
 };
 

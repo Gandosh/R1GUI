@@ -127,6 +127,8 @@ void testFormat() {
   R1_EXPECT(formatNumber(1.23456, 0, 3) == "1.235");
   R1_EXPECT(formatNumber(0.1 + 0.2, 0, 3) == "0.3");
   R1_EXPECT(formatNumber(-0.0004, 0, 3) == "0");
+  R1_EXPECT(formatNumber(-0.001, 2, 2) == "0.00");  // no negative zero after rounding
+  R1_EXPECT(formatNumber(-0.5, 2, 2) == "-0.50");
   R1_EXPECT(formatNumber(-0.0, 0, 3) == "0");
   R1_EXPECT(formatNumber(2, 1, 3) == "2.0");
   R1_EXPECT(formatNumber(2.5, 2, 3) == "2.50");

@@ -95,6 +95,7 @@ PreviewApp::PreviewApp(const AppOptions& options) : started_(Clock::now()), path
   target_ = std::make_unique<r1ui::render::WindowTarget>(*device_, *window_, r1ui::render::WindowTargetOptions{options.presentMode});
   textures_ = std::make_unique<GpuTextureFactory>(*device_);
   services_ = std::make_unique<widgets::Services>(tokens_, *textures_, widgets::ServicesPaths{paths_.fonts(), {paths_.icons(), paths_.customIcons()}});
+  windowAtlas_ = std::make_unique<widgets::AtlasConsumer>(services_->text());
   scene_ = std::make_unique<Scene>(services_->theme(), services_->text());
   scene_->setGlobalKeyHandler(this);
   swatches_ = std::make_unique<SwatchesView>(*tokens_);
@@ -130,6 +131,7 @@ std::unique_ptr<widgets::UiContext> PreviewApp::makeContext(r1ui::core::tree::Wi
   };
   auto ui = std::make_unique<widgets::UiContext>(*services_, options);
   ui->setGlobalKeyHandler(this);
+  ui->setAtlasConsumer(windowAtlas_.get());
   ui->setFrameLoopRunning(true);
   ui->rootStyle().direction = r1ui::core::layout::FlexDirection::Column;
   ui->rootStyle().padding[r1ui::core::layout::kTop] = kTitleBarHeight;
@@ -409,18 +411,18 @@ bool PreviewApp::frame(FrameTimes* times) {
     redraw_ = true;  // layout already consumed this frame's damage: draw again once the target is ready
     return false;
   }
-  services_->text().beginFrame();
+  services_->text().beginFrame(*windowAtlas_);
   scene_->paint(target_->painter());
   if (ui != nullptr) {
     ui->paint(target_->painter());
     ui->finishPaint();
   }
   paintMode(target_->painter());
-  services_->text().uploadAtlas();
+  services_->text().uploadAtlas(*windowAtlas_);
   const auto t2 = Clock::now();
   const bool presented = target_->endFrame();
   const auto t3 = Clock::now();
-  const bool atlasOverflowed = (ui != nullptr ? ui->consumeRepaint() : false) || services_->text().consumeAtlasOverflow();
+  const bool atlasOverflowed = (ui != nullptr ? ui->consumeRepaint() : false) || services_->text().consumeAtlasOverflow(*windowAtlas_);
   if (presented) {
     redraw_ = atlasOverflowed;  // the atlas was reset: draw once more
     if (framesPresented_++ == 0) startupMs_ = millis(started_, t3);

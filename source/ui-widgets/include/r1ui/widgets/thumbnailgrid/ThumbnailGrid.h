@@ -217,7 +217,8 @@ class ThumbnailGrid : public WidgetObject {
   void pumpThumbnails(PaintContext& ctx, const thumbs::Metrics& m);
   uint32_t bucketFor(double scale) const;
   void rebuildKeyIndex() const;
-  void rebuildSelectionAfterModelChange();
+  // `deferNotify`: called from paint, so the selection callback runs from a zero-delay timer instead.
+  void rebuildSelectionAfterModelChange(bool deferNotify = false);
 
   // selection helpers
   void selectOnly(uint64_t key);
@@ -276,6 +277,10 @@ class ThumbnailGrid : public WidgetObject {
   std::vector<uint64_t> wanted_;
   std::unordered_set<uint64_t> protectedKeys_;
   bool animating_ = false;
+  bool selectionNotifyPending_ = false;
+  // Wrapped label lines per (name, lines, width, size): bisecting a long name on every frame was both
+  // slow and flooded the shaped-run cache. Cleared when full and whenever the label size changes.
+  std::unordered_map<std::string, std::vector<std::string>> wrapCache_;
 
   // rename
   uint64_t renameKey_ = 0;
