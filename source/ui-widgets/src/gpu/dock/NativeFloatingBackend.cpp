@@ -138,15 +138,9 @@ FloatCreateResult NativeFloatingBackend::createWindow(const FloatRequest& reques
   const dock::Point minimum{std::clamp(request.minContentSize.x, 1.0, dock::kMaxCoordinate), std::clamp(request.minContentSize.y, 1.0, dock::kMaxCoordinate)};
   const dock::Rect content = native::limitContentSize(request.contentRect, minimum, maxContentSize());
 
-  // Physical placement: the monitor showing the requested top-left decides the scale.
-  const dock::Point topLeft{content.x, content.y};
-  const int monitor = space_.monitorOfLogical(topLeft);
-  const double s = space_.scaleOf(monitor);
-  const dock::Point origin = space_.toPhysical(topLeft, monitor);
-  const auto round = [](double v) { return static_cast<int>(std::lround(std::clamp(v, -1.0e6, 1.0e6))); };
-  platform::Rect outer{round(origin.x - f.border * s), round(origin.y - f.titleHeight * s), std::max(1, round((content.w + 2.0 * f.border) * s)),
-                       std::max(1, round((content.h + f.titleHeight + f.border) * s))};
-  outer = platform::clampToVisible(outer, space_.monitors(), options_.visibleMarginLogical);
+  int monitor = -1;
+  double s = 1.0;
+  const platform::Rect outer = outerPhysical(content, -1, monitor, s);
 
   native::NativeWindowInit init;
   init.id = table_.nextId();
@@ -166,7 +160,6 @@ FloatCreateResult NativeFloatingBackend::createWindow(const FloatRequest& reques
     return result;
   }
   window->content = readContent(*window);
-  window->restore = window->content;
   if (live_) window->window().setLiveCallback(live_);
   result.id = table_.add(std::move(window));
   result.ok = true;
@@ -185,11 +178,26 @@ bool NativeFloatingBackend::destroyWindow(FloatId window) {
 
 // ---- rectangle rules ---------------------------------------------------------------------------------
 
+// The outer window rectangle (physical px) for a content rectangle: the monitor showing its top-left
+// decides the scale and the origin (`hint` wins where logical ranges overlap), the size is the logical
+// size times that scale, and the 100 px reachability rule is applied. `monitor` and `scale` report what
+// was used.
+platform::Rect NativeFloatingBackend::outerPhysical(const dock::Rect& content, int hint, int& monitor, double& scale) const {
+  const native::FrameMetrics& f = options_.frame;
+  const dock::Point topLeft{content.x, content.y};
+  monitor = space_.monitorOfLogical(topLeft, hint);
+  scale = space_.scaleOf(monitor);
+  const dock::Point origin = space_.toPhysical(topLeft, monitor);
+  const auto round = [](double v) { return static_cast<int>(std::lround(std::clamp(v, -1.0e6, 1.0e6))); };
+  const platform::Rect outer{round(origin.x - f.border * scale), round(origin.y - f.titleHeight * scale), std::max(1, round((content.w + 2.0 * f.border) * scale)),
+                             std::max(1, round((content.h + f.titleHeight + f.border) * scale))};
+  return platform::clampToVisible(outer, space_.monitors(), options_.visibleMarginLogical);
+}
+
 // Moves and sizes the window to `content` (already finite). The OS may hand over to another DPI while
 // SetWindowPos runs (the platform applies the suggested rectangle at once), so the placement repeats
 // once with the new scale until a pass changes no DPI: that pass is exact.
 void NativeFloatingBackend::place(NativeWindow& w, dock::Rect content) {
-  const native::FrameMetrics& f = w.frameMetrics();
   content = native::limitContentSize(content, w.minContent, maxContentSize());
   if (w.maximized) {
     w.maximized = false;
@@ -197,16 +205,11 @@ void NativeFloatingBackend::place(NativeWindow& w, dock::Rect content) {
   }
   const platform::Rect now = w.window().windowRect();
   int hint = space_.monitorOfPhysical(now.x + now.width / 2.0, now.y + now.height / 2.0);
-  const auto round = [](double v) { return static_cast<int>(std::lround(std::clamp(v, -1.0e6, 1.0e6))); };
   const float dpiBefore = w.window().dpiScale();
   for (int pass = 0; pass < 3; ++pass) {
-    const dock::Point topLeft{content.x, content.y};
-    const int monitor = space_.monitorOfLogical(topLeft, hint);
-    const double s = space_.scaleOf(monitor);
-    const dock::Point origin = space_.toPhysical(topLeft, monitor);
-    platform::Rect outer{round(origin.x - f.border * s), round(origin.y - f.titleHeight * s), std::max(1, round((content.w + 2.0 * f.border) * s)),
-                         std::max(1, round((content.h + f.titleHeight + f.border) * s))};
-    outer = platform::clampToVisible(outer, space_.monitors(), options_.visibleMarginLogical);
+    int monitor = -1;
+    double s = 1.0;
+    const platform::Rect outer = outerPhysical(content, hint, monitor, s);
     const float dpiPass = w.window().dpiScale();
     w.window().setWindowRect(outer);
     hint = monitor;
@@ -215,7 +218,6 @@ void NativeFloatingBackend::place(NativeWindow& w, dock::Rect content) {
   // The DPI event the move produced belongs to the host's call, not to the user.
   w.expectedScale = w.window().dpiScale() != dpiBefore ? static_cast<double>(w.window().dpiScale()) : 0.0;
   w.content = readContent(w);
-  w.restore = w.content;
 }
 
 bool NativeFloatingBackend::setContentRect(FloatId window, const dock::Rect& contentRect) {
@@ -247,7 +249,6 @@ bool NativeFloatingBackend::setMaximized(FloatId window, bool maximized) {
   if (w->maximized == maximized) return true;
   if (!w->resizable) return false;
   if (maximized) {
-    w->restore = w->content;
     w->maximized = true;
     if (!w->window().isMaximized()) w->window().maximizeToggle();
   } else {
@@ -255,7 +256,6 @@ bool NativeFloatingBackend::setMaximized(FloatId window, bool maximized) {
     if (w->window().isMaximized()) w->window().maximizeToggle();
   }
   w->content = readContent(*w);
-  if (!maximized) w->restore = w->content;
   return true;
 }
 

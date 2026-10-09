@@ -177,11 +177,6 @@ bool NativeWindow::render(uint64_t nowMs) {
   return presented;
 }
 
-void NativeWindow::invalidateSwapchain() {
-  target_->invalidate();
-  redraw_ = true;
-}
-
 std::optional<uint64_t> NativeWindow::msUntilTick(uint64_t nowMs) {
   ui_->setTime(nowMs);
   return ui_->msUntilTick();

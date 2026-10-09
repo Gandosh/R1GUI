@@ -72,7 +72,6 @@ class NativeWindow {
   bool maximized = false;        // mirrors the OS state; changed by the host before it acts, by events otherwise
   bool shown = true;             // false after setVisible(false)
   dock::Rect content;            // last known content rectangle, screen logical
-  dock::Rect restore;            // content rectangle to return to when un-maximized
   double expectedScale = 0.0;    // scale a host-driven move announced (0 = none): that DPI event is not the user's
   bool lost = false;             // the OS destroyed the window; the listener was told
 
@@ -91,7 +90,6 @@ class NativeWindow {
   // Lays out and draws one frame when needed; false when nothing was presented.
   bool render(uint64_t nowMs);
   void requestRedraw() { redraw_ = true; }
-  void invalidateSwapchain();
   std::optional<uint64_t> msUntilTick(uint64_t nowMs);
   uint64_t framesPresented() const { return framesPresented_; }
 

@@ -111,10 +111,6 @@ dock::Rect outerOfContent(const dock::Rect& content, const FrameMetrics& frame) 
   return {content.x - frame.border, content.y - frame.titleHeight, content.w + 2.0 * frame.border, content.h + frame.titleHeight + frame.border};
 }
 
-dock::Rect contentOfOuter(const dock::Rect& outer, const FrameMetrics& frame) {
-  return {outer.x + frame.border, outer.y + frame.titleHeight, outer.w - 2.0 * frame.border, outer.h - frame.titleHeight - frame.border};
-}
-
 dock::Rect limitContentSize(dock::Rect content, dock::Point minimum, dock::Point maximum) {
   const double maxW = std::clamp(maximum.x, 1.0, dock::kMaxCoordinate);
   const double maxH = std::clamp(maximum.y, 1.0, dock::kMaxCoordinate);

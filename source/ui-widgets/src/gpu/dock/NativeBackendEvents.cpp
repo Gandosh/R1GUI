@@ -93,7 +93,6 @@ void NativeFloatingBackend::handleChanges(FloatId window, const WindowChanges& c
     const bool maximizeChanged = maximized != w->maximized;
     const bool rectChanged = !sameRect(content, w->content);
     w->maximized = maximized;
-    if (!maximized) w->restore = content;
     w->content = content;
     if (maximizeChanged && listener_ != nullptr) {
       listener_->onFloatMaximizedChanged(window, maximized);
@@ -133,7 +132,6 @@ void NativeFloatingBackend::onDisplayChanged() {
     if (fitted == outer) continue;
     w->window().setWindowRect(fitted);
     w->content = readContent(*w);
-    w->restore = w->content;
     if (listener_ != nullptr) listener_->onFloatMoved(id, w->content);
   }
 }

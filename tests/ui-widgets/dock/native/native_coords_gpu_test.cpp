@@ -99,7 +99,6 @@ void frame_arithmetic() {
   const dock::Rect content{100, 200, 300, 150};
   const dock::Rect outer = outerOfContent(content, f);
   R1_EXPECT(outer == dock::Rect({99, 166, 302, 185}), "1 px border, 34 px title bar");
-  R1_EXPECT(contentOfOuter(outer, f) == content);
   R1_EXPECT(f.insets().top == 34 && f.insets().left == 1 && f.insets().bottom == 1 && f.insets().right == 1);
   R1_EXPECT(limitContentSize({0, 0, 3, 4}, {120, 90}, {1000, 800}) == dock::Rect({0, 0, 120, 90}), "raised to the minimum");
   R1_EXPECT(limitContentSize({5, 6, 5000, 4000}, {120, 90}, {1000, 800}) == dock::Rect({5, 6, 1000, 800}), "limited to the screen");

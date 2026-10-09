@@ -135,6 +135,7 @@ class NativeFloatingBackend final : public IFloatingBackend {
   dock::Point clientOrigin(const native::NativeWindow& w) const;
   dock::Rect readContent(const native::NativeWindow& w) const;
   dock::Point maxContentSize() const;
+  platform::Rect outerPhysical(const dock::Rect& content, int hint, int& monitor, double& scale) const;
   void place(native::NativeWindow& w, dock::Rect content);
   void raiseOs(FloatId window);
   void reportLost(FloatId window);

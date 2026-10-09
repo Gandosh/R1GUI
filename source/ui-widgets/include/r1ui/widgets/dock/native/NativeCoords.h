@@ -65,9 +65,8 @@ struct FrameMetrics {
   FrameInsets insets() const { return {border, titleHeight, border, border}; }
 };
 
-// Outer window rectangle (client area, since the window is borderless) of a content rectangle and back.
+// Outer window rectangle (client area, since the window is borderless) of a content rectangle.
 dock::Rect outerOfContent(const dock::Rect& content, const FrameMetrics& frame);
-dock::Rect contentOfOuter(const dock::Rect& outer, const FrameMetrics& frame);
 
 // Limits a requested content rectangle: finite values only (the caller checked), size between `minimum`
 // and `maximum`, never larger than kMaxCoordinate. The position is not limited here.

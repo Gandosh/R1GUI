@@ -59,6 +59,12 @@ struct DockNative {
     const dock::Rect r = s->tabRect(*s->indexOf(panel));
     return rig.backend->toScreen(s->window(), {r.x + r.w / 2.0, r.y + r.h / 2.0});
   }
+  // A point of the primary monitor, `fx` and `fy` of the way across its work area (screen logical px):
+  // empty desktop space beside the main window, wherever the monitor's size puts it.
+  dock::Point desktop(double fx, double fy) const {
+    const platform::MonitorInfo& m = rig.backend->screenSpace().monitors().front();
+    return rig.backend->screenSpace().toLogical(m.workArea.x + m.workArea.width * fx, m.workArea.y + m.workArea.height * fy);
+  }
   FloatId windowOf(dock::PanelId panel) const { return host->stripOf(panel)->window(); }
 
   // A toolkit-level drag: presses in the window holding `panel`'s tab and moves to `target` (screen
@@ -124,7 +130,7 @@ void tab_out_and_back() {
   auto rig = NativeRig::create(skip);
   DockNative d(*rig);
   R1_EXPECT(d.topLevelWindows() == 1 && d.rig.backend->windowCount() == 0, "just the main window");
-  const dock::Point desktop{1500, 900};  // empty desktop space beside the main window (primary monitor)
+  const dock::Point desktop = d.desktop(0.62, 0.45);  // empty desktop space beside the main window (primary monitor)
   R1_EXPECT(d.rig.backend->topmostWindowAt(desktop, {}) == std::nullopt, "no window of ours there");
 
   // 1. Drag Panel 2 out of the main window and drop it on the desktop.
@@ -157,8 +163,8 @@ void between_floating_windows() {
   std::string skip;
   auto rig = NativeRig::create(skip);
   DockNative d(*rig);
-  d.drag(2, {1400, 800});
-  d.drag(5, {1900, 1000});
+  d.drag(2, d.desktop(0.62, 0.35));
+  d.drag(5, d.desktop(0.85, 0.65));
   R1_EXPECT(d.rig.backend->windowCount() == 2 && d.topLevelWindows() == 3);
   const FloatId wa = d.windowOf(2);
   const FloatId wb = d.windowOf(5);
@@ -183,7 +189,7 @@ void os_moves_resizes_closes() {
   std::string skip;
   auto rig = NativeRig::create(skip);
   DockNative d(*rig);
-  d.drag(2, {1500, 900});
+  d.drag(2, d.desktop(0.62, 0.45));
   const FloatId w = d.windowOf(2);
   platform::Window* win = d.rig.backend->nativeWindow(w);
   const uint32_t areaId = d.areaOf(2)->id;
@@ -224,7 +230,7 @@ void os_destroys_a_window() {
   std::string skip;
   auto rig = NativeRig::create(skip);
   DockNative d(*rig);
-  d.drag(3, {1500, 900});
+  d.drag(3, d.desktop(0.62, 0.45));
   const FloatId w = d.windowOf(3);
   R1_EXPECT(DestroyWindow(hwndOf(d.rig.backend->nativeWindow(w))) != FALSE);
   d.rig.settle(6);
@@ -236,7 +242,7 @@ void minimize_and_restore() {
   std::string skip;
   auto rig = NativeRig::create(skip);
   DockNative d(*rig);
-  d.drag(2, {1500, 900});
+  d.drag(2, d.desktop(0.62, 0.45));
   const FloatId w = d.windowOf(2);
   const dock::Rect rect = *d.rig.backend->contentRect(w);
   const dock::Rect main = d.rig.backend->mainContentRect();
@@ -254,7 +260,7 @@ void idle_uses_no_cpu() {
   std::string skip;
   auto rig = NativeRig::create(skip);
   DockNative d(*rig);
-  d.drag(2, {1500, 900});
+  d.drag(2, d.desktop(0.62, 0.45));
   d.rig.settle(8);
   const auto cpuMs = [] {
     FILETIME create, exit, kernel, user;
