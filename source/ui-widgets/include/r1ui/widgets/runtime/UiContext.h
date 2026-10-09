@@ -145,6 +145,17 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   OverlayManager& overlays() { return overlays_; }
   TooltipManager& tooltips() { return tooltips_; }
 
+  // ---- timers ----
+  // One-shot timers on the context clock (setTime): the callback runs from tick() once `delayMs`
+  // has passed. Callbacks run on the UI thread outside any lock and may set or cancel timers; a
+  // timer set by a callback fires at the earliest on the next tick. Returns 0 when the limit
+  // (kMaxTimers) is reached. Capture WidgetIds, not pointers, in the callback and re-check alive().
+  using TimerId = uint32_t;
+  static constexpr size_t kMaxTimers = 4096;
+  TimerId setTimer(uint64_t delayMs, std::function<void()> callback);
+  // True when the timer was still pending.
+  bool cancelTimer(TimerId id);
+
   // ---- animation ----
   void setAnimationsEnabled(bool enabled) { animationsEnabled_ = enabled; }
   // The shell declares that frames are being produced; without it animations are instant.
@@ -184,7 +195,7 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   void finishPaint();
   // True (once) when an atlas ran out of room during the frame: paint again.
   bool consumeRepaint();
-  // Advances timers (tooltips); true when a frame is needed because of it.
+  // Advances timers (tooltips and setTimer callbacks); true when a frame is needed because of it.
   bool tick();
   // Milliseconds until tick() has something to do; nullopt = nothing scheduled.
   std::optional<uint64_t> msUntilTick() const;
@@ -245,6 +256,14 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   void endAnimationPass();
 
   void paintWidget(render::Painter& painter, core::tree::WidgetId id);
+  bool runDueTimers();
+  std::optional<uint64_t> msUntilTimer() const;
+
+  struct Timer {
+    TimerId id = 0;
+    uint64_t dueMs = 0;
+    std::function<void()> callback;
+  };
 
   Services& services_;
   UiHost host_;
@@ -275,6 +294,8 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   uint32_t seenThemeRevision_ = 0;
   uint32_t seenSheetRevision_ = 0;
   std::unordered_map<TweenKey, Tween, TweenKeyHash> tweens_;
+  std::vector<Timer> timers_;
+  TimerId nextTimerId_ = 1;
 };
 
 }  // namespace r1ui::widgets

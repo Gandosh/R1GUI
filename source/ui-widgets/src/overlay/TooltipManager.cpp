@@ -92,6 +92,7 @@ void TooltipManager::show() {
   options.fadeInMs = static_cast<double>(timing_.fadeMs);
   overlay_ = ui_.overlays().open(options);
   if (!overlay_.valid()) return;
+  if (factory_ && factory_(ui_, overlay_.host, source_, text_)) return;
   Label& label = ui_.create<Label>(overlay_.host, text_, LabelRole::Body);
   label.setEllipsis(false);
 }

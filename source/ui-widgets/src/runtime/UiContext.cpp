@@ -224,10 +224,17 @@ FrameInfo UiContext::frame() {
 
 bool UiContext::tick() {
   DispatchGuard guard(*this);
-  return tooltips_.tick();
+  const bool tooltip = tooltips_.tick();
+  const bool timer = runDueTimers();
+  return tooltip || timer;
 }
 
-std::optional<uint64_t> UiContext::msUntilTick() const { return tooltips_.msUntilTick(); }
+std::optional<uint64_t> UiContext::msUntilTick() const {
+  const std::optional<uint64_t> tooltip = tooltips_.msUntilTick();
+  const std::optional<uint64_t> timer = msUntilTimer();
+  if (tooltip && timer) return std::min(*tooltip, *timer);
+  return tooltip ? tooltip : timer;
+}
 
 bool UiContext::consumeRepaint() {
   const bool was = repaintRequested_;

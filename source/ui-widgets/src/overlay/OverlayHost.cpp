@@ -114,7 +114,7 @@ void OverlayHost::paint(PaintContext& ctx) {
   const theme::ResolvedStyle& rs = ctx.resolve(styleKey(), 0);
   const render::CornerRadii radii = render::CornerRadii::uniform(ctx.px(rs.radius));
   // Shadows are issued last to first so the first listed layer ends up on top (Painter.h).
-  const auto layers = ctx.ui().services().tokens().shadow(shadowName(surface_));
+  const auto layers = ctx.ui().services().tokens().shadow(shadow_.empty() ? shadowName(surface_) : shadow_.c_str());
   if (layers) {
     for (auto it = layers->rbegin(); it != layers->rend(); ++it) {
       render::ShadowSpec spec;

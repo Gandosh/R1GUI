@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -41,6 +42,11 @@ class TooltipManager {
 
   void setTiming(const TooltipTiming& timing) { timing_ = timing; }
   const TooltipTiming& timing() const { return timing_; }
+  // Replaces the default content (one Label with the source's text) of newly shown tooltips: the
+  // factory adds children to `host` and returns true, or returns false to get the default label.
+  // Used by the rich tooltip (title, shortcut, description) of the tooltip widget folder.
+  using ContentFactory = std::function<bool(UiContext&, core::tree::WidgetId host, core::tree::WidgetId source, const std::string& text)>;
+  void setContentFactory(ContentFactory factory) { factory_ = std::move(factory); }
   // Globally switches tooltips off (spec rule 7); closes a visible one.
   void setEnabled(bool enabled);
   bool enabled() const { return enabled_; }
@@ -76,6 +82,7 @@ class TooltipManager {
 
   UiContext& ui_;
   TooltipTiming timing_;
+  ContentFactory factory_;
   bool enabled_ = true;
   core::tree::WidgetId source_;      // widget whose tooltip is pending or shown
   std::string text_;
