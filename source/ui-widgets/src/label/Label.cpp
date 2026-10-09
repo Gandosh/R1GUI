@@ -71,7 +71,9 @@ core::layout::MeasureResult Label::measure(const core::layout::MeasureInput& inp
   const theme::ResolvedStyle& rs = resolved();
   const double scale = ui().scale();
   const float px = static_cast<float>(rs.text.fontSize * scale);
-  double width = static_cast<double>(ui().text().measure(text_, px, rs.text.weight)) / scale;
+  // Whole logical pixels, rounded up: layout rounds box widths, and a box even a fraction narrower
+  // than the text would make paint() truncate it with an ellipsis.
+  double width = std::ceil(static_cast<double>(ui().text().measure(text_, px, rs.text.weight)) / scale);
   if (input.widthMode == core::layout::MeasureMode::AtMost) width = std::min(width, input.width);
   return {width, rs.text.lineHeight};
 }
