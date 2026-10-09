@@ -2,16 +2,21 @@
 // Owns: implementation of GpuResources.h (buffer/image allocation, memory-type choice, release).
 // Why: see GpuResources.h. One dedicated vkAllocateMemory per resource; the resource count in
 //   this phase is small (a few images plus per-frame palette buffers), so no sub-allocator yet.
-// Callers: vulkan/Renderer.cpp. Calls: the Vulkan loader.
+// Callers: every vulkan/*.cpp. Calls: the Vulkan loader.
 #include "GpuResources.h"
 
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
 
+#include "r1ui/render/RenderDevice.h"
+
 namespace r1ui::render::detail {
 
 void check(VkResult result, const char* call) {
+  if (result == VK_ERROR_DEVICE_LOST) {
+    throw DeviceLostError(std::string("Vulkan device lost during ") + call);
+  }
   if (result != VK_SUCCESS) {
     throw std::runtime_error(std::string("Vulkan call failed: ") + call + " (VkResult " +
                              std::to_string(static_cast<int>(result)) + ")");
@@ -91,7 +96,8 @@ GpuBuffer& GpuBuffer::operator=(GpuBuffer&& other) noexcept {
 // ---- GpuImage -------------------------------------------------------------------------
 
 GpuImage::GpuImage(VkDevice device, const VkPhysicalDeviceMemoryProperties& properties,
-                   uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage)
+                   uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage,
+                   bool withView)
     : device_(device) {
   try {
     VkImageCreateInfo info{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
@@ -115,6 +121,14 @@ GpuImage::GpuImage(VkDevice device, const VkPhysicalDeviceMemoryProperties& prop
         findMemoryType(properties, requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
     check(vkAllocateMemory(device_, &alloc, nullptr, &memory_), "vkAllocateMemory");
     check(vkBindImageMemory(device_, image_, memory_, 0), "vkBindImageMemory");
+    if (withView) {
+      VkImageViewCreateInfo view{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
+      view.image = image_;
+      view.viewType = VK_IMAGE_VIEW_TYPE_2D;
+      view.format = format;
+      view.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+      check(vkCreateImageView(device_, &view, nullptr, &view_), "vkCreateImageView");
+    }
   } catch (...) {
     release();
     throw;
@@ -123,10 +137,12 @@ GpuImage::GpuImage(VkDevice device, const VkPhysicalDeviceMemoryProperties& prop
 
 void GpuImage::release() {
   if (device_ == VK_NULL_HANDLE) return;
+  if (view_ != VK_NULL_HANDLE) vkDestroyImageView(device_, view_, nullptr);
   if (image_ != VK_NULL_HANDLE) vkDestroyImage(device_, image_, nullptr);
   if (memory_ != VK_NULL_HANDLE) vkFreeMemory(device_, memory_, nullptr);
   device_ = VK_NULL_HANDLE;
   image_ = VK_NULL_HANDLE;
+  view_ = VK_NULL_HANDLE;
   memory_ = VK_NULL_HANDLE;
 }
 
@@ -135,6 +151,7 @@ GpuImage::~GpuImage() { release(); }
 GpuImage::GpuImage(GpuImage&& other) noexcept
     : device_(std::exchange(other.device_, VK_NULL_HANDLE)),
       image_(std::exchange(other.image_, VK_NULL_HANDLE)),
+      view_(std::exchange(other.view_, VK_NULL_HANDLE)),
       memory_(std::exchange(other.memory_, VK_NULL_HANDLE)) {}
 
 GpuImage& GpuImage::operator=(GpuImage&& other) noexcept {
@@ -142,6 +159,7 @@ GpuImage& GpuImage::operator=(GpuImage&& other) noexcept {
     release();
     device_ = std::exchange(other.device_, VK_NULL_HANDLE);
     image_ = std::exchange(other.image_, VK_NULL_HANDLE);
+    view_ = std::exchange(other.view_, VK_NULL_HANDLE);
     memory_ = std::exchange(other.memory_, VK_NULL_HANDLE);
   }
   return *this;
