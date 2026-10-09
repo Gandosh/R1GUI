@@ -317,6 +317,7 @@ void Toolbar::openGroup(size_t index) {
   options.anchor = ui().absRect(g.box);
   options.placement = flyoutPlacement_;
   options.gap = 8.0;
+  options.owner = id();
   options.initialHighlight = static_cast<int>(g.current);
   const core::tree::WidgetId mainId = g.main;
   UiContext* context = &ui();

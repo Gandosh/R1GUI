@@ -252,10 +252,11 @@ void testHostile() {
   bool threw = false;
   try {
     rig.paint();
-  } catch (const std::runtime_error&) {
-    threw = true;  // an unknown icon is reported by the icon cache (the shell shows it), never a crash
+  } catch (const std::exception&) {
+    threw = true;
   }
-  R1_EXPECT(threw);
+  R1_EXPECT(!threw);  // an unknown icon is a placeholder square, counted by the icon cache, never an exception
+  R1_EXPECT(rig.t.ui.icons().failedLoads() >= 1);
   rig.bar->button(1)->setIcon("plus");
   rig.paint();
   R1_EXPECT(rig.bar->buttonCount() == 2002);

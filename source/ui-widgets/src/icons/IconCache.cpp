@@ -72,18 +72,41 @@ void IconCache::prepare(std::string_view name, int pixelSize) {
   if (!allocate(side, cell)) {
     cells_.clear();
     shelfY_ = shelfHeight_ = cursorX_ = 0;
-    overflow_ = true;
+    ++resetEpoch_;
     if (!allocate(side, cell)) throw std::runtime_error("the icon atlas cannot hold the icon");
   }
   texture_->update(cell.x, cell.y, side, side, coverage);
   cells_.emplace(std::move(key), cell);
 }
 
+// Loads one (name, size) pair, remembering a failure so a bad name costs one disk lookup, not one per frame.
+bool IconCache::tryPrepare(const std::pair<std::string, int>& key) {
+  if (failed_.count(key) != 0) return false;
+  try {
+    prepare(key.first, key.second);
+    return true;
+  } catch (const std::exception&) {
+    failed_.insert(key);
+    return false;
+  }
+}
+
 void IconCache::draw(r1ui::render::Painter& painter, std::string_view name, float x, float y, int pixelSize,
-                     const r1ui::render::Color& tint) {
-  prepare(name, pixelSize);
-  const Cell cell = cells_.at({std::string(name), pixelSize});
+                     const r1ui::render::Color& tint, std::string_view fallback) {
   const float side = static_cast<float>(pixelSize);
+  std::pair<std::string, int> key{std::string(name), pixelSize};
+  if (!tryPrepare(key)) {
+    if (fallback.empty() || fallback == name) {
+      painter.border({std::round(x), std::round(y), side, side}, r1ui::render::CornerRadii::uniform(0.0f), 1.0f, tint);
+      return;
+    }
+    key = {std::string(fallback), pixelSize};
+    if (!tryPrepare(key)) {
+      painter.border({std::round(x), std::round(y), side, side}, r1ui::render::CornerRadii::uniform(0.0f), 1.0f, tint);
+      return;
+    }
+  }
+  const Cell cell = cells_.at(key);
   const float atlas = static_cast<float>(kAtlasSide);
   const float u0 = static_cast<float>(cell.x) / atlas;
   const float v0 = static_cast<float>(cell.y) / atlas;
@@ -94,14 +117,9 @@ void IconCache::setAntiAlias(AntiAlias aa) {
   if (aa == aa_) return;
   aa_ = aa;
   cells_.clear();
+  failed_.clear();  // a changed setting is a chance to find the file again
   shelfY_ = shelfHeight_ = cursorX_ = 0;
-  overflow_ = true;  // quads already built from the old cells must be rebuilt
-}
-
-bool IconCache::consumeOverflow() {
-  const bool was = overflow_;
-  overflow_ = false;
-  return was;
+  ++resetEpoch_;  // quads already built from the old cells must be rebuilt
 }
 
 }  // namespace r1ui::widgets

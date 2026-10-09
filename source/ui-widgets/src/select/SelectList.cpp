@@ -448,7 +448,10 @@ void SelectList::onKeyDown(Event& e) {
     case Key::Up: e.markHandled(); moveHighlight(model.step(highlight_, -1)); return;
     case Key::PageDown: e.markHandled(); moveHighlight(model.page(highlight_, pageRows)); return;
     case Key::PageUp: e.markHandled(); moveHighlight(model.page(highlight_, -pageRows)); return;
-    case Key::Enter: e.markHandled(); chooseHighlighted(); return;
+    case Key::Enter:
+      e.markHandled();
+      if (!e.repeat) chooseHighlighted();  // a held key chooses once, not once per repeat
+      return;
     case Key::Tab:
       e.markHandled();
       s->close();
@@ -481,7 +484,7 @@ void SelectList::onKeyDown(Event& e) {
   } else if (e.key == Key::Space) {
     e.markHandled();
     if (!typeBuffer_.empty() && ui().now() - typeAtMs_ <= kTypeAheadMs) typeAhead(U' ');
-    else chooseHighlighted();
+    else if (!e.repeat) chooseHighlighted();
   } else {
     const auto v = static_cast<uint16_t>(e.key);
     if ((v >= 'A' && v <= 'Z') || (v >= '0' && v <= '9')) e.markHandled();  // the character arrives as text input

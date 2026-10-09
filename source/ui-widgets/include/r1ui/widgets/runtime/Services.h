@@ -12,14 +12,16 @@
 //   the first row), so adding a widget never edits a shared table. The new table must be valid
 //   against the tokens or the whole addition is rejected (std::runtime_error naming the bad rows)
 //   and the previous sheet stays in force.
-// Resolution: resolve(key, state) returns a reference into a cache that is cleared when the theme
-//   revision or the sheet changes; hold the reference only for the duration of one paint/measure
-//   call. An unknown key throws std::logic_error (a programming error, found by the widget's tests).
+// Resolution: resolve(key, state) returns the ResolvedStyle BY VALUE (about 150 bytes of plain data),
+//   backed by a cache that is cleared when the theme revision or the sheet changes. A result stays
+//   valid however long it is held: registering a new widget type's rows (the first create<NewType>) or
+//   switching the theme while another window paints can not invalidate it. Binding it to a
+//   `const ResolvedStyle&` extends the lifetime as before. An unknown key throws std::logic_error (a
+//   programming error, found by the widget's tests).
 // Threading: UI thread only.
 #pragma once
 
 #include <cstdint>
-#include <deque>
 #include <filesystem>
 #include <memory>
 #include <span>
@@ -63,7 +65,7 @@ class Services {
   // Bumped whenever rows were added; contexts repaint and caches reset.
   uint32_t sheetRevision() const { return sheetRevision_; }
   bool hasStyleKey(std::string_view key) const { return sheet_->hasKey(key); }
-  const theme::ResolvedStyle& resolve(std::string_view key, uint8_t state);
+  theme::ResolvedStyle resolve(std::string_view key, uint8_t state);
 
   // ---- colours ----
   // Theme colour by token name as a painter colour; opaque magenta for an unknown name so a
@@ -87,7 +89,7 @@ class Services {
   std::vector<const void*> addedTables_;
   std::unique_ptr<theme::StyleSheet> sheet_;
   uint32_t sheetRevision_ = 1;
-  std::unordered_map<std::string, std::deque<CachedState>, KeyHash, std::equal_to<>> cache_;
+  std::unordered_map<std::string, std::vector<CachedState>, KeyHash, std::equal_to<>> cache_;
   uint32_t cacheThemeRevision_ = 0;
   uint32_t cacheSheetRevision_ = 0;
   TextEngine text_;

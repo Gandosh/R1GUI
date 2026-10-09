@@ -123,6 +123,9 @@ class PreviewApp final : private r1ui::core::events::GlobalKeyHandler {
   std::unique_ptr<r1ui::render::WindowTarget> target_;
   std::unique_ptr<GpuTextureFactory> textures_;
   std::unique_ptr<r1ui::widgets::Services> services_;
+  // This window's share of the glyph atlas: the shell scene, the active context and the direct-drawn
+  // modes all draw text in one frame, so one consumer tracks the whole frame.
+  std::unique_ptr<r1ui::widgets::AtlasConsumer> windowAtlas_;
   std::unique_ptr<Scene> scene_;
   std::unique_ptr<SwatchesView> swatches_;
   std::unique_ptr<ScreensView> screens_;

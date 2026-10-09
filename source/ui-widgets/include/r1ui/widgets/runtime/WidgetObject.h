@@ -128,7 +128,9 @@ class WidgetObject : public core::events::EventHandler {
 
   // ---- lifecycle and layout hooks ----
   virtual void onAttached() {}
-  // Before the node is destroyed (children are already gone or going); the id is still valid.
+  // Before the node is destroyed (children are already gone or going); the id is still valid. Runs
+  // exactly once, even when the hook itself destroys other widgets of the subtree. Only release the
+  // widget's own state here: do not move focus, open popups or destroy widgets that are not yours.
   virtual void onDetached() {}
   // Content size in logical pixels; only called when style().hasMeasure is true. Must be a pure
   // function of the widget's state (see core/layout/Measure.h) and must not mutate the tree.
@@ -180,6 +182,7 @@ class WidgetObject : public core::events::EventHandler {
   core::tree::WidgetId id_;
   uint16_t state_ = 0;
   bool wantsLayout_ = false;
+  bool detached_ = false;  // UiContext::destroy already ran onDetached (it runs exactly once)
   std::string tooltip_;
   std::string accessibleName_;
 };

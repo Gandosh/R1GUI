@@ -41,7 +41,14 @@ void ThumbnailGrid::onAttached() {
   setWantsLayoutCallback(true);
 }
 
-void ThumbnailGrid::onDetached() { cancelRename(); }
+// The rename box is a child of the grid and goes with the subtree; the hook only forgets it, because
+// destroying widgets or moving focus from onDetached would act on a widget that is being torn down.
+void ThumbnailGrid::onDetached() {
+  renaming_ = false;
+  renameKey_ = 0;
+  renameInvalid_ = false;
+  renameEntry_ = {};
+}
 
 void ThumbnailGrid::onLayout() {
   const double w = ui().absRect(id()).w;
@@ -183,7 +190,7 @@ void ThumbnailGrid::pumpFilter() {
     filterRunning_ = false;
     finishSort();
     ++shownVersion_;
-    rebuildSelectionAfterModelChange();
+    rebuildSelectionAfterModelChange(true);  // pumpFilter runs from paint
   }
   clampScroll();
 }
@@ -204,7 +211,7 @@ void ThumbnailGrid::finishSort() {
   for (size_t i = 0; i < names.size(); ++i) shown_[i] = names[i].second;
 }
 
-void ThumbnailGrid::rebuildSelectionAfterModelChange() {
+void ThumbnailGrid::rebuildSelectionAfterModelChange(bool deferNotify) {
   if (selected_.empty() && !hasCursor_) return;
   // Keep the keys that are still shown; a lost selection notifies once (spec 08 rules 71, 73).
   std::unordered_set<uint64_t> present;
@@ -221,7 +228,23 @@ void ThumbnailGrid::rebuildSelectionAfterModelChange() {
   for (auto it = selected_.begin(); it != selected_.end();) it = present.count(*it) != 0 ? std::next(it) : selected_.erase(it);
   if (hasCursor_ && present.count(cursor_) == 0) hasCursor_ = false;
   if (present.count(anchor_) == 0) anchor_ = hasCursor_ ? cursor_ : 0;
-  if (selected_.size() != before && onSelectionChanged) onSelectionChanged();
+  if (selected_.size() == before || !onSelectionChanged) return;
+  if (!deferNotify) {
+    onSelectionChanged();
+    return;
+  }
+  // Paint contract: no application callback from the paint walk. The state is already consistent;
+  // the notification follows at the next tick.
+  if (selectionNotifyPending_) return;
+  selectionNotifyPending_ = true;
+  const core::tree::WidgetId self = id();
+  UiContext* context = &ui();
+  context->setTimer(0, [context, self]() {
+    if (ThumbnailGrid* grid = context->objectAs<ThumbnailGrid>(self)) {
+      grid->selectionNotifyPending_ = false;
+      if (grid->onSelectionChanged) grid->onSelectionChanged();
+    }
+  });
 }
 
 // ---- pictures ---------------------------------------------------------------------------------

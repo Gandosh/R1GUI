@@ -137,7 +137,7 @@ void NumberField::setDropdownButton(bool visible) {
 
 // ---- geometry ---------------------------------------------------------------------------------------
 
-const theme::ResolvedStyle& NumberField::fieldStyle() const { return ui().services().resolve("input.panel", styleState()); }
+theme::ResolvedStyle NumberField::fieldStyle() const { return ui().services().resolve("input.panel", styleState()); }
 
 NumberField::Parts NumberField::parts() const {
   const theme::ResolvedStyle& rs = fieldStyle();

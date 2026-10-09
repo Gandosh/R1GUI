@@ -61,6 +61,11 @@ constexpr theme::StyleRuleEntry kRows[] = {
 
 std::span<const theme::StyleRuleEntry> TreeView::styleRows() { return kRows; }
 
+void TreeView::onDetached() {
+  if (stepTimer_ != 0) ui().cancelTimer(stepTimer_);
+  stepTimer_ = 0;
+}
+
 void TreeView::onAttached() {
   ui().services().addStyleRows(ScrollBar::styleRows());  // the scrollbar is drawn by this widget
   setFocusable(true);
@@ -176,6 +181,13 @@ void TreeView::rebuildRows() {
     if (r.hasChildren && expanded_.count(child) != 0 && f.depth + 1 < kMaxDepth) stack.push_back({child, 0, children, f.depth + 1, index});
   }
   seenRevision_ = revision;
+  // A collapse (which does not change the model revision) can remove the rows of a dragged node: the
+  // drag cannot continue without them.
+  if (drag_.active && std::any_of(drag_.payload.begin(), drag_.payload.end(), [&](NodeId n) { return rowIndex_.count(n) == 0; })) {
+    drag_ = {};
+    wantFrames(false);
+    ui().router().cancelPointerInteraction();
+  }
   if (rename_.active()) {
     const auto it = rowIndex_.find(rename_.node());
     if (it == rowIndex_.end()) {

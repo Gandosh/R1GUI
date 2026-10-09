@@ -46,21 +46,20 @@ void Services::addStyleRows(std::span<const theme::StyleRuleEntry> rows) {
   ++sheetRevision_;
 }
 
-const theme::ResolvedStyle& Services::resolve(std::string_view key, uint8_t state) {
+theme::ResolvedStyle Services::resolve(std::string_view key, uint8_t state) {
   if (cacheThemeRevision_ != theme_.revision() || cacheSheetRevision_ != sheetRevision_) {
     cache_.clear();
     cacheThemeRevision_ = theme_.revision();
     cacheSheetRevision_ = sheetRevision_;
   }
   auto it = cache_.find(key);
-  if (it == cache_.end()) it = cache_.emplace(std::string(key), std::deque<CachedState>{}).first;
+  if (it == cache_.end()) it = cache_.emplace(std::string(key), std::vector<CachedState>{}).first;
   for (const CachedState& c : it->second) {
     if (c.state == state) return c.value;
   }
   std::optional<theme::ResolvedStyle> resolved = sheet_->resolve(theme_, key, state);
   if (!resolved) throw std::logic_error("unknown style key \"" + std::string(key) + "\"");
   it->second.push_back({state, std::move(*resolved)});
-  // deque: appending never moves earlier entries, so references handed out for other states stay valid.
   return it->second.back().value;
 }
 

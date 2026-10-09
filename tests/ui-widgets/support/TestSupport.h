@@ -7,7 +7,9 @@
 //   of expectations around a TestUi, with synthetic input and a recording Painter.
 // Callers: every tests/ui-widgets/<folder>/*_test.cpp. Usage: `int main() { ...; return r1test::finish(); }`.
 // Failure behavior: expectations never abort; finish() returns 1 when any failed. Fixture
-//   construction failures (missing assets) throw; the test's main should let them terminate.
+//   construction failures (missing assets) throw; the test's main should let them terminate. A CRT
+//   assertion or abort in a test (a checked-iterator failure, std::terminate) never opens a dialog on
+//   the desktop: it prints to stderr and the process exits non-zero (NoDialogs below).
 #pragma once
 
 #include <cmath>
@@ -21,7 +23,31 @@
 #include "r1ui/theme/Tokens.h"
 #include "r1ui/widgets/runtime/UiContext.h"
 
+#ifdef _WIN32
+#include <crtdbg.h>
+#include <cstdlib>
+extern "C" __declspec(dllimport) unsigned int __stdcall SetErrorMode(unsigned int mode);
+#endif
+
 namespace r1test {
+
+// Turns every modal failure dialog of the C runtime and the OS into a line on stderr (an unattended
+// test run must never leave a message box on the owner's screen).
+struct NoDialogs {
+  NoDialogs() {
+#ifdef _WIN32
+    _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#ifdef _DEBUG  // the report functions exist (and matter) in the debug CRT only
+    for (const int kind : {_CRT_ASSERT, _CRT_ERROR, _CRT_WARN}) {
+      _CrtSetReportMode(kind, _CRTDBG_MODE_FILE);
+      _CrtSetReportFile(kind, _CRTDBG_FILE_STDERR);
+    }
+#endif
+    SetErrorMode(0x0001 | 0x0002 | 0x8000);  // SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX
+#endif
+  }
+};
+inline const NoDialogs noDialogs;
 
 inline int& failureCount() {
   static int failures = 0;

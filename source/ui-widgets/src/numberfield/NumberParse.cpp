@@ -273,7 +273,8 @@ std::string formatNumber(double value, int minFractionDigits, int maxFractionDig
     while (text.size() > keep && text.back() == '0') text.pop_back();
     if (text.back() == '.') text.pop_back();
   }
-  if (text == "-0") text = "0";
+  // A small negative value that rounds to zero is "0", not "-0.00".
+  if (text.size() > 1 && text[0] == '-' && text.find_first_not_of("0.", 1) == std::string::npos) text.erase(0, 1);
   return text;
 }
 

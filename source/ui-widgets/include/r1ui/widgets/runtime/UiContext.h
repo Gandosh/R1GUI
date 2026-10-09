@@ -24,8 +24,10 @@
 // Destruction: destroy() removes the subtree from the tree at once but frees the C++ objects at
 //   the next safe point, so widgets may destroy themselves from their own handlers.
 // Failure behavior: exceptions from widget paint/measure propagate to the caller of frame/paint
-//   (the shell shows them); tree limits make create() return an error (std::length_error is
-//   thrown by create<T>; use tryCreate when the tree may be full).
+//   (the shell shows them); an exception thrown by an input handler, a timer callback or a tooltip
+//   never leaves the input entry points (handlePlatformEvent, pointerDown, keyDown, tick, ...): it is
+//   reported through UiHost::reportFault, counted (inputFaults) and the pointer interaction is
+//   released. Tree limits make create() fail (std::length_error is thrown by create<T>).
 // Threading: UI thread only.
 #pragma once
 
@@ -58,6 +60,9 @@ namespace r1ui::widgets {
 struct UiHost {
   std::function<void(std::string_view)> writeClipboard;
   std::function<std::optional<std::string>()> readClipboard;
+  // Receives the message of an exception that a widget handler or timer callback threw (see
+  // UiContext::inputFaults); without it the message goes to stderr.
+  std::function<void(std::string_view)> reportFault;
 };
 
 struct UiContextOptions {
@@ -163,12 +168,20 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   bool animationsActive() const { return animationsEnabled_ && frameLoopRunning_; }
   render::Color animatedColor(core::tree::WidgetId widget, int slot, const render::Color& target);
   float animatedValue(core::tree::WidgetId widget, int slot, float target);
+  // Drops the tween of one (widget, slot) pair and gives back the frame request it held. For widgets
+  // whose slot set changes while they live (a tab bar closing a tab); a destroyed widget loses all
+  // its tweens automatically.
+  void releaseAnimation(core::tree::WidgetId widget, int slot);
 
   // ---- input ----
   // Translates one platform event (physical pixels) and routes it. Resize and DPI events are
   // ignored here: the shell calls setViewport.
   void handlePlatformEvent(const platform::Event& event);
   void setGlobalKeyHandler(core::events::GlobalKeyHandler* handler) { appKeys_ = handler; }
+  // The window's share of the glyph atlas (see AtlasConsumer). By default the context has its own; a
+  // shell that also draws text itself in the same frame (before or after the context paints) passes
+  // one consumer per window so the whole frame is tracked together. Must outlive the context's frames.
+  void setAtlasConsumer(AtlasConsumer* consumer) { atlas_ = consumer != nullptr ? consumer : &ownAtlas_; }
   // Direct input in logical pixels (tests, synthetic input). Each returns true when handled.
   bool pointerMove(double x, double y, uint8_t modifiers = 0);
   bool pointerDown(double x, double y, core::events::Button button = core::events::Button::Left, uint8_t modifiers = 0);
@@ -178,7 +191,8 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   bool keyDown(core::events::Key key, uint8_t modifiers = 0, bool repeat = false);
   bool keyUp(core::events::Key key, uint8_t modifiers = 0);
   bool textInput(char32_t codePoint, uint8_t modifiers = 0);
-  // Moves keyboard focus to `id` from application code (program focus shows no focus ring; pass\r\n  // FocusReason::Keyboard to show it). Unlike
+  // Moves keyboard focus to `id` from application code (program focus shows no focus ring; pass
+  // FocusReason::Keyboard to show it). Unlike
   // calling router().focus() directly, this runs inside a dispatch frame, so a blur handler that
   // destroys its own widget cannot free it while the router is still using it. False (focus
   // unchanged) when the widget is not focusable.
@@ -200,7 +214,7 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   void paint(render::Painter& painter);
   // After the last paint of a frame, before endFrame: uploads the glyph atlas.
   void finishPaint();
-  // True (once) when an atlas ran out of room during the frame: paint again.
+  // True (once) when an atlas ran out of room or was reset during the frame: paint again.
   bool consumeRepaint();
   // Advances timers (tooltips and setTimer callbacks); true when a frame is needed because of it.
   bool tick();
@@ -209,6 +223,12 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   // Discards all layout caches (benchmarks, after a font change).
   void requestFullLayout() { invalidator_.requestFullLayout(); }
   size_t widgetCount() const { return tree_.nodeCount(); }
+  // Bookkeeping sizes for leak tests: widgets that asked for onLayout, and live animation tweens.
+  size_t layoutCallbackCount() const { return layoutCallbacks_.size(); }
+  size_t animationCount() const { return tweens_.size(); }
+  // Exceptions caught at the input boundary since the context was created, and the last message.
+  size_t inputFaults() const { return inputFaults_; }
+  const std::string& lastInputFault() const { return lastInputFault_; }
 
  private:
   friend class WidgetObject;
@@ -220,6 +240,7 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   }
   void attach(core::tree::WidgetId parent, core::tree::WidgetId before, std::unique_ptr<WidgetObject> object);
   void setLayoutCallback(core::tree::WidgetId id, bool wants);
+  void forgetDestroyed();
 
   // MeasureProvider
   core::layout::MeasureResult measure(core::tree::WidgetId widget, const core::layout::MeasureInput& input) override;
@@ -229,7 +250,10 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   // Input plumbing
   bool routePointerDown(const core::events::PointerInput& input);
   core::events::PointerInput makePointer(double x, double y, core::events::Button button, uint8_t modifiers) const;
-  void noteInput();
+  // Runs `body` (an input entry point's work); an exception is reported and counted, never propagated.
+  template <class F>
+  bool guarded(F&& body);
+  void noteFault(const char* what);
   // Marks an input/frame entry point: while one is on the stack destroyed objects stay allocated.
   struct DispatchGuard {
     UiContext& ui;
@@ -285,6 +309,9 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   OverlayManager overlays_;
   TooltipManager tooltips_;
   core::events::GlobalKeyHandler* appKeys_ = nullptr;
+  AtlasConsumer ownAtlas_;
+  AtlasConsumer* atlas_ = &ownAtlas_;
+  uint64_t iconEpochAtPaint_ = 0;
 
   float scale_ = 1.0f;
   int viewportW_ = 0;
@@ -298,6 +325,8 @@ class UiContext final : private core::layout::MeasureProvider, private core::eve
   double pointerX_ = 0.0;
   double pointerY_ = 0.0;
   int dispatchDepth_ = 0;
+  size_t inputFaults_ = 0;
+  std::string lastInputFault_;
   uint32_t seenThemeRevision_ = 0;
   uint32_t seenSheetRevision_ = 0;
   std::unordered_map<TweenKey, Tween, TweenKeyHash> tweens_;

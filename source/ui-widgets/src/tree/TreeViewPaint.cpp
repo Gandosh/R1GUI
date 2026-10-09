@@ -33,7 +33,6 @@ Cursor TreeView::cursor() const {
 
 void TreeView::paint(PaintContext& ctx) {
   ensureRows();
-  advance(ui().now());
   clampScroll();
   placeBar();
   if (rows_.empty()) return;

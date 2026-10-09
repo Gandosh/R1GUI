@@ -245,7 +245,11 @@ void Splitter::snapshotWeights() {
 void Splitter::changed() {
   for (size_t i = 0; i < panes_.size(); ++i) applyStyle(i);
   requestPaint();
-  if (onChanged_) onChanged_(*this);
+  // A copy is called: the handler may replace this callback (setOn...) while it runs.
+  if (onChanged_) {
+    const auto callback = onChanged_;
+    callback(*this);
+  }
 }
 
 bool Splitter::resizePair(size_t a, size_t b, double sizeA, double sizeB, double delta) {

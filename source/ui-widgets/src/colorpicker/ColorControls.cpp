@@ -95,6 +95,15 @@ void SvSquare::update(double localX, double localY) {
   if (!ui().alive(self)) return;
 }
 
+// A drag whose change callback destroyed the widget (the picker's popover closing) never reached onEnd:
+// the hook closes the bracket the host opened with onBegin.
+void SvSquare::onDetached() {
+  if (!gestureOpen_) return;
+  gestureOpen_ = false;
+  dragging_ = false;
+  if (onEnd) onEnd();
+}
+
 void SvSquare::finish(bool cancel) {
   if (!dragging_) return;
   dragging_ = false;
@@ -106,6 +115,7 @@ void SvSquare::finish(bool cancel) {
     if (onChange) onChange(startS_, startV_);
     if (!ui().alive(self)) return;
   }
+  gestureOpen_ = false;
   if (onEnd) onEnd();
 }
 
@@ -117,6 +127,7 @@ void SvSquare::onPointerDown(Event& e) {
   if (!focused()) ui().router().focus(id(), events::FocusReason::Pointer);
   ui().router().capturePointer(id());
   dragging_ = true;
+  gestureOpen_ = true;
   startS_ = s_;
   startV_ = v_;
   const core::tree::WidgetId self = id();
@@ -234,6 +245,13 @@ void ColorSliderTrack::paintOver(PaintContext& ctx) {
   if (focusVisible()) ctx.focusRing(all, ctx.px(kThumb * 0.5));
 }
 
+void ColorSliderTrack::onDetached() {
+  if (!gestureOpen_) return;
+  gestureOpen_ = false;
+  dragging_ = false;
+  if (onEnd) onEnd();
+}
+
 void ColorSliderTrack::finish(bool cancel) {
   if (!dragging_) return;
   dragging_ = false;
@@ -244,6 +262,7 @@ void ColorSliderTrack::finish(bool cancel) {
     if (onChange) onChange(startT_);
     if (!ui().alive(self)) return;
   }
+  gestureOpen_ = false;
   if (onEnd) onEnd();
 }
 
@@ -255,6 +274,7 @@ void ColorSliderTrack::onPointerDown(Event& e) {
   if (!focused()) ui().router().focus(id(), events::FocusReason::Pointer);
   ui().router().capturePointer(id());
   dragging_ = true;
+  gestureOpen_ = true;
   startT_ = t_;
   const core::tree::WidgetId self = id();
   if (onBegin) onBegin();

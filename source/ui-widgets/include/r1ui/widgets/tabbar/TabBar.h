@@ -34,6 +34,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "r1ui/theme/StyleSheet.h"
@@ -72,6 +73,7 @@ class TabBar : public WidgetObject {
 
   const char* typeName() const override { return "TabBar"; }
   void onAttached() override;
+  void onDetached() override;
   void paint(PaintContext& ctx) override;
   void paintOver(PaintContext& ctx) override;
   Cursor cursor() const override;
@@ -165,6 +167,8 @@ class TabBar : public WidgetObject {
   size_t slotFor(double pointerX) const;
   void clampScroll();
   void endDrag(bool commit);
+  int animationSlot(TabId id, int sub);
+  void releaseAnimationSlots(TabId id);
   std::string_view fullTitle(size_t index) const;
 
   std::vector<TabInfo> tabs_;
@@ -176,7 +180,7 @@ class TabBar : public WidgetObject {
   Hit hover_;
   Hit pressHit_;
   Drag drag_;
-  std::optional<size_t> middlePress_;
+  std::optional<TabId> middlePress_;  // by id: the list may change between press and release
   mutable Layout layout_;
   mutable bool layoutValid_ = false;
   mutable double layoutScale_ = 0.0;
@@ -187,6 +191,11 @@ class TabBar : public WidgetObject {
   std::function<void(TabId, size_t, size_t)> onReorder_;
   std::function<void(TabId, double, double)> onContext_;
   OverlayId listOverlay_;
+  // Animation slots: one dense pair per live tab, given back when the tab goes (a slot derived from the
+  // id could collide for ids that differ only in high bits and was never released).
+  std::unordered_map<TabId, int> animSlots_;
+  std::vector<int> freeAnimSlots_;
+  int nextAnimSlot_ = 16;  // 0..15 belong to the strip buttons (Part values)
 };
 
 }  // namespace r1ui::widgets

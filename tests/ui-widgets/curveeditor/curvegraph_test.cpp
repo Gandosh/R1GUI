@@ -887,7 +887,11 @@ void testCullingWithManyKeys() {
   std::fprintf(stdout, "curve editor: 100000 keys all visible: %.2f ms per paint (%zu keys drawn, %zu polyline points)\n", outMs, editor.graph().lastDrawnKeyCount(),
                editor.graph().lastDrawnPointCount());
   R1_EXPECT(editor.graph().lastDrawnKeyCount() < 100 && editor.graph().lastDrawnPointCount() < 8 * 800);
+#ifdef NDEBUG
   R1_EXPECT(outMs < 500.0);
+#else
+  R1_EXPECT(outMs < 3000.0);  // the Debug runtime (checked iterators) is about 40 times slower
+#endif
   // Selecting every key, moving them all, paints and stays valid.
   editor.graph().setView({0.0, 20.0, -4.0, 4.0});
   const auto t2 = std::chrono::steady_clock::now();

@@ -313,7 +313,7 @@ void MenuPanel::onKeyDown(Event& e) {
         return;
       }
       e.markHandled();
-      if (highlighted_ >= 0) itemActivated(highlighted_, true);
+      if (highlighted_ >= 0 && !e.repeat) itemActivated(highlighted_, true);  // a held key activates once
       return;
     }
     case events::Key::Right:

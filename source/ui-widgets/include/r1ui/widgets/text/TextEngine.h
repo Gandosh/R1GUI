@@ -2,15 +2,23 @@
 // Owns: the shared text service: the Inter font family (Regular outlines with synthetic bold for
 //   heavier weights), a bounded cache of shaped runs, a bounded cache of ellipsis fits, the CPU
 //   glyph atlas, its coverage texture (only the dirty rectangle is uploaded) and the drawing of
-//   shaped text as tinted coverage quads through the Painter.
+//   shaped text as tinted coverage quads through the Painter. The run cache is bounded by entry count
+//   and by bytes of text, and is cleared as a whole when either bound is reached.
 // Why: layout needs text widths and drawing needs quads from the same shaper (what is measured is
 //   what is drawn); the GPU texture must follow the atlas without re-uploading it every frame; one
 //   engine is shared by every window (Services owns it).
 // Callers: widgets (measure / fit / draw), UiContext (beginFrame, uploadAtlas), the preview, the
 //   weight calibration test. Calls: ui-text (FontLibrary, shapeText, GlyphAtlas, buildGlyphQuads).
-// Frame protocol: beginFrame() before the first draw of a frame, uploadAtlas() after the last draw
-//   and before the target's endFrame. If the atlas ran out of room during a frame it is cleared
-//   afterwards and consumeAtlasOverflow() reports that a repaint is needed.
+// Frame protocol: beginFrame(consumer) before the first draw of a frame, uploadAtlas(consumer) after
+//   the last draw and before the target's endFrame, consumeAtlasOverflow(consumer) after it. If the
+//   atlas ran out of room during a frame it is cleared afterwards and consumeAtlasOverflow() reports
+//   that a repaint is needed.
+// Consumers (multi-window): one AtlasConsumer per window (or per UiContext) tracks what that window
+//   has not uploaded yet, so a window that finishes its frame first does not consume the dirty region
+//   of the others; each consumer also learns whether the atlas was cleared, or another window's frame
+//   was interleaved with its own (the shared eviction pins are per engine, not per window), during
+//   its own frame and must then paint again. The overloads without a consumer use one built-in
+//   consumer, for single-window code and tests.
 // Units: physical pixels everywhere in this class (callers multiply logical sizes by the display
 //   scale). Failure behavior: text that cannot be shaped measures as 0 wide and draws nothing.
 // Weight: faces are Regular only. Every weight thickens the outline by defaultEmboldenPx(size) *
@@ -23,6 +31,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -72,6 +81,26 @@ struct FittedText {
   bool truncated = false;
 };
 
+class TextEngine;
+
+// What one window needs to know about the shared atlas between its beginFrame and its next frame.
+// Register by construction; it must be destroyed before the engine.
+class AtlasConsumer {
+ public:
+  explicit AtlasConsumer(TextEngine& engine);
+  ~AtlasConsumer();
+  AtlasConsumer(const AtlasConsumer&) = delete;
+  AtlasConsumer& operator=(const AtlasConsumer&) = delete;
+
+ private:
+  friend class TextEngine;
+  TextEngine& engine_;
+  std::optional<r1ui::text::DirtyRect> pending_;  // changed since this consumer last uploaded
+  bool inFlight_ = false;                         // between beginFrame and consumeAtlasOverflow
+  bool tainted_ = false;                          // another consumer's frame overlapped this one
+  uint64_t epochSeen_ = 0;                        // TextEngine::clearEpoch_ at the start of the frame
+};
+
 class TextEngine {
  public:
   // Throws std::runtime_error naming the font file when it is missing or damaged. The factory must
@@ -81,6 +110,9 @@ class TextEngine {
   // Width of `utf8` in pixels at `pixelSize` (advances do not depend on the weight).
   // `tabular` shapes digits with the OpenType tnum feature (equal advances) like number fields do.
   float measure(std::string_view utf8, float pixelSize, int weight = 400, bool tabular = false);
+  // Like measure(), but a run that is not cached already is shaped without being cached: for probing
+  // many throw-away substrings (bisection while wrapping) that would otherwise evict the runs that are drawn.
+  float measureTransient(std::string_view utf8, float pixelSize, bool tabular = false);
   const r1ui::text::FontMetrics& metrics(float pixelSize);
   // Distance from the top of a line box of `boxHeight` pixels to the baseline of text at `pixelSize`,
   // computed the way the reference browser does (whole-pixel ascent and descent, floored half-leading).
@@ -90,11 +122,18 @@ class TextEngine {
   const FittedText& fit(std::string_view utf8, float pixelSize, float maxWidth, bool tabular = false);
 
   void beginFrame();
+  void beginFrame(AtlasConsumer& consumer);
   // Draws the text with its pen start at (penX, baselineY). Missing glyphs are skipped.
   void draw(r1ui::render::Painter& painter, std::string_view utf8, float pixelSize, int weight, float penX,
             float baselineY, const r1ui::render::Color& tint, bool tabular = false);
+  // Uploads what `consumer` has not uploaded yet to the atlas texture.
   void uploadAtlas();
+  void uploadAtlas(AtlasConsumer& consumer);
+  // Ends the consumer's frame. If the atlas was full during any frame it is cleared now. True when
+  // this consumer's frame must be painted again: the atlas was cleared, or another consumer's frame
+  // overlapped with it, since its beginFrame.
   bool consumeAtlasOverflow();
+  bool consumeAtlasOverflow(AtlasConsumer& consumer);
 
   const WeightModel& weightModel() const { return model_; }
   // Throws std::invalid_argument for a negative, non-finite or absurd (> 8) strength; the previous
@@ -104,6 +143,9 @@ class TextEngine {
   // The editor shapes with this font; the face for weight 400.
   const r1ui::text::Font& regular() const { return *regular_; }
   size_t cachedRuns() const { return runs_.size(); }
+  // Bounds of the shaped-run cache (defaults 4096 entries, 4 MiB of text); the cache is cleared when it
+  // holds more than the new bounds allow. Zero values are replaced by 1.
+  void setRunCacheLimits(size_t maxEntries, size_t maxTextBytes);
   // CPU atlas image (width * height R8), for calibration tests.
   const r1ui::text::GlyphAtlas& atlas() const { return atlas_; }
 
@@ -112,10 +154,24 @@ class TextEngine {
     std::string text;
     float pixelSize;
     bool tabular;
-    friend bool operator==(const Key&, const Key&) = default;
+  };
+  // The same key without owning the text, so a cache hit does not allocate a std::string.
+  struct KeyView {
+    std::string_view text;
+    float pixelSize;
+    bool tabular;
   };
   struct KeyHash {
-    size_t operator()(const Key& k) const;
+    using is_transparent = void;
+    size_t operator()(const Key& k) const { return (*this)(KeyView{k.text, k.pixelSize, k.tabular}); }
+    size_t operator()(const KeyView& k) const;
+  };
+  struct KeyEqual {
+    using is_transparent = void;
+    bool operator()(const Key& a, const Key& b) const { return (*this)(KeyView{a.text, a.pixelSize, a.tabular}, b); }
+    bool operator()(const Key& a, const KeyView& b) const { return (*this)(KeyView{a.text, a.pixelSize, a.tabular}, b); }
+    bool operator()(const KeyView& a, const Key& b) const { return (*this)(a, KeyView{b.text, b.pixelSize, b.tabular}); }
+    bool operator()(const KeyView& a, const KeyView& b) const { return a.text == b.text && a.pixelSize == b.pixelSize && a.tabular == b.tabular; }
   };
   struct FitKey {
     std::string text;
@@ -134,7 +190,10 @@ class TextEngine {
   r1ui::text::FontHandle regular_;
   r1ui::text::GlyphAtlas atlas_;
   std::unique_ptr<AtlasTexture> texture_;
-  std::unordered_map<Key, r1ui::text::ShapedRun, KeyHash> runs_;
+  std::unordered_map<Key, r1ui::text::ShapedRun, KeyHash, KeyEqual> runs_;
+  size_t runBytes_ = 0;  // text bytes held by runs_ (bounded together with the entry count)
+  size_t maxRuns_ = 4096;
+  size_t maxRunBytes_ = size_t{4} << 20;
   std::unordered_map<FitKey, FittedText, FitKeyHash> fits_;
   FittedText lastFit_;
   std::unordered_map<float, r1ui::text::FontMetrics> metrics_;
@@ -142,6 +201,11 @@ class TextEngine {
   std::vector<uint8_t> scratch_;
   WeightModel model_ = kCalibratedWeights;
   bool overflow_ = false;
+  uint64_t clearEpoch_ = 0;                   // counts atlas clears
+  std::vector<AtlasConsumer*> consumers_;     // registered in AtlasConsumer's constructor
+  AtlasConsumer defaultConsumer_{*this};      // for the overloads without a consumer
+  friend class AtlasConsumer;
+  void distributeDirty();
 };
 
 }  // namespace r1ui::widgets

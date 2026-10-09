@@ -33,9 +33,13 @@ class MenuStack final : public MenuPanelListener, public std::enable_shared_from
   // ---- controller API ----
   bool open(MenuSpec spec, const MenuOpenOptions& options);
   void closeAll(DismissReason reason) { closeFrom(0, reason); }
+  // The controller handle is gone: no application callback may run any more (they capture the owner).
+  // The menu itself stays until it is dismissed; activating a row then only closes it.
   void release() {
+    released_ = true;
     rootClosed_ = nullptr;
     rootNavigation_ = nullptr;
+    command_ = nullptr;
   }
   bool isOpen() const { return !levels_.empty(); }
   int levelCount() const { return static_cast<int>(levels_.size()); }
@@ -83,6 +87,7 @@ class MenuStack final : public MenuPanelListener, public std::enable_shared_from
   MenuLook look_;
   UiContext::TimerId pending_ = 0;
   double lastMoveX_ = 0.0;
+  bool released_ = false;
 };
 
 // ---- opening ------------------------------------------------------------------------------------
@@ -329,15 +334,12 @@ void MenuStack::runCommand(MenuPanel& panel, int index) {
   const std::shared_ptr<MenuStack> self = shared_from_this();
   cancelPending();
   const MenuItemSpec result = panel.applyActivationState(index);  // checks toggle before the callback sees them
-  const std::function<void(const MenuItemSpec&)> handler = result.onActivate ? result.onActivate : command_;
-  const bool stay = result.keepOpen;
-  try {
-    if (handler) handler(result);
-  } catch (...) {
-    if (!stay) closeAll(DismissReason::Programmatic);
-    throw;
-  }
-  if (!stay) closeAll(DismissReason::Programmatic);
+  const std::function<void(const MenuItemSpec&)> handler = released_ ? nullptr : (result.onActivate ? result.onActivate : command_);
+  // The stack closes first (focus goes back to where it was before the menu), then the command runs:
+  // a command that opens a dialog saves a focus target that still exists, and one that moves focus
+  // itself wins over the restore.
+  if (!result.keepOpen) closeAll(DismissReason::Programmatic);
+  if (handler) handler(result);
 }
 
 // ---- MenuController handle ----------------------------------------------------------------------

@@ -376,7 +376,9 @@ DecodeResult decodePng(std::span<const uint8_t> bytes) {
   const size_t rowBytes = size_t{width} * channels;
   const size_t rawSize = size_t{height} * (rowBytes + 1);
   std::vector<uint8_t> raw;
-  raw.reserve(rawSize);
+  // Deflate expands at most 1032:1, so a header that claims more than the data can hold must not make us
+  // reserve it before the stream is read (a 57 byte file could ask for hundreds of megabytes).
+  raw.reserve(std::min(rawSize, compressed.size() * 1032 + 4096));
   const std::string inflateError = Inflater(compressed, rawSize).run(raw);
   if (!inflateError.empty()) return fail(inflateError);
   if (raw.size() != rawSize) return fail("pixel data shorter than the header requires");

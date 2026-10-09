@@ -5,7 +5,7 @@
 // Invariants: a drag exists only between an accepted DragStart and the release or cancel; the payload
 //   holds NodeIds in row order without descendants of other payload nodes; the drop request is built from
 //   the preview computed on the last pointer sample.
-// Callers: TreeView input handlers, paint() (advance), tests (advance).
+// Callers: TreeView input handlers, the step timer (advance), tests (advance).
 #include <algorithm>
 #include <cmath>
 
@@ -21,6 +21,7 @@ using core::events::Phase;
 namespace Mod = core::events::Mod;
 
 namespace {
+constexpr uint64_t kStepMs = 16;     // period of the timer steps
 constexpr uint64_t kMaxStepMs = 50;  // a long gap between frames must not make the list jump
 constexpr double kDropBandFraction = 0.25;
 constexpr double kDropBandMin = 3.0;
@@ -74,7 +75,9 @@ bool TreeView::dropAllowed(NodeId target, DropZone zone) {
   const size_t t = it->second;
   // A node cannot be dropped relative to itself or into its own subtree.
   for (const NodeId p : drag_.payload) {
-    const size_t r = rowIndex_.at(p);
+    const auto payloadRow = rowIndex_.find(p);
+    if (payloadRow == rowIndex_.end()) return false;  // its row went away (collapsed parent): nothing can be dropped
+    const size_t r = payloadRow->second;
     size_t end = r + 1;
     while (end < rows_.size() && rows_[end].depth > rows_[r].depth) ++end;
     if (t >= r && t < end) return false;
@@ -155,11 +158,24 @@ void TreeView::cancelDrag() {
 
 // ---- time ---------------------------------------------------------------------------------------
 
+// The time steps (edge auto-scroll, the slow-click rename) run from a context timer, not from paint:
+// they change scroll and focus and may call the application, none of which belongs in the paint walk.
 void TreeView::wantFrames(bool on) {
-  if (on == framesWanted_) return;
   framesWanted_ = on;
-  if (on) ui().invalidator().requestAnimation(id());
-  else ui().invalidator().cancelAnimation(id());
+  if (!on) {
+    if (stepTimer_ != 0) ui().cancelTimer(stepTimer_);
+    stepTimer_ = 0;
+    return;
+  }
+  if (stepTimer_ != 0) return;
+  const core::tree::WidgetId self = id();
+  UiContext* context = &ui();
+  stepTimer_ = context->setTimer(kStepMs, [context, self]() {
+    if (TreeView* tree = context->objectAs<TreeView>(self)) {
+      tree->stepTimer_ = 0;
+      tree->advance(context->now());
+    }
+  });
 }
 
 void TreeView::advance(uint64_t now) {

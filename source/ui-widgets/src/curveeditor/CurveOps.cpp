@@ -52,19 +52,38 @@ size_t resortMerged(Curve& c, const std::vector<uint32_t>& movedSorted) {
 
 // ---- Selection --------------------------------------------------------------------------------
 
+void Selection::touched() {
+  static uint64_t counter = 0;
+  revision_ = ++counter;
+}
+
 bool Selection::contains(const Selected& s) const { return std::binary_search(items_.begin(), items_.end(), s); }
 
 bool Selection::add(const Selected& s) {
   const auto it = std::lower_bound(items_.begin(), items_.end(), s);
   if (it != items_.end() && *it == s) return false;
   items_.insert(it, s);
+  touched();
   return true;
+}
+
+void Selection::assign(std::vector<Selected> items) {
+  std::sort(items.begin(), items.end());
+  items.erase(std::unique(items.begin(), items.end()), items.end());
+  items_ = std::move(items);
+  touched();
+}
+
+bool Selection::hasCurve(uint32_t curve) const {
+  const auto it = std::lower_bound(items_.begin(), items_.end(), Selected{curve, 0, Part::Key});
+  return it != items_.end() && it->curve == curve;
 }
 
 bool Selection::remove(const Selected& s) {
   const auto it = std::lower_bound(items_.begin(), items_.end(), s);
   if (it == items_.end() || !(*it == s)) return false;
   items_.erase(it);
+  touched();
   return true;
 }
 
@@ -75,6 +94,7 @@ void Selection::toggle(const Selected& s) {
 void Selection::set(const Selected& s) {
   items_.clear();
   items_.push_back(s);
+  touched();
 }
 
 bool Selection::hasHandles() const {
@@ -87,8 +107,8 @@ bool Selection::hasKeys() const {
 
 std::vector<uint32_t> Selection::keysOf(uint32_t curve) const {
   std::vector<uint32_t> ids;
-  for (const Selected& s : items_) {
-    if (s.curve == curve && s.part == Part::Key) ids.push_back(s.key);
+  for (auto it = std::lower_bound(items_.begin(), items_.end(), Selected{curve, 0, Part::Key}); it != items_.end() && it->curve == curve; ++it) {
+    if (it->part == Part::Key) ids.push_back(it->key);
   }
   return ids;
 }
@@ -96,8 +116,8 @@ std::vector<uint32_t> Selection::keysOf(uint32_t curve) const {
 std::vector<uint32_t> Selection::keysOrOwnersOf(uint32_t curve) const {
   std::vector<uint32_t> ids = keysOf(curve);
   if (!ids.empty()) return ids;
-  for (const Selected& s : items_) {
-    if (s.curve == curve && (ids.empty() || ids.back() != s.key)) ids.push_back(s.key);  // sorted by key
+  for (auto it = std::lower_bound(items_.begin(), items_.end(), Selected{curve, 0, Part::Key}); it != items_.end() && it->curve == curve; ++it) {
+    if (ids.empty() || ids.back() != it->key) ids.push_back(it->key);  // sorted by key
   }
   return ids;
 }
@@ -108,7 +128,9 @@ bool Selection::anyPartSelected(uint32_t curve, uint32_t key) const {
 
 void Selection::prune(const std::vector<Curve>& curves) {
   const KeyLookup lookup(curves);
+  const size_t before = items_.size();
   items_.erase(std::remove_if(items_.begin(), items_.end(), [&](const Selected& s) { return lookup.indexOf(s.curve, s.key) == npos; }), items_.end());
+  if (items_.size() != before) touched();
 }
 
 // ---- lookup -----------------------------------------------------------------------------------

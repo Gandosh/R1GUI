@@ -76,7 +76,11 @@ void Switch::setChecked(bool checked) {
 void Switch::activate() {
   const bool next = mixed() ? true : !checked();
   setChecked(next);
-  if (onChange_) onChange_(next);
+  // A copy is called: the handler may replace this callback (setOn...) while it runs.
+  if (onChange_) {
+    const auto callback = onChange_;
+    callback(next);
+  }
 }
 
 float Switch::paintOpacity() const { return static_cast<float>(ui().services().resolve("switch.track", styleState()).opacity); }

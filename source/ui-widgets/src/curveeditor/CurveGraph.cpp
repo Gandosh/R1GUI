@@ -83,6 +83,7 @@ void CurveGraph::setCurves(std::vector<Curve> curves) {
     curve::sanitize(c);
   }
   curves_ = std::move(curves);
+  ++dataRevision_;
   selection_.prune(curves_);
   if (hoverCurve_ != 0 && curve::findCurve(curves_, hoverCurve_) == nullptr) hoverCurve_ = 0;
   requestPaint();
@@ -226,49 +227,59 @@ void CurveGraph::applySelection(const Selected& item, uint8_t m) {
   setSelectionInternal(std::move(next));
 }
 
+// The select-everything commands collect the items first and build the sorted selection once
+// (adding item by item into the sorted vector is quadratic at 100k keys).
 void CurveGraph::selectAll() {
-  curve::Selection s;
+  std::vector<Selected> items;
   for (const Curve& c : curves_) {
     if (!curveEditable(c)) continue;
-    for (const Key& k : c.keys) s.add({c.id, k.id, Part::Key});
+    for (const Key& k : c.keys) items.push_back({c.id, k.id, Part::Key});
   }
+  curve::Selection s;
+  s.assign(std::move(items));
   setSelectionInternal(std::move(s));
 }
 
 void CurveGraph::clearSelection() { setSelectionInternal({}); }
 
 void CurveGraph::invertSelection() {
-  curve::Selection s;
+  std::vector<Selected> items;
   for (const Curve& c : curves_) {
     if (!curveEditable(c)) continue;
     const bool hasSelected = std::any_of(c.keys.begin(), c.keys.end(), [&](const Key& k) { return selection_.containsKey(c.id, k.id); });
     if (!hasSelected) continue;  // rule 35: only curves that have a selection
     for (const Key& k : c.keys) {
-      if (!selection_.containsKey(c.id, k.id)) s.add({c.id, k.id, Part::Key});
+      if (!selection_.containsKey(c.id, k.id)) items.push_back({c.id, k.id, Part::Key});
     }
   }
+  curve::Selection s;
+  s.assign(std::move(items));
   setSelectionInternal(std::move(s));
 }
 
 void CurveGraph::selectAfterScrub() {
-  curve::Selection s;
+  std::vector<Selected> items;
   for (const Curve& c : curves_) {
     if (!curveEditable(c)) continue;
     for (const Key& k : c.keys) {
-      if (k.time >= scrubTime_) s.add({c.id, k.id, Part::Key});
+      if (k.time >= scrubTime_) items.push_back({c.id, k.id, Part::Key});
     }
   }
+  curve::Selection s;
+  s.assign(std::move(items));
   setSelectionInternal(std::move(s));
 }
 
 void CurveGraph::selectBeforeScrub() {
-  curve::Selection s;
+  std::vector<Selected> items;
   for (const Curve& c : curves_) {
     if (!curveEditable(c)) continue;
     for (const Key& k : c.keys) {
-      if (k.time <= scrubTime_) s.add({c.id, k.id, Part::Key});
+      if (k.time <= scrubTime_) items.push_back({c.id, k.id, Part::Key});
     }
   }
+  curve::Selection s;
+  s.assign(std::move(items));
   setSelectionInternal(std::move(s));
 }
 
@@ -332,7 +343,14 @@ bool CurveGraph::handlePosition(uint32_t curveId, uint32_t keyId, bool outSide, 
   const Curve* c = curve::findCurve(curves_, curveId);
   if (c == nullptr) return false;
   const size_t i = curve::indexOfKey(*c, keyId);
-  if (i == curve::npos) return false;
+  return i != curve::npos && handlePositionAt(*c, i, outSide, out);
+}
+
+// The painting, hit testing and marquee loops already hold the key index, so they call this one:
+// resolving the key by id per handle made those loops O(visible x keys) (seconds at 20k keys).
+bool CurveGraph::handlePositionAt(const Curve& curveRef, size_t i, bool outSide, curve::Point& out) const {
+  const Curve* c = &curveRef;
+  if (i >= c->keys.size()) return false;
   const bool exists = outSide ? (i + 1 < c->keys.size() && c->keys[i].interp == curve::Interp::Cubic) : (i > 0 && c->keys[i - 1].interp == curve::Interp::Cubic);
   if (!exists) return false;
   const curve::Mapping m = plotMapping();
@@ -376,7 +394,7 @@ Selected CurveGraph::hitItem(double x, double y) const {
       if (handlesShown) {
         for (const bool out : {false, true}) {
           curve::Point p;
-          if (!handlePosition(c.id, k.id, out, p)) continue;
+          if (!handlePositionAt(c, i, out, p)) continue;
           const double d = std::hypot(p.x - x, p.y - y);
           if (d <= kHandleHit && d < bestDistance) {
             bestDistance = d - 1e-6;  // handles win ties against a key at the same distance
@@ -489,6 +507,7 @@ void CurveGraph::touch(uint32_t curveId) {
 }
 
 void CurveGraph::changedCurves(const std::vector<uint32_t>& ids) {
+  ++dataRevision_;
   requestPaint();
   if (onChanged) onChanged(ids);
 }
@@ -501,6 +520,7 @@ void CurveGraph::endInteraction(bool committed) {
     for (const Curve& s : snapshots_) {
       if (Curve* c = curve::findCurve(curves_, s.id)) {
         *c = s;
+        ++dataRevision_;
         restored.push_back(s.id);
       }
     }
@@ -663,15 +683,16 @@ void CurveGraph::nudgeSelected(double dt, double dv, const char* label) {
     };
     std::vector<Pending> pending;
     const curve::Mapping m = plotMapping();
+    const curve::KeyLookup lookup(curves_);
     for (size_t i = 0; i < curves_.size(); ++i) {
       if (!curveEditable(curves_[i])) continue;
       Curve work = curves_[i];
       bool any = false;
       for (const Selected& s : selection_.items()) {
         if (s.curve != work.id || s.part == Part::Key) continue;
-        const size_t k = curve::indexOfKey(work, s.key);
+        const size_t k = lookup.indexOf(s.curve, s.key);  // work only changes tangents: the order is the live curve's
         curve::Point p;
-        if (k == curve::npos || !handlePosition(s.curve, s.key, s.part == Part::Out, p)) continue;
+        if (k == curve::npos || !handlePositionAt(curves_[i], k, s.part == Part::Out, p)) continue;
         // The handle as drawn, moved by (dt, dv) in data units, gives the new tangent.
         const double ht = m.toTime(p.x) + dt - work.keys[k].time;
         const double hv = m.toValue(p.y) + dv - work.keys[k].value;
@@ -1122,21 +1143,25 @@ void CurveGraph::applyMarquee(uint8_t mods) {
       }
     }
     if (handles) {
-      for (const Key& k : c.keys) {
+      for (size_t i = 0; i < c.keys.size(); ++i) {
         for (const bool out : {false, true}) {
           curve::Point p;
-          if (!handlePosition(c.id, k.id, out, p)) continue;
-          if (p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1) hits.push_back({c.id, k.id, out ? Part::Out : Part::In});
+          if (!handlePositionAt(c, i, out, p)) continue;
+          if (p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1) hits.push_back({c.id, c.keys[i].id, out ? Part::Out : Part::In});
         }
       }
     }
   }
-  curve::Selection next = hasMod(mods, events::Mod::kShift) || hasMod(mods, events::Mod::kAlt) || hasMod(mods, events::Mod::kCtrl) ? selection_ : curve::Selection{};
-  for (const Selected& s : hits) {
-    if (hasMod(mods, events::Mod::kShift)) next.add(s);
-    else if (hasMod(mods, events::Mod::kAlt)) next.remove(s);
-    else if (hasMod(mods, events::Mod::kCtrl)) next.toggle(s);
-    else next.add(s);
+  const bool extend = hasMod(mods, events::Mod::kShift) || hasMod(mods, events::Mod::kAlt) || hasMod(mods, events::Mod::kCtrl);
+  curve::Selection next = extend ? selection_ : curve::Selection{};
+  if (!extend) {
+    next.assign(std::move(hits));
+  } else {
+    for (const Selected& s : hits) {
+      if (hasMod(mods, events::Mod::kShift)) next.add(s);
+      else if (hasMod(mods, events::Mod::kAlt)) next.remove(s);
+      else next.toggle(s);
+    }
   }
   setSelectionInternal(std::move(next));
 }

@@ -1,6 +1,6 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the measured numbers of TabBar (docs/spec/widgets.md 4.1) shared by its translation units, and
-//   the animation slots of a tab.
+//   (the strip buttons' animation slots are their Part values, see TabBar::animationSlot).
 // Why: layout, painting and the pointer code must agree on a tab's geometry to the pixel; one place
 //   names each measured value.
 // Callers: TabBar.cpp, TabBarLayout.cpp, TabBarPaint.cpp only (private header, not installed).
@@ -22,8 +22,6 @@ constexpr double kCloseTop = 9.5;     // measured close button y
 constexpr double kWheelStep = 48.0;
 constexpr double kButtonIcon = 14.0;
 constexpr double kCompactBelow = 100.0;  // narrower tabs (shrunk or overflowing) drop the icon and free the close button's space until needed
-
-int slotOf(TabId id, int sub) { return static_cast<int>((id * 4 + static_cast<TabId>(sub)) & 0x3fffffffu); }
 
 }  // namespace
 }  // namespace r1ui::widgets

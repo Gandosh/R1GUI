@@ -197,10 +197,11 @@ void testActionButton() {
   bool threw = false;
   try {
     paintOnce(t);
-  } catch (const std::runtime_error&) {
-    threw = true;  // an unknown icon is reported by the icon cache (the shell shows it), never a crash
+  } catch (const std::exception&) {
+    threw = true;
   }
-  R1_EXPECT(threw);
+  R1_EXPECT(!threw);  // an unknown icon is a placeholder square, counted by the icon cache, never an exception
+  R1_EXPECT(t.ui.icons().failedLoads() >= 1);
   again.setIcon("x");
   paintOnce(t);
 }

@@ -105,6 +105,7 @@ class NumberField : public WidgetObject {
 
   // ---- WidgetObject ----
   void onAttached() override;
+  void onDetached() override;
   float paintOpacity() const override;
   bool wantsContinuousFrames() const override { return editing_ && focused(); }
   void paint(PaintContext& ctx) override;
@@ -142,7 +143,7 @@ class NumberField : public WidgetObject {
 
   Parts parts() const;
   Part partAt(double x, double y) const;
-  const theme::ResolvedStyle& fieldStyle() const;
+  theme::ResolvedStyle fieldStyle() const;
   double baseStep() const;
   static double stepMultiplier(uint8_t modifiers);
   double normalise(double value) const;
@@ -156,6 +157,8 @@ class NumberField : public WidgetObject {
   // One complete bracket for a discrete user change; false when the widget was destroyed.
   bool commitValue(double value);
   void stepBy(double notches, uint8_t modifiers);
+  // Steps from `base` (the stored value, or the text typed in edit mode) and commits when that differs from the stored value.
+  void stepFrom(double base, double notches, uint8_t modifiers);
 
   // ---- edit mode ----
   void enterEdit(bool selectAll);

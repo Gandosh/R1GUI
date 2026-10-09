@@ -26,9 +26,10 @@ void TabBar::paint(PaintContext& ctx) {
   painter.fillRect(ctx.toPhysical(bar.x, bar.y + kHeight - 1.0, bar.w, 1.0), ctx.color(barStyle.border.color));
 
   // Positions of the tabs; while dragging the others make room for the dragged one.
-  std::vector<double> xs = L.x;
+  std::vector<double> dragged;  // only filled while a drag rearranges the strip
   const size_t n = tabs_.size();
   if (drag_.active && n > 0) {
+    dragged = L.x;
     std::vector<size_t> order;
     for (size_t i = 0; i < n; ++i) {
       if (i != drag_.index) order.push_back(i);
@@ -36,14 +37,15 @@ void TabBar::paint(PaintContext& ctx) {
     order.insert(order.begin() + static_cast<std::ptrdiff_t>(std::min(drag_.slot, order.size())), drag_.index);
     double cursor = L.x[0];
     for (const size_t i : order) {
-      xs[i] = cursor;
+      dragged[i] = cursor;
       cursor += L.w[i];
     }
     const double lo = L.stripX;
     const double hi = L.stripX + std::max(L.overflow ? L.stripW : L.contentW, L.w[drag_.index]) - L.w[drag_.index];
-    xs[drag_.index] = std::clamp(drag_.pointerX - bar.x - drag_.grab, lo, hi);
+    dragged[drag_.index] = std::clamp(drag_.pointerX - bar.x - drag_.grab, lo, hi);
   }
 
+  const std::vector<double>& xs = drag_.active && n > 0 ? dragged : L.x;
   if (L.overflow) painter.pushClip(ctx.toPhysical(bar.x + L.stripX, bar.y, L.stripW, kHeight));
   const auto paintTab = [&](size_t i) {
     const TabInfo& t = tabs_[i];
@@ -55,7 +57,7 @@ void TabBar::paint(PaintContext& ctx) {
     const render::Rect box = ctx.toPhysical(x, bar.y, L.w[i], kTabHeight);
     if (rs.background.a > 0) painter.fillRect(box, ctx.color(rs.background));
     painter.fillRect(ctx.toPhysical(x + L.w[i] - kBorder, bar.y, kBorder, kTabHeight), ctx.color(rs.border.color));
-    const render::Color text = ctx.animatedColor(slotOf(t.id, 0), ctx.color(rs.text.color));
+    const render::Color text = ctx.animatedColor(animationSlot(t.id, 0), ctx.color(rs.text.color));
     const bool compact = L.w[i] < kCompactBelow;
     double left = kPadX;
     if (!t.icon.empty() && !compact) {
@@ -72,7 +74,7 @@ void TabBar::paint(PaintContext& ctx) {
     o.color = text;
     ctx.drawText(t.title, rs.text, box, o);
     if (t.closable) {
-      const float visible = ctx.animatedValue(slotOf(t.id, 1), (activeTab || hot) ? 1.0f : 0.0f);
+      const float visible = ctx.animatedValue(animationSlot(t.id, 1), (activeTab || hot) ? 1.0f : 0.0f);
       if (visible > 0.001f) {
         const bool overClose = hover_.part == Part::Close && hover_.index == i;
         const theme::ResolvedStyle& cs = ctx.resolve("tabbar.close", overClose ? State::kHover : State::kNone);
@@ -97,7 +99,7 @@ void TabBar::paint(PaintContext& ctx) {
   const auto button = [&](Part part, double x, double w, const char* icon, bool enabled) {
     const bool hot = hover_.part == part && enabled;
     const theme::ResolvedStyle& bs = ctx.resolve("tabbar.button", (hot ? State::kHover : State::kNone) | (enabled ? State::kNone : State::kDisabled));
-    const render::Color tint = ctx.animatedColor(slotOf(static_cast<TabId>(part) + 1000000, 0), ctx.color(bs.text.color));
+    const render::Color tint = ctx.animatedColor(static_cast<int>(part), ctx.color(bs.text.color));
     ctx.drawIcon(icon, kButtonIcon, ctx.toPhysical(bar.x + x, bar.y, w, kTabHeight), tint);
   };
   if (L.hasNew) button(Part::New, L.newX, kNewButtonWidth, "plus", true);
