@@ -311,8 +311,8 @@ class FlexRun {
         }
         it.target = clampExtent(t);
       }
-      std::vector<double> clamped;  // violations are decided on the unclamped targets
-      clamped.reserve(unfrozen);
+      clamped_.clear();  // violations are decided on the unclamped targets
+      std::vector<double>& clamped = clamped_;
       for (size_t i = ln.begin; i < ln.end; ++i) {
         const Item& it = flow_[i];
         if (it.frozen) continue;
@@ -646,6 +646,7 @@ class FlexRun {
   std::vector<tree::WidgetId> absolute_;
   std::vector<tree::WidgetId> hidden_;
   std::vector<Line> lines_;
+  std::vector<double> clamped_;  // scratch of resolveFlex, reused across its iterations
 };
 
 }  // namespace

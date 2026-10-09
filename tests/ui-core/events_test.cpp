@@ -158,6 +158,25 @@ void hitTesting() {
   expect(hitTest(s.tree, s.root, 210, 210) == s.root, "overflow:hidden clips hit testing too");
 }
 
+void layeredChildrenOrder() {
+  // Containers with layered or absolute children sort them by (layer, absolute, sibling order); the
+  // sort uses a stack buffer up to 16 children and heap storage beyond, with the same result.
+  for (const int count : {3, 16, 17, 100}) {
+    Scene s;
+    std::vector<WidgetId> boxes;
+    for (int i = 0; i < count; ++i) boxes.push_back(absBox(s.tree, s.b, 0, 0, 100, 100));
+    s.relayout();
+    // Same layer: the later sibling is on top.
+    expect(hitTest(s.tree, s.root, 100, 100) == boxes.back(), "later sibling wins at equal layer");
+    // A middle child on a higher layer beats every later sibling.
+    const size_t pick = static_cast<size_t>(count / 2);
+    s.tree.get(boxes[pick])->layer = 5;
+    expect(hitTest(s.tree, s.root, 100, 100) == boxes[pick], "higher layer wins");
+    s.tree.get(boxes[pick])->layer = -1;
+    expect(hitTest(s.tree, s.root, 100, 100) == boxes.back(), "a lower layer loses");
+  }
+}
+
 void overlappingSiblings() {
   WidgetTree t;
   const WidgetId root = addRoot(t, sized(100, 100));
@@ -278,6 +297,36 @@ void hoverTracking() {
   (void)d.tree.destroy(d.b);
   dr.sync();
   expect(dlog.empty() && dr.hovered() == d.a, "sync after destroy is silent and re-hovers the parent");
+}
+
+void cancelClearsHeldButtons() {
+  // Capture or focus lost elsewhere: the OS never sends the release. The cancelled button must not
+  // swallow the next click or leak into later move events.
+  Scene s;
+  std::vector<std::string> log;
+  Probe pb("B", log);
+  uint32_t lastButtons = 99;
+  pb.hook = [&](Event& e, Router&) {
+    if (e.type == EventType::PointerMove) lastButtons = e.buttons;
+  };
+  s.tree.get(s.b)->handler = &pb;
+  Router router(s.tree, s.root);
+  router.pointerDown(at(60, 60, 1, Button::Left));
+  expect(router.heldButtons() != 0, "button held after the press");
+  router.cancelPointerInteraction();
+  expect(router.heldButtons() == 0, "cancel clears the held buttons");
+  router.pointerMove(at(62, 62, 5));
+  expect(lastButtons == 0, "moves after the cancel report no buttons");
+  log.clear();
+  router.pointerDown(at(60, 60, 1000, Button::Left));
+  router.pointerUp(at(60, 60, 1010, Button::Left));
+  expect(contains(log, "B:Down:T") && contains(log, "B:Click:T"), "the next click is delivered in full");
+  // The late release of the cancelled press (arriving after a re-press) must not leak a click.
+  router.pointerDown(at(60, 60, 2000, Button::Left));
+  router.cancelPointerInteraction();
+  log.clear();
+  router.pointerUp(at(60, 60, 2010, Button::Left));
+  expect(!contains(log, "B:Click:T") && !contains(log, "B:Up:T"), "a late release of a cancelled press is ignored");
 }
 
 void pointerCapture() {
@@ -860,9 +909,11 @@ void eventStorm() {
 
 int main() {
   runCase("hit_testing", hitTesting);
+  runCase("layered_children_order", layeredChildrenOrder);
   runCase("overlapping_siblings", overlappingSiblings);
   runCase("capture_and_bubble", captureAndBubble);
   runCase("hover_tracking", hoverTracking);
+  runCase("cancel_clears_held_buttons", cancelClearsHeldButtons);
   runCase("pointer_capture", pointerCapture);
   runCase("clicks_and_drags", clicksAndDrags);
   runCase("focus_and_tab", focusAndTab);

@@ -31,8 +31,9 @@
 //  * DragStart is sent once per press to the press target (bubbling) when the pointer is
 //    strictly more than dragThreshold px from the press point (spec 08 rule 1: exactly the
 //    threshold is not a drag). A handler marks it handled to accept the drag, which suppresses
-//    the Click. cancelPointerInteraction() (e.g. Escape during a drag) forgets the press and
-//    releases capture without a click.
+//    the Click. cancelPointerInteraction() (e.g. Escape during a drag, capture or focus lost to
+//    another window) forgets the press, releases capture and clears the held-button state
+//    without a click; a release that arrives later for a cancelled button is ignored.
 //  * A left press that nobody handled focuses the innermost focusable widget at or above the
 //    target (without focus indication), unless a handler already moved focus (spec 01 rules
 //    1-3); pressing a non-focusable area keeps the previous focus (rule 8).
@@ -154,6 +155,9 @@ class Router {
 
   std::vector<tree::WidgetId> hoverChain_;  // root..leaf of the hovered widgets
   uint64_t hoverVersion_ = 0;               // tree structure version the chain was built at
+  // Capacity kept between hover changes so a pointer move that crosses widgets allocates nothing.
+  std::vector<tree::WidgetId> hoverSpareA_;
+  std::vector<tree::WidgetId> hoverSpareB_;
   tree::WidgetId capture_;
   uint32_t buttons_ = 0;
   Press press_;

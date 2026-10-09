@@ -5,6 +5,7 @@
 //   nor recommitted), and damage for reparent / destroy / create / visibility changes.
 // Callers: CTest (label fast).
 #include <cstdio>
+#include <stdexcept>
 #include <unordered_map>
 #include <vector>
 
@@ -402,6 +403,55 @@ void requestLayoutOnDirtyBoundaryReachesParent() {
   expectRect(absOf(s.tree, s.b), 10, 0, 200, 400, "its sibling moved up against it");
 }
 
+void throwingMeasureKeepsQueuedRoots() {
+  // A provider that throws during a pass must not lose the roots that did not get theirs.
+  struct Throwing : MeasureProvider {
+    bool armed = true;
+    MeasureResult measure(WidgetId, const MeasureInput&) override {
+      if (armed) throw std::runtime_error("measure failed");
+      return {10, 10};
+    }
+  };
+  TwoPanels s;
+  Throwing thrower;
+  Style leaf;
+  leaf.hasMeasure = true;
+  leaf.alignSelf = Align::Start;
+  const WidgetId inA = addChild(s.tree, s.a, leaf);
+  const WidgetId inB = addChild(s.tree, s.b, leaf);
+  s.inv.requestLayout(inA);
+  s.inv.requestLayout(inB);
+  bool threw = false;
+  try {
+    (void)s.inv.runFrame(&thrower);
+  } catch (const std::runtime_error&) {
+    threw = true;
+  }
+  expect(threw, "the measure failure reaches the caller");
+  expect(s.inv.needsFrame(), "the unfinished roots are still queued");
+  thrower.armed = false;
+  (void)s.inv.runFrame(&thrower);
+  expectRect(absOf(s.tree, inA), 0, 0, 10, 10, "first panel content laid out by the retry");
+  expectRect(absOf(s.tree, inB), 200, 0, 10, 10, "second panel content laid out by the retry");
+  expect(!s.tree.get(inA)->layoutDirty && !s.tree.get(inB)->layoutDirty, "clean after the retry");
+}
+
+void repeatedAnimationRequestsStayCheap() {
+  TwoPanels s;
+  std::vector<WidgetId> many;
+  for (int i = 0; i < 2000; ++i) many.push_back(addChild(s.tree, s.a, sized(1, 1)));
+  for (int round = 0; round < 50; ++round) {
+    for (const WidgetId id : many) s.inv.requestAnimation(id);  // 100 000 requests, 2000 distinct widgets
+  }
+  const FrameResult f = s.inv.runFrame(&s.measure);
+  expect(f.animating.size() == 2000, "each animating widget is listed once");
+  s.inv.cancelAnimation(many[5]);
+  s.inv.cancelAnimation(many[5]);
+  expect(s.inv.runFrame(&s.measure).animating.size() == 1999, "cancel removes exactly one");
+  s.inv.requestAnimation(many[5]);
+  expect(s.inv.runFrame(&s.measure).animating.size() == 2000, "and it can be requested again");
+}
+
 void manyPaintRequestsStayBounded() {
   Panels s;
   WidgetTree& t = s.tree;
@@ -459,6 +509,8 @@ int main() {
   runCase("structure_damage", structureDamage);
   runCase("reparent_between_boundaries", reparentBetweenBoundaries);
   runCase("dirty_boundary_request_reaches_parent", requestLayoutOnDirtyBoundaryReachesParent);
+  runCase("throwing_measure_keeps_queued_roots", throwingMeasureKeepsQueuedRoots);
+  runCase("repeated_animation_requests", repeatedAnimationRequestsStayCheap);
   runCase("many_paint_requests_stay_bounded", manyPaintRequestsStayBounded);
   runCase("hostile_use", hostileUse);
   return finish("ui-core.invalidation");

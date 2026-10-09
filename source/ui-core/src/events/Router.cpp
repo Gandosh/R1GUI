@@ -127,13 +127,17 @@ void Router::updateHover(WidgetId newLeaf) {
   const WidgetId oldLeaf = hoverChain_.empty() ? kNoWidget : hoverChain_.back();
   if (newLeaf == oldLeaf && hoverVersion_ == tree_.structureVersion()) return;
 
-  std::vector<WidgetId> next;
+  // `previous` and `next` stay stable while Enter / Leave handlers run (a handler may move the
+  // pointer state again); their storage comes from the spares and goes back at the end.
+  std::vector<WidgetId> next = std::move(hoverSpareB_);
+  next.clear();
   if (tree_.alive(newLeaf)) {
     tree_.ancestorsOf(newLeaf, next);
     std::reverse(next.begin(), next.end());
   }
   std::vector<WidgetId> previous = std::move(hoverChain_);
-  hoverChain_ = next;
+  hoverChain_ = std::move(hoverSpareA_);
+  hoverChain_.assign(next.begin(), next.end());
   hoverVersion_ = tree_.structureVersion();
 
   size_t common = 0;
@@ -156,6 +160,9 @@ void Router::updateHover(WidgetId newLeaf) {
   for (size_t i = common; i < next.size(); ++i) {
     if (tree_.alive(next[i])) boundary(EventType::PointerEnter, next[i], oldLeaf);
   }
+  previous.clear();
+  hoverSpareA_ = std::move(previous);
+  hoverSpareB_ = std::move(next);
 }
 
 void Router::refreshHoverFromLastPosition() {
@@ -203,6 +210,10 @@ void Router::cancelPointerInteraction() {
   press_ = Press{};
   lastClick_.valid = false;
   releaseCapture();
+  // The OS may never deliver the matching releases (capture or focus lost elsewhere), and a
+  // button left set would swallow the next press and make later moves look like a drag. A late
+  // release for a cancelled button is ignored by pointerUp.
+  buttons_ = 0;
 }
 
 // A destroyed capturer simply disappears (nothing can be delivered); a hidden one is released.

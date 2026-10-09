@@ -59,6 +59,7 @@ struct Widget {
   bool layoutDirty = false;
   bool paintDirty = false;
   bool subtreePaintDirty = false;  // some descendant is paint dirty
+  bool animating = false;          // listed by the Invalidator as wanting continuous frames
 
   // True when children are clipped to the widget rect (flag or overflow:hidden).
   bool clips() const { return flags.clipsChildren || style.overflow == layout::Overflow::Hidden; }

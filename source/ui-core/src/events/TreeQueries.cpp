@@ -96,19 +96,34 @@ WidgetId hitNode(const WidgetTree& tree, WidgetId id, double x, double y, const 
         if (hit.valid()) return hit;
       }
     } else {
-      // (layer, absolute, sibling order, id): sorted so the topmost child comes first.
-      std::vector<std::tuple<int32_t, int, uint32_t, WidgetId>> order;
-      uint32_t index = 0;
-      for (WidgetId c = tree.firstChild(id); c.valid(); c = tree.nextSibling(c), ++index) {
-        const Widget* cw = tree.get(c);
-        order.emplace_back(cw->layer, cw->style.position == layout::Position::Absolute ? 1 : 0, index, c);
+      // (layer, absolute, sibling order, id): sorted so the topmost child comes first. Up to
+      // kInlineOrder children are sorted in a stack buffer, so hit testing a pointer move
+      // allocates only for unusually wide layered containers.
+      constexpr size_t kInlineOrder = 16;
+      struct Entry {
+        int32_t layer;
+        int32_t absolute;
+        uint32_t index;
+        WidgetId id;
+      };
+      Entry inlineOrder[kInlineOrder];
+      std::vector<Entry> wideOrder;
+      Entry* order = inlineOrder;
+      size_t count = 0;
+      if (tree.childCount(id) > kInlineOrder) {
+        wideOrder.resize(tree.childCount(id));
+        order = wideOrder.data();
       }
-      std::sort(order.begin(), order.end(), [](const auto& l, const auto& r) {
-        return std::tie(std::get<0>(l), std::get<1>(l), std::get<2>(l)) >
-               std::tie(std::get<0>(r), std::get<1>(r), std::get<2>(r));
+      uint32_t index = 0;
+      for (WidgetId c = tree.firstChild(id); c.valid() && count < tree.childCount(id); c = tree.nextSibling(c), ++index) {
+        const Widget* cw = tree.get(c);
+        order[count++] = Entry{cw->layer, cw->style.position == layout::Position::Absolute ? 1 : 0, index, c};
+      }
+      std::sort(order, order + count, [](const Entry& l, const Entry& r) {
+        return std::tie(l.layer, l.absolute, l.index) > std::tie(r.layer, r.absolute, r.index);
       });
-      for (const auto& entry : order) {
-        const WidgetId hit = hitNode(tree, std::get<3>(entry), x, y, childClip);
+      for (size_t i = 0; i < count; ++i) {
+        const WidgetId hit = hitNode(tree, order[i].id, x, y, childClip);
         if (hit.valid()) return hit;
       }
     }
