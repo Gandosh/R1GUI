@@ -1,11 +1,15 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: RAII wrappers for a Vulkan buffer or 2D image together with its dedicated device memory,
-//   memory-type selection, and the VkResult check helper shared by the renderer sources.
+// Owns: RAII wrappers for a Vulkan buffer or 2D image (optionally with a colour view) together with
+//   its dedicated device memory, memory-type selection, and the VkResult check helper shared by
+//   the renderer sources.
 // Why: every GPU allocation in ui-render goes through one place that validates sizes, picks a
 //   memory type from the device's real properties and frees everything on any exit path.
-// Callers: vulkan/Renderer.cpp only (internal; never included from public headers).
+// Callers: the vulkan/*.cpp files only (internal; never included from public headers).
 // Lifetime: a wrapper must be destroyed (or reset) before the VkDevice it was created on, and
-//   only after the GPU is done using it; the renderer guarantees this with fences/idle waits.
+//   only after the GPU is done using it; the render device guarantees this by moving wrappers
+//   into its deferred-destruction queue (RenderDevice.h) or by waiting for idle.
+// Allocation count: one vkAllocateMemory per resource; the resource count is bounded by the
+//   frame rings, texture limit and targets, far below maxMemoryAllocationCount (4096 minimum).
 // Failure behavior: constructors throw std::runtime_error after releasing anything partly made.
 #pragma once
 
@@ -16,6 +20,7 @@
 namespace r1ui::render::detail {
 
 // Converts a failed VkResult into an exception naming the call; no failure is ignored.
+// VK_ERROR_DEVICE_LOST becomes DeviceLostError (RenderDevice.h).
 void check(VkResult result, const char* call);
 
 // Index of a memory type allowed by typeBits that has all the required property flags.
@@ -37,6 +42,7 @@ class GpuBuffer {
 
   VkBuffer handle() const { return buffer_; }
   void* mapped() const { return mapped_; }
+  bool valid() const { return buffer_ != VK_NULL_HANDLE; }
 
  private:
   void release();
@@ -49,9 +55,9 @@ class GpuBuffer {
 class GpuImage {
  public:
   GpuImage() = default;
-  // Creates a device-local, optimally tiled, single-mip 2D image.
+  // Creates a device-local, optimally tiled, single-mip 2D image; `withView` adds a colour view.
   GpuImage(VkDevice device, const VkPhysicalDeviceMemoryProperties& properties, uint32_t width,
-           uint32_t height, VkFormat format, VkImageUsageFlags usage);
+           uint32_t height, VkFormat format, VkImageUsageFlags usage, bool withView = false);
   ~GpuImage();
   GpuImage(GpuImage&& other) noexcept;
   GpuImage& operator=(GpuImage&& other) noexcept;
@@ -59,11 +65,13 @@ class GpuImage {
   GpuImage& operator=(const GpuImage&) = delete;
 
   VkImage handle() const { return image_; }
+  VkImageView view() const { return view_; }
 
  private:
   void release();
   VkDevice device_ = VK_NULL_HANDLE;
   VkImage image_ = VK_NULL_HANDLE;
+  VkImageView view_ = VK_NULL_HANDLE;
   VkDeviceMemory memory_ = VK_NULL_HANDLE;
 };
 

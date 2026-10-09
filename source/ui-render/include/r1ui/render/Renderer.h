@@ -1,13 +1,15 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: the public Vulkan renderer facade for one window (device, swapchain, frame loop) and the
-//   generic frame description: clear colour, solid rectangles and one letterboxed image.
-// Why: keeps every Vulkan type out of public headers so other modules include only this surface.
-// Callers: examples/preview and later the toolkit shell. Calls: Vulkan loader via Renderer.cpp.
+// Owns: the simple one-window facade used by the preview: a RenderDevice plus a WindowTarget, the
+//   generic frame description (clear colour, solid rectangles, one letterboxed image) and image
+//   upload/destroy by generation-checked id.
+// Why: keeps the Phase 1/2 preview API stable while the real renderer (RenderDevice,
+//   WindowTarget, Painter) takes over underneath; new code should use those directly.
+// Callers: examples/preview. Calls: RenderDevice, WindowTarget, Texture, Painter.
 // Invariants: single-threaded, owned by the UI thread; the Window must outlive the Renderer.
-// Drawing model (Phase 1): everything is transfer work (clear, blit); there are no shaders or
-//   pipelines yet. Consequently rectangle alpha is ignored (rectangles are drawn opaque) and
-//   rectangles are not anti-aliased; callers pre-composite translucent colours. The 2D batcher
-//   (slice 3.3) replaces this path.
+// Drawing model: since slice 3.3 rectangles go through the Painter, so rectangle alpha is
+//   honoured (straight alpha, blended in sRGB-encoded space) and rectangle edges are anti-aliased
+//   at fractional positions; integer rectangles with alpha 255 are pixel-exact as before. The
+//   image is a linearly filtered textured quad drawn first, then the rectangles in list order.
 #pragma once
 
 #include <cstdint>
@@ -28,7 +30,7 @@ struct Rgba8 {
   uint8_t r = 0;
   uint8_t g = 0;
   uint8_t b = 0;
-  uint8_t a = 255;  // ignored by the Phase 1 blit path (see header comment)
+  uint8_t a = 255;
 };
 
 // A solid rectangle in physical client pixels; clipped to the window, drawn in list order.
