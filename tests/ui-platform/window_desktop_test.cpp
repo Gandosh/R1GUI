@@ -12,11 +12,15 @@
 #include <windowsx.h>
 #include <dwmapi.h>
 
+#include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <cstdio>
 #include <initializer_list>
 #include <iterator>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "TestSupport.h"
@@ -439,8 +443,96 @@ void queuesAreBoundedUnderFlood() {
   expect(events.size() == kMaxQueuedWindowEvents, "unified queue holds exactly its bound");
   expect(legacy.size() == kMaxQueuedEvents, "legacy key queue holds exactly its bound");
   expect(!events.empty() && events.back().virtualKey == static_cast<uint32_t>(0x70 + ((kFlood - 1) % 12)), "newest event survived");
-  const size_t minimumDropped = (kFlood - kMaxQueuedWindowEvents) + (kFlood - kMaxQueuedEvents);
-  expect(w.droppedEventCount() >= minimumDropped, "drops are counted");
+  expect(w.droppedEventCount() == kFlood - kMaxQueuedWindowEvents, "drops of the unified queue are counted");
+}
+
+void altTapDoesNotEnterMenuMode() {
+  // A lone Alt tap / F10 reaches a borderless window as SC_KEYMENU. The default handler would run a
+  // modal menu loop (the next key is eaten); the window must swallow it. A watchdog ends the loop
+  // after 1.5 s so a regression fails the test instead of hanging it.
+  Window w(borderlessDesc());
+  settle(w);
+  const HWND hwnd = handleOf(w);
+  std::atomic<bool> done{false};
+  std::thread watchdog([&] {
+    for (int i = 0; i < 30 && !done; ++i) std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    if (!done) PostMessageW(hwnd, WM_CANCELMODE, 0, 0);
+  });
+  const auto t0 = std::chrono::steady_clock::now();
+  const LRESULT tap = send(w, WM_SYSCOMMAND, SC_KEYMENU, 0);
+  const LRESULT letter = send(w, WM_SYSCOMMAND, SC_KEYMENU, 'F');
+  send(w, WM_SYSCHAR, 'f', 1 << 29);
+  const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+  done = true;
+  watchdog.join();
+  GUITHREADINFO info{};
+  info.cbSize = sizeof(info);
+  GetGUIThreadInfo(GetCurrentThreadId(), &info);
+  expect(ms < 1000.0 && tap == 0 && letter == 0, "Alt tap, F10 and Alt+letter return at once instead of running a menu loop");
+  expect((info.flags & GUI_INMENUMODE) == 0, "the thread is not in menu mode");
+  expect(w.pumpEvents(), "window alive");
+
+  // Positive control: with the OS behaviour requested, the same message does start the menu loop,
+  // which proves the check above can fail.
+  WindowDesc osDesc = borderlessDesc();
+  osDesc.altTapOpensSystemMenu = true;
+  osDesc.position = Point{600, 100};
+  Window os(osDesc);
+  settle(os);
+  const HWND osHwnd = handleOf(os);
+  std::atomic<bool> osDone{false};
+  std::thread osWatchdog([&] {
+    for (int i = 0; i < 10 && !osDone; ++i) std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    if (!osDone) PostMessageW(osHwnd, WM_CANCELMODE, 0, 0);
+  });
+  const auto o0 = std::chrono::steady_clock::now();
+  send(os, WM_SYSCOMMAND, SC_KEYMENU, 0);
+  const double osMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - o0).count();
+  osDone = true;
+  osWatchdog.join();
+  expect(osMs >= 400.0, "control: altTapOpensSystemMenu keeps the OS menu loop (it ran until cancelled)");
+}
+
+void closingEventsSurviveAFlood() {
+  // The application stops draining: wheel and move events pile up around the events that close
+  // an interaction. Those must all reach the application; only the coalescible ones are lost.
+  Window w(borderlessDesc());
+  settle(w);
+  constexpr int kPairs = 600;  // 4 events each: well past kMaxQueuedWindowEvents
+  const Rect r = w.windowRect();
+  const LPARAM wheelPos = pack(r.x + 40, r.y + 40);
+  w.setCloseNeedsConfirmation(true);  // a close request is reported instead of closing
+  post(w, WM_KEYDOWN, 0x41, 1);
+  post(w, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(30, 30));
+  for (int i = 0; i < kPairs; ++i) {
+    post(w, WM_MOUSEWHEEL, MAKEWPARAM(0, WHEEL_DELTA), wheelPos);
+    post(w, WM_MOUSEMOVE, MK_LBUTTON, MAKELPARAM(31 + (i % 50), 31));
+    post(w, WM_KEYDOWN, 0x42, 1 | (1 << 30));  // auto-repeat
+    post(w, WM_MOUSEWHEEL, MAKEWPARAM(0, WHEEL_DELTA), wheelPos);
+  }
+  post(w, WM_LBUTTONUP, 0, MAKELPARAM(60, 31));
+  post(w, WM_KEYUP, 0x41, 1 | (1 << 30) | (1u << 31));
+  post(w, WM_KILLFOCUS, 0, 0);
+  post(w, WM_CLOSE, 0, 0);
+  for (int round = 0; round < 100; ++round) pumpAll(w);
+  const auto events = w.takeEvents();
+  const auto count = [&](EventType t) {
+    return static_cast<int>(std::count_if(events.begin(), events.end(), [t](const Event& e) { return e.type == t; }));
+  };
+  expect(count(EventType::MouseUp) == 1, "the button release survives the flood");
+  expect(count(EventType::KeyUp) == 1, "the key release survives the flood");
+  expect(count(EventType::FocusLost) == 1, "the focus loss survives the flood");
+  expect(count(EventType::CloseRequested) == 1, "the close request survives the flood");
+  expect(events.size() <= kMaxQueuedWindowEvents, "and the queue is still bounded by its capacity");
+  expect(w.droppedEventCount() > 0, "the coalescible events were dropped and counted");
+  // Press and release stay in order, so the consumer sees a closed interaction.
+  int downAt = -1;
+  int upAt = -1;
+  for (size_t i = 0; i < events.size(); ++i) {
+    if (events[i].type == EventType::MouseDown && downAt < 0) downAt = static_cast<int>(i);
+    if (events[i].type == EventType::MouseUp) upAt = static_cast<int>(i);
+  }
+  expect(upAt >= 0 && (downAt < 0 || downAt < upAt), "order is preserved");
 }
 
 void severalWindowsOneThread() {
@@ -541,13 +633,17 @@ void hostileDescriptorsAreRejectedWithoutLeaks() {
   Window ok(borderlessDesc());
   expect(liveThreadWindows() > before, "a valid window is created after rejections");
   bool threw = false;
+  bool accepted = true;
   try {
-    ok.setTitle("\xC3\x28");
-  } catch (const std::invalid_argument&) {
+    accepted = ok.setTitle("\xC3\x28 ansi \xE9");
+  } catch (...) {
     threw = true;
   }
-  expect(threw, "setTitle rejects invalid UTF-8 and the window survives");
-  ok.setTitle("fine \xE2\x82\xAC");
+  expect(!threw && !accepted, "setTitle never throws for invalid UTF-8 and reports the substitution");
+  wchar_t shown[64] = {};
+  GetWindowTextW(handleOf(ok), shown, 64);
+  expect(std::wstring(shown) == L"\uFFFD( ansi \uFFFD", "invalid bytes are shown as U+FFFD");
+  expect(ok.setTitle("fine \xE2\x82\xAC"), "valid text is accepted as is");
   expect(ok.pumpEvents(), "window still alive");
 }
 
@@ -578,6 +674,8 @@ int main() {
   runCase("focus_size_dpi_close", focusSizeDpiAndClose);
   runCase("wait_and_live_callback", waitAndLiveCallback);
   runCase("queues_bounded", queuesAreBoundedUnderFlood);
+  runCase("closing_events_survive_flood", closingEventsSurviveAFlood);
+  runCase("alt_tap_no_menu_mode", altTapDoesNotEnterMenuMode);
   runCase("several_windows", severalWindowsOneThread);
   runCase("cursors", cursorsFollowTheShape);
   runCase("clipboard", clipboardRoundTripAndHostileText);

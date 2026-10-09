@@ -28,6 +28,18 @@ void validRoundTrips() {
   expect(isValidUtf8("\xEE\x80\x80"), "U+E000 just above the surrogates is valid");
 }
 
+void invalidBytesBecomeReplacementCharacters() {
+  expect(replaceInvalidUtf8("plain \xE2\x82\xAC ok") == "plain \xE2\x82\xAC ok", "valid text is unchanged");
+  expect(replaceInvalidUtf8("\xC3\x28") == "\xEF\xBF\xBD(", "bad continuation: lead byte replaced, '(' kept");
+  expect(replaceInvalidUtf8("a\xE9z") == "a\xEF\xBF\xBD" "z", "an ANSI e-acute becomes U+FFFD");
+  expect(replaceInvalidUtf8("\xED\xA0\x80") == "\xEF\xBF\xBD\xEF\xBF\xBD\xEF\xBF\xBD", "surrogate bytes are replaced one by one");
+  expect(replaceInvalidUtf8("\xE2\x82") == "\xEF\xBF\xBD\xEF\xBF\xBD", "truncated sequence");
+  std::string every;
+  for (int b = 0; b < 256; ++b) every.push_back(static_cast<char>(b));
+  expect(isValidUtf8(replaceInvalidUtf8(every)), "the result is always valid UTF-8");
+  expect(replaceInvalidUtf8("").empty(), "empty");
+}
+
 void invalidUtf8IsRejected() {
   const char* bad[] = {
       "\x80",              // lone continuation byte
@@ -90,6 +102,7 @@ void assemblerPairsSurrogates() {
 int main() {
   runCase("valid_round_trips", validRoundTrips);
   runCase("invalid_utf8_rejected", invalidUtf8IsRejected);
+  runCase("invalid_bytes_replaced", invalidBytesBecomeReplacementCharacters);
   runCase("invalid_utf16_rejected", invalidUtf16IsRejected);
   runCase("text_code_point_filter", textCodePointFilter);
   runCase("assembler_pairs_surrogates", assemblerPairsSurrogates);

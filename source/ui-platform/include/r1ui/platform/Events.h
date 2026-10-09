@@ -58,4 +58,29 @@ struct Event {
   Rect rect;
 };
 
+// How much the queue policy values an event (see BoundedQueue.h ranks): 0 may be discarded or
+// coalesced first, 1 is ordinary, 2 is never discarded for room because losing it would leave the
+// toolkit with a held button or key, a running drag, a stale size or a window that cannot close.
+inline int eventRank(const Event& e) {
+  switch (e.type) {
+    case EventType::MouseMove:
+    case EventType::Wheel:
+    case EventType::Moved: return 0;
+    case EventType::KeyDown: return e.repeat ? 0 : 1;
+    case EventType::Char:
+    case EventType::MouseDown:
+    case EventType::MouseDoubleClick: return 1;
+    case EventType::KeyUp:
+    case EventType::MouseUp:
+    case EventType::MouseLeave:
+    case EventType::FocusGained:
+    case EventType::FocusLost:
+    case EventType::CaptureLost:
+    case EventType::Resized:
+    case EventType::DpiChanged:
+    case EventType::CloseRequested: return 2;
+  }
+  return 1;
+}
+
 }  // namespace r1ui::platform

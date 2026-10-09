@@ -88,6 +88,23 @@ bool isValidUtf8(std::string_view utf8) {
   return true;
 }
 
+std::string replaceInvalidUtf8(std::string_view text) {
+  std::string out;
+  out.reserve(text.size());
+  for (size_t i = 0; i < text.size();) {
+    char32_t cp = 0;
+    const size_t n = decodeOne(text, i, cp);
+    if (n == 0) {
+      appendUtf8(out, 0xFFFD);
+      ++i;
+    } else {
+      out.append(text.substr(i, n));
+      i += n;
+    }
+  }
+  return out;
+}
+
 std::optional<std::u16string> utf8ToUtf16(std::string_view utf8) {
   std::u16string out;
   out.reserve(utf8.size());

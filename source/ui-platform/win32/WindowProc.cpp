@@ -252,6 +252,15 @@ bool Window::Impl::handleKeyboard(UINT msg, WPARAM wp, LPARAM lp, LRESULT& resul
       // the system menu.
       return msg == WM_KEYDOWN || msg == WM_KEYUP;
     }
+    case WM_SYSCOMMAND:
+      // A lone Alt tap or F10 arrives as SC_KEYMENU with lParam 0; Alt+letter carries the letter
+      // (there is no menu to match it, the default would only beep). Alt+Space (' ') opens the
+      // window menu and is left to the default handler, as is every other system command.
+      if (borderless && !altTapOpensSystemMenu && (wp & 0xFFF0) == SC_KEYMENU && lp != ' ') return true;
+      return false;
+    case WM_SYSCHAR:
+      // Alt+letter would reach the same dead end through the default handler.
+      return borderless && !altTapOpensSystemMenu && wp != ' ';
     case WM_CHAR: {
       if (wp > 0xFFFF) return true;  // not a UTF-16 unit: drop
       const std::optional<char32_t> cp = chars.feed(static_cast<char16_t>(wp));

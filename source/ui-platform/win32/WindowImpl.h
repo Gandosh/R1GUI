@@ -28,6 +28,7 @@ struct Window::Impl {
   Size minClientSize{0, 0};  // 0 = none
   bool minSizeLogical = false;
   bool needsConfirm = false;
+  bool altTapOpensSystemMenu = false;
 
   // State fed by messages.
   int width = 0;
@@ -52,7 +53,7 @@ struct Window::Impl {
   BoundedQueue<KeyEvent> keyQueue{kMaxQueuedEvents};
   BoundedQueue<MouseClick> clickQueue{kMaxQueuedEvents};
   BoundedQueue<MouseEvent> mouseQueue{kMaxQueuedEvents};
-  BoundedQueue<Event> events{kMaxQueuedWindowEvents};
+  BoundedQueue<Event> events{kMaxQueuedWindowEvents, &eventRank};
 
   Impl() = default;
   Impl(const Impl&) = delete;
