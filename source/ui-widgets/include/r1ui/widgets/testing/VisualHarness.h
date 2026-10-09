@@ -74,6 +74,9 @@ struct VisualSpec {
     int x = 0, y = 0, w = 0, h = 0;
   };
   std::vector<Ignore> ignore;
+  // Compare luminance only. The reference browser draws text with LCD subpixel antialiasing (coloured
+  // fringes at stem edges); ours is grayscale, so text crops are compared on luminance.
+  bool luminance = false;
 };
 
 struct VisualResult {
@@ -88,6 +91,10 @@ struct VisualResult {
 // Renders `build` at the size of the reference crop and compares. Always writes
 // <artifactDir>/<reference>[-light].png and, when pixels fail, <...>.diff.png.
 VisualResult compareWithReference(const BuildFn& build, const VisualSpec& spec, const VisualPaths& paths);
+
+// The shared services of the rig (created on first use from `paths`): calibration tests change the
+// text engine's bold strength or read the glyph atlas through it.
+Services& sharedServices(const VisualPaths& paths);
 
 // Number of validation-layer messages seen by the shared device (Debug trees); 0 otherwise.
 unsigned validationMessageCount();

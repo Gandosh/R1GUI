@@ -11,7 +11,7 @@
 //   drawn partially.
 // Limits: the file is at most kMaxSvgBytes, kMaxSvgElements elements, kMaxSvgPoints flattened
 //   points; the output side is 4..kMaxIconPixels.
-// Anti-aliasing: 4x4 supersampling per pixel. Pixel centres follow the browser convention (the
+// Anti-aliasing: see AntiAlias (4x4 supersampling per pixel by default). Pixel centres follow the browser convention (the
 //   viewBox maps to [0, size] and pixel i covers [i, i+1]).
 #pragma once
 
@@ -56,8 +56,13 @@ struct SvgParseResult {
 
 SvgParseResult parseSvg(std::string_view text);
 
+// Anti-aliasing pattern: Smooth samples a 4x4 grid per pixel (17 levels, the default for the UI);
+// Msaa4 uses the four-sample pattern of the reference browser's GPU raster (5 levels) and is what
+// the visual tests use so icons compare against the reference crops.
+enum class AntiAlias : uint8_t { Smooth, Msaa4 };
+
 // size x size bytes, row 0 at the top, 255 = full coverage. Throws std::invalid_argument for a
 // size outside [kMinIconPixels, kMaxIconPixels].
-std::vector<uint8_t> rasterizeIcon(const SvgIcon& icon, int size);
+std::vector<uint8_t> rasterizeIcon(const SvgIcon& icon, int size, AntiAlias aa = AntiAlias::Smooth);
 
 }  // namespace r1ui::widgets

@@ -22,7 +22,6 @@ constexpr int kCubicSegments = 16;
 constexpr int kQuadSegments = 12;
 constexpr int kEllipseSegments = 48;
 constexpr int kCornerSegments = 8;
-constexpr int kSupersample = 4;
 
 using Attributes = std::vector<std::pair<std::string, std::string>>;
 
@@ -613,7 +612,23 @@ SvgParseResult parseSvg(std::string_view text) {
   return result;
 }
 
-std::vector<uint8_t> rasterizeIcon(const SvgIcon& icon, int size) {
+// Sample offsets inside a pixel (0..1). Smooth: a 4x4 grid (17 coverage levels). Msaa4: the four
+// positions of the standard 4x multisample pattern (D3D) that the reference browser's GPU raster
+// uses, so coverage matches its renders to within the geometry difference (5 levels).
+std::vector<std::pair<float, float>> samplePattern(AntiAlias aa) {
+  std::vector<std::pair<float, float>> points;
+  if (aa == AntiAlias::Msaa4) {
+    points = {{0.5f - 2.0f / 16.0f, 0.5f - 6.0f / 16.0f}, {0.5f + 6.0f / 16.0f, 0.5f - 2.0f / 16.0f},
+              {0.5f - 6.0f / 16.0f, 0.5f + 2.0f / 16.0f}, {0.5f + 2.0f / 16.0f, 0.5f + 6.0f / 16.0f}};
+  } else {
+    for (int sy = 0; sy < 4; ++sy) {
+      for (int sx = 0; sx < 4; ++sx) points.emplace_back((static_cast<float>(sx) + 0.5f) / 4.0f, (static_cast<float>(sy) + 0.5f) / 4.0f);
+    }
+  }
+  return points;
+}
+
+std::vector<uint8_t> rasterizeIcon(const SvgIcon& icon, int size, AntiAlias aa) {
   if (size < kMinIconPixels || size > kMaxIconPixels) throw std::invalid_argument("rasterizeIcon: size out of range");
   std::vector<Segment> segments;
   std::vector<const SvgOutline*> filled;
@@ -629,6 +644,7 @@ std::vector<uint8_t> rasterizeIcon(const SvgIcon& icon, int size) {
   const float half = icon.strokeWidth * 0.5f;
   const float halfSquared = half * half;
   const float margin = unit * 0.75f;  // a pixel's farthest corner from its centre is ~0.71 px
+  const std::vector<std::pair<float, float>> samples = samplePattern(aa);
   std::vector<uint8_t> coverage(static_cast<size_t>(size) * static_cast<size_t>(size), 0);
   for (int py = 0; py < size; ++py) {
     for (int px = 0; px < size; ++px) {
@@ -644,24 +660,22 @@ std::vector<uint8_t> rasterizeIcon(const SvgIcon& icon, int size) {
         continue;
       }
       int hits = 0;
-      for (int sy = 0; sy < kSupersample; ++sy) {
-        for (int sx = 0; sx < kSupersample; ++sx) {
-          const float x = (static_cast<float>(px) + (static_cast<float>(sx) + 0.5f) / kSupersample) * unit;
-          const float y = (static_cast<float>(py) + (static_cast<float>(sy) + 0.5f) / kSupersample) * unit;
-          bool covered = maybeFilled && insideFilled(filled, x, y);
-          if (!covered && d <= half + margin) {
-            for (const Segment& s : segments) {
-              if (distanceSquared(s, x, y) <= halfSquared) {
-                covered = true;
-                break;
-              }
+      for (const auto& [ox, oy] : samples) {
+        const float x = (static_cast<float>(px) + ox) * unit;
+        const float y = (static_cast<float>(py) + oy) * unit;
+        bool covered = maybeFilled && insideFilled(filled, x, y);
+        if (!covered && d <= half + margin) {
+          for (const Segment& s : segments) {
+            if (distanceSquared(s, x, y) <= halfSquared) {
+              covered = true;
+              break;
             }
           }
-          if (covered) ++hits;
         }
+        if (covered) ++hits;
       }
       coverage[static_cast<size_t>(py) * static_cast<size_t>(size) + static_cast<size_t>(px)] =
-          static_cast<uint8_t>((hits * 255 + kSupersample * kSupersample / 2) / (kSupersample * kSupersample));
+          static_cast<uint8_t>((hits * 255 + static_cast<int>(samples.size()) / 2) / static_cast<int>(samples.size()));
     }
   }
   return coverage;

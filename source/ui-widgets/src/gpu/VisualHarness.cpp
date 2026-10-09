@@ -21,7 +21,10 @@ namespace r1ui::widgets::testing {
 namespace {
 
 struct Rig {
-  Rig(const VisualPaths& paths) : factory(device), services(loadTokens(paths), factory, makePaths(paths)) {}
+  explicit Rig(const VisualPaths& paths) : factory(device), services(loadTokens(paths), factory, makePaths(paths)) {
+    // The reference crops were rendered by a browser whose GPU raster uses 4-sample multisampling for paths.
+    services.icons().setAntiAlias(AntiAlias::Msaa4);
+  }
 
   static std::shared_ptr<const theme::Tokens> loadTokens(const VisualPaths& paths) {
     auto result = theme::Tokens::loadFile(paths.assetsDir / "theme" / "tokens.json");
@@ -157,7 +160,20 @@ VisualResult compareWithReference(const BuildFn& build, const VisualSpec& spec, 
       }
     }
   }
-  result.metrics = image::compare(ref, candidate, *tolerance);
+  if (spec.luminance) {
+    const auto gray = [](image::Image& img) {
+      for (size_t i = 0; i + 3 < img.rgba.size(); i += 4) {
+        const double y = 0.2126 * img.rgba[i] + 0.7152 * img.rgba[i + 1] + 0.0722 * img.rgba[i + 2];
+        img.rgba[i] = img.rgba[i + 1] = img.rgba[i + 2] = static_cast<uint8_t>(std::lround(y));
+      }
+    };
+    image::Image grayCandidate = candidate;
+    gray(ref);
+    gray(grayCandidate);
+    result.metrics = image::compare(ref, grayCandidate, *tolerance);
+  } else {
+    result.metrics = image::compare(ref, candidate, *tolerance);
+  }
   result.renderPath = paths.artifactDir / (artifactName(spec) + ".png");
   image::writePng(result.renderPath, candidate.width, candidate.height, candidate.rgba);
   if (result.metrics.error.empty() && result.metrics.failingPixels != 0) {
@@ -167,6 +183,8 @@ VisualResult compareWithReference(const BuildFn& build, const VisualSpec& spec, 
   }
   return result;
 }
+
+Services& sharedServices(const VisualPaths& paths) { return rig(paths).services; }
 
 unsigned validationMessageCount() { return created() != nullptr ? created()->device.validationMessageCount() : 0u; }
 

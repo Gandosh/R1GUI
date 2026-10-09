@@ -50,9 +50,11 @@ TextEngine::TextEngine(TextureFactory& textures, const std::filesystem::path& fo
   texture_ = textures.createCoverage(r1ui::core::checkedCast<uint32_t>(atlas_.width()), r1ui::core::checkedCast<uint32_t>(atlas_.height()));
 }
 
-void TextEngine::setBoldStrength(float strength) {
-  if (!std::isfinite(strength) || strength < 0.0f || strength > kMaxBoldStrength) throw std::invalid_argument("bold strength out of range");
-  boldStrength_ = strength;
+void TextEngine::setStrength(TextPolarity polarity, WeightStrength strength) {
+  for (const float v : {strength.bold, strength.regular}) {
+    if (!std::isfinite(v) || v < 0.0f || v > kMaxBoldStrength) throw std::invalid_argument("text weight strength out of range");
+  }
+  strengths_[static_cast<size_t>(polarity)] = strength;
 }
 
 const r1ui::text::ShapedRun* TextEngine::shaped(std::string_view utf8, float pixelSize) {
@@ -78,7 +80,14 @@ const r1ui::text::FontMetrics& TextEngine::metrics(float pixelSize) {
   return metrics_.emplace(pixelSize, regular_->metricsAt(safe)).first->second;
 }
 
-float TextEngine::baselineInBox(float pixelSize, float boxHeight) { return metrics(pixelSize).baselineInBox(boxHeight); }
+float TextEngine::baselineInBox(float pixelSize, float boxHeight) {
+  // The browser rounds ascent and descent to whole pixels and floors the half-leading, which puts
+  // the baseline of 11 px text in an 11 px line one pixel higher than the unrounded CSS formula.
+  const r1ui::text::FontMetrics& m = metrics(pixelSize);
+  const float ascent = std::round(m.ascent);
+  const float descent = std::round(m.descent);
+  return ascent + std::floor((boxHeight - (ascent + descent)) * 0.5f);
+}
 
 const FittedText& TextEngine::fit(std::string_view utf8, float pixelSize, float maxWidth) {
   const float width = measure(utf8, pixelSize);
@@ -108,7 +117,10 @@ void TextEngine::draw(r1ui::render::Painter& painter, std::string_view utf8, flo
   quads_.clear();
   r1ui::text::QuadParams params;
   params.pixelSize = pixelSize;
-  params.emboldenPx = weight >= kSyntheticBoldFromWeight ? r1ui::text::defaultEmboldenPx(pixelSize) * boldStrength_ : 0.0f;
+  // Text lighter than mid grey is light text on a dark surface (luminance of the straight sRGB tint).
+  const float luminance = 0.2126f * tint.r + 0.7152f * tint.g + 0.0722f * tint.b;
+  const WeightStrength strength = strengths_[luminance >= 0.5f ? 0 : 1];
+  params.emboldenPx = r1ui::text::defaultEmboldenPx(pixelSize) * (weight >= kSyntheticBoldFromWeight ? strength.bold : strength.regular);
   const auto stats = r1ui::text::buildGlyphQuads(atlas_, *regular_, *run, params, penX, baselineY, quads_);
   if (!stats.ok()) return;
   if (stats.value().atlasFull) overflow_ = true;

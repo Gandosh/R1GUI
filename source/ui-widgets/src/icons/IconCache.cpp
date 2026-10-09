@@ -66,7 +66,7 @@ void IconCache::prepare(std::string_view name, int pixelSize) {
   const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
   const SvgParseResult parsed = parseSvg(text);
   if (!parsed.ok) throw std::runtime_error("Cannot use the icon " + file.string() + ": " + parsed.error);
-  const std::vector<uint8_t> coverage = rasterizeIcon(parsed.icon, pixelSize);
+  const std::vector<uint8_t> coverage = rasterizeIcon(parsed.icon, pixelSize, aa_);
   const auto side = r1ui::core::checkedCast<uint32_t>(pixelSize);
   Cell cell;
   if (!allocate(side, cell)) {
@@ -88,6 +88,14 @@ void IconCache::draw(r1ui::render::Painter& painter, std::string_view name, floa
   const float u0 = static_cast<float>(cell.x) / atlas;
   const float v0 = static_cast<float>(cell.y) / atlas;
   painter.drawTexture(texture_->ref(), {std::round(x), std::round(y), side, side}, {u0, v0, side / atlas, side / atlas}, tint);
+}
+
+void IconCache::setAntiAlias(AntiAlias aa) {
+  if (aa == aa_) return;
+  aa_ = aa;
+  cells_.clear();
+  shelfY_ = shelfHeight_ = cursorX_ = 0;
+  overflow_ = true;  // quads already built from the old cells must be rebuilt
 }
 
 bool IconCache::consumeOverflow() {

@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "r1ui/render/Painter.h"
+#include "r1ui/widgets/icons/SvgRaster.h"
 #include "r1ui/widgets/text/TextureFactory.h"
 
 namespace r1ui::widgets {
@@ -40,6 +41,9 @@ class IconCache {
   // Draws the icon in a square of `pixelSize` whose top-left is (x, y), snapped to whole pixels.
   void draw(r1ui::render::Painter& painter, std::string_view name, float x, float y, int pixelSize,
             const r1ui::render::Color& tint);
+  // Rasterisation anti-aliasing; changing it drops every cached icon (they are rasterised again on use).
+  void setAntiAlias(AntiAlias aa);
+  AntiAlias antiAlias() const { return aa_; }
   // True (once) after the atlas was reset because it was full.
   bool consumeOverflow();
   size_t cachedCount() const { return cells_.size(); }
@@ -58,6 +62,7 @@ class IconCache {
   uint32_t shelfY_ = 0;
   uint32_t shelfHeight_ = 0;
   uint32_t cursorX_ = 0;
+  AntiAlias aa_ = AntiAlias::Smooth;
   bool overflow_ = false;
 };
 

@@ -1,5 +1,5 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: GPU oracle for the preview's text path: a string drawn through TextEngine into an offscreen
+// Owns: GPU oracle for the text path: a string drawn through TextEngine into an offscreen
 //   target must show the same ink as the CPU rasteriser produced for its glyphs (atlas upload and
 //   textured quads are correct), repeated draws of the same text give identical pixels, and an
 //   atlas that is reset mid-session still draws correctly.
@@ -58,6 +58,7 @@ int main() {
   r1ui::render::RenderDevice device;
   r1ui::widgets::GpuTextureFactory textures(device);
   r1ui::widgets::TextEngine text(textures, assets + "/fonts");
+  text.setStrength(r1ui::widgets::TextPolarity::LightText, {0.0f, 0.0f});  // measure the rasteriser, not the calibrated thickening
   const std::string value = "Rectangle Position 0123 Hamburgefonstiv";
   const std::vector<uint8_t> first = drawString(device, text, value, 24.0f, 400);
   char* dumpDir = nullptr;

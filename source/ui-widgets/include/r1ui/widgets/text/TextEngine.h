@@ -14,8 +14,8 @@
 // Units: physical pixels everywhere in this class (callers multiply logical sizes by the display
 //   scale). Failure behavior: text that cannot be shaped measures as 0 wide and draws nothing.
 // Weight: faces are Regular only. Weights below kSyntheticBoldFromWeight draw unmodified; heavier
-//   weights thicken the outline by defaultEmboldenPx(size) * boldStrength(). The strength is
-//   calibrated against the reference crops (docs/dev/widgets.md, "Text weight").
+//   weights thicken the outline by defaultEmboldenPx(size) * WeightStrength::bold, lighter ones by
+//   defaultEmboldenPx(size) * WeightStrength::regular (per text polarity). The strengths are calibrated against the reference crops (docs/dev/widgets.md, "Text weight").
 #pragma once
 
 #include <cstdint>
@@ -37,8 +37,17 @@ namespace r1ui::widgets {
 
 // Weights at or above this thicken the outline (browser behaviour for a family without a real bold).
 inline constexpr int kSyntheticBoldFromWeight = 600;
-// Calibrated multiplier of ui-text's default synthetic bold strength (see widgets.md).
-inline constexpr float kDefaultBoldStrength = 2.0f;
+// Calibrated multipliers of ui-text's default synthetic bold strength (docs/dev/widgets.md, "Text
+// weight"). Browsers enhance light text on a dark surface (heavier) and dark text on a light
+// surface (lighter) differently, so there is one pair per text polarity: `bold` for weights from
+// kSyntheticBoldFromWeight, `regular` for lighter weights. Polarity follows the tint's luminance.
+struct WeightStrength {
+  float bold;
+  float regular;
+};
+inline constexpr WeightStrength kLightTextStrength{2.18f, 0.2f};
+inline constexpr WeightStrength kDarkTextStrength{1.0f, 0.1f};
+enum class TextPolarity : uint8_t { LightText, DarkText };
 
 struct FittedText {
   std::string text;      // possibly shortened, ends with U+2026 when truncated
@@ -55,7 +64,8 @@ class TextEngine {
   // Width of `utf8` in pixels at `pixelSize` (advances do not depend on the weight).
   float measure(std::string_view utf8, float pixelSize, int weight = 400);
   const r1ui::text::FontMetrics& metrics(float pixelSize);
-  // Distance from the top of a line box of `boxHeight` pixels to the baseline of text at `pixelSize`.
+  // Distance from the top of a line box of `boxHeight` pixels to the baseline of text at `pixelSize`,
+  // computed the way the reference browser does (whole-pixel ascent and descent, floored half-leading).
   float baselineInBox(float pixelSize, float boxHeight);
   // `utf8` shortened with an ellipsis to fit `maxWidth` pixels (unchanged when it fits). The result
   // is cached; the reference stays valid until the next fit() call.
@@ -68,8 +78,9 @@ class TextEngine {
   void uploadAtlas();
   bool consumeAtlasOverflow();
 
-  float boldStrength() const { return boldStrength_; }
-  void setBoldStrength(float strength);
+  WeightStrength strength(TextPolarity polarity) const { return strengths_[static_cast<size_t>(polarity)]; }
+  // Throws std::invalid_argument for a negative, non-finite or absurd (> 8) strength.
+  void setStrength(TextPolarity polarity, WeightStrength strength);
 
   // The editor shapes with this font; the face for weight 400.
   const r1ui::text::Font& regular() const { return *regular_; }
@@ -108,7 +119,7 @@ class TextEngine {
   std::unordered_map<float, r1ui::text::FontMetrics> metrics_;
   std::vector<r1ui::text::GlyphQuad> quads_;
   std::vector<uint8_t> scratch_;
-  float boldStrength_ = kDefaultBoldStrength;
+  WeightStrength strengths_[2] = {kLightTextStrength, kDarkTextStrength};
   bool overflow_ = false;
 };
 
