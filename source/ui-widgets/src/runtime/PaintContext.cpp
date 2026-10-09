@@ -56,13 +56,13 @@ float PaintContext::drawText(std::string_view text, const theme::TextStyle& ts, 
   float width = 0.0f;
   bool clip = false;
   if (options.ellipsis) {
-    const FittedText& fitted = engine.fit(text, size, room);
+    const FittedText& fitted = engine.fit(text, size, room, options.tabular);
     shown = fitted.text;
     width = fitted.width;
     // The bare ellipsis can still be wider than a tiny box.
     clip = width > room + 0.5f;
   } else {
-    width = engine.measure(text, size, weight);
+    width = engine.measure(text, size, weight, options.tabular);
     clip = width > room + 0.5f;
   }
   float x = left;
@@ -72,7 +72,7 @@ float PaintContext::drawText(std::string_view text, const theme::TextStyle& ts, 
   const float baseline = box.y + engine.baselineInBox(size, box.h);
   const render::Color tint = options.color ? *options.color : color(ts.color);
   if (clip) painter_.pushClip(box);
-  engine.draw(painter_, shown, size, weight, x, baseline, tint);
+  engine.draw(painter_, shown, size, weight, x, baseline, tint, options.tabular);
   if (clip) painter_.popClip();
   return width;
 }

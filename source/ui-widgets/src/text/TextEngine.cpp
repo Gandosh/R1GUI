@@ -33,12 +33,12 @@ r1ui::text::GlyphAtlas makeAtlas() {
 }  // namespace
 
 size_t TextEngine::KeyHash::operator()(const Key& k) const {
-  return std::hash<std::string>{}(k.text) ^ (std::hash<float>{}(k.pixelSize) * 0x9E3779B97F4A7C15ull);
+  return std::hash<std::string>{}(k.text) ^ (std::hash<float>{}(k.pixelSize) * 0x9E3779B97F4A7C15ull) ^ (k.tabular ? 0x51ED270B1u : 0u);
 }
 
 size_t TextEngine::FitKeyHash::operator()(const FitKey& k) const {
   return std::hash<std::string>{}(k.text) ^ (std::hash<float>{}(k.pixelSize) * 0x9E3779B97F4A7C15ull) ^
-         (std::hash<int32_t>{}(k.widthQ) * 0xC2B2AE3D27D4EB4Full);
+         (std::hash<int32_t>{}(k.widthQ) * 0xC2B2AE3D27D4EB4Full) ^ (k.tabular ? 0x51ED270B1u : 0u);
 }
 
 TextEngine::TextEngine(TextureFactory& textures, const std::filesystem::path& fontDir) : atlas_(makeAtlas()) {
@@ -57,19 +57,21 @@ void TextEngine::setStrength(TextPolarity polarity, WeightStrength strength) {
   strengths_[static_cast<size_t>(polarity)] = strength;
 }
 
-const r1ui::text::ShapedRun* TextEngine::shaped(std::string_view utf8, float pixelSize) {
+const r1ui::text::ShapedRun* TextEngine::shaped(std::string_view utf8, float pixelSize, bool tabular) {
   if (!r1ui::text::isValidPixelSize(pixelSize)) return nullptr;
-  Key key{std::string(utf8), pixelSize};
+  Key key{std::string(utf8), pixelSize, tabular};
   const auto found = runs_.find(key);
   if (found != runs_.end()) return &found->second;
-  auto run = r1ui::text::shapeText(*regular_, pixelSize, utf8);
+  r1ui::text::ShapeOptions options;
+  options.tabularNumbers = tabular;
+  auto run = r1ui::text::shapeText(*regular_, pixelSize, utf8, options);
   if (!run.ok()) return nullptr;
   if (runs_.size() >= kMaxCachedRuns) runs_.clear();
   return &runs_.emplace(std::move(key), std::move(run.value())).first->second;
 }
 
-float TextEngine::measure(std::string_view utf8, float pixelSize, int) {
-  const r1ui::text::ShapedRun* run = shaped(utf8, pixelSize);
+float TextEngine::measure(std::string_view utf8, float pixelSize, int, bool tabular) {
+  const r1ui::text::ShapedRun* run = shaped(utf8, pixelSize, tabular);
   return run != nullptr ? run->width : 0.0f;
 }
 
@@ -89,18 +91,20 @@ float TextEngine::baselineInBox(float pixelSize, float boxHeight) {
   return ascent + std::floor((boxHeight - (ascent + descent)) * 0.5f);
 }
 
-const FittedText& TextEngine::fit(std::string_view utf8, float pixelSize, float maxWidth) {
-  const float width = measure(utf8, pixelSize);
+const FittedText& TextEngine::fit(std::string_view utf8, float pixelSize, float maxWidth, bool tabular) {
+  const float width = measure(utf8, pixelSize, kRegularWeight, tabular);
   if (!(maxWidth >= 0.0f) || width <= maxWidth) {
     lastFit_ = {std::string(utf8), width, false};
     return lastFit_;
   }
   // Quantised so sub-pixel jitter of a layout width does not defeat the cache.
   const int32_t widthQ = static_cast<int32_t>(std::min(maxWidth, 1.0e6f) * 64.0f);
-  FitKey key{std::string(utf8), pixelSize, widthQ};
+  FitKey key{std::string(utf8), pixelSize, widthQ, tabular};
   const auto found = fits_.find(key);
   if (found != fits_.end()) return found->second;
-  auto result = r1ui::text::truncateWithEllipsis(*regular_, pixelSize, utf8, maxWidth);
+  r1ui::text::ShapeOptions options;
+  options.tabularNumbers = tabular;
+  auto result = r1ui::text::truncateWithEllipsis(*regular_, pixelSize, utf8, maxWidth, options);
   FittedText fitted;
   if (result.ok()) fitted = {std::move(result.value().text), result.value().width, result.value().truncated};
   if (fits_.size() >= kMaxCachedFits) fits_.clear();
@@ -110,9 +114,9 @@ const FittedText& TextEngine::fit(std::string_view utf8, float pixelSize, float 
 void TextEngine::beginFrame() { atlas_.beginFrame(); }
 
 void TextEngine::draw(r1ui::render::Painter& painter, std::string_view utf8, float pixelSize, int weight, float penX,
-                      float baselineY, const r1ui::render::Color& tint) {
+                      float baselineY, const r1ui::render::Color& tint, bool tabular) {
   if (utf8.empty()) return;
-  const r1ui::text::ShapedRun* run = shaped(utf8, pixelSize);
+  const r1ui::text::ShapedRun* run = shaped(utf8, pixelSize, tabular);
   if (run == nullptr) return;
   quads_.clear();
   r1ui::text::QuadParams params;

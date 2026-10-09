@@ -34,6 +34,7 @@ struct TextOptions {
   bool ellipsis = true;   // shorten with U+2026 when the text does not fit; false clips instead
   std::optional<render::Color> color;  // overrides the style's text colour
   int weight = -1;        // overrides the style's weight when >= 0
+  bool tabular = false;   // digits with equal advances (OpenType tnum), as number fields show them
 };
 
 class PaintContext {

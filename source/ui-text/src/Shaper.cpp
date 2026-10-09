@@ -77,6 +77,9 @@ std::vector<hb_feature_t> buildFeatures(const ShapeOptions& options) {
   const auto off = [&](char a, char b, char c, char d) {
     features.push_back(hb_feature_t{HB_TAG(a, b, c, d), 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END});
   };
+  if (options.tabularNumbers) {
+    features.push_back(hb_feature_t{HB_TAG('t', 'n', 'u', 'm'), 1, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END});
+  }
   if (!options.kerning) off('k', 'e', 'r', 'n');
   if (!options.ligatures) {
     off('l', 'i', 'g', 'a');
