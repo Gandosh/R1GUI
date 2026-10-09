@@ -101,8 +101,15 @@ class FlexRun {
 
   Size run() {
     gather();
-    if (!def_[M_]) sizeMainFromContent();
-    resolveAll();
+    // A content-sized main axis resolves the items once to size the container (percent main sizes
+    // count as auto then). The second resolution only differs for items with a percent size, min,
+    // max or basis on the main axis, so it is skipped when there are none.
+    bool resolved = false;
+    if (!def_[M_]) {
+      sizeMainFromContent();
+      resolved = !mainPercent_;
+    }
+    if (!resolved) resolveAll();
     buildLines();
     for (const Line& ln : lines_) resolveFlex(ln);
     sizeCross();
@@ -141,6 +148,10 @@ class FlexRun {
         it.pad[a] = cs.padding[a == 0 ? kLeft : kTop] + cs.padding[a == 0 ? kRight : kBottom];
         it.fit[a] = (a == 0 ? cs.width : cs.height).kind == Length::Kind::FitContent;
       }
+      const auto isPct = [](const Length& l) { return l.kind == Length::Kind::Percent; };
+      mainPercent_ = mainPercent_ || isPct(cs.flexBasis) ||
+                     isPct(M_ == 0 ? cs.width : cs.height) || isPct(M_ == 0 ? cs.minWidth : cs.minHeight) ||
+                     isPct(M_ == 0 ? cs.maxWidth : cs.maxHeight);
       flow_.push_back(std::move(it));
     }
   }
@@ -630,6 +641,7 @@ class FlexRun {
   double gapM_ = 0;
   double gapX_ = 0;
   double availX_ = kNaN;
+  bool mainPercent_ = false;  // some in-flow item has a percent main-axis size, min, max or basis
   std::vector<Item> flow_;
   std::vector<tree::WidgetId> absolute_;
   std::vector<tree::WidgetId> hidden_;

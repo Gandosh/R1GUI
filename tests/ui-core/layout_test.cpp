@@ -629,6 +629,72 @@ void cacheKeepsNestingLinear() {
   expectRect(absOf(t, cur), 0, 0, 80, 20, "innermost container wraps the text exactly");
 }
 
+// Builds `depth` alternating Column/Row containers, each content-sized and aligned `align`, each
+// holding two measured leaves plus the next container (the shape of toolbars inside panels inside
+// toolbars). Returns the innermost container.
+WidgetId buildAlternatingNest(WidgetTree& t, TestMeasure& m, WidgetId root, int depth, Align align, bool wrap) {
+  WidgetId cur = root;
+  for (int i = 0; i < depth; ++i) {
+    Style s;
+    s.direction = (i % 2) != 0 ? FlexDirection::Row : FlexDirection::Column;
+    s.alignSelf = align;
+    if (wrap) s.wrap = FlexWrap::Wrap;
+    cur = addChild(t, cur, s);
+    addText(t, cur, m, 50 + i, 16);
+    addText(t, cur, m, 70, 16);
+  }
+  return cur;
+}
+
+void startAlignedNestingScales() {
+  // Regression for the exponential layout cost of deeply nested shrink-to-fit containers: before
+  // the pass-scoped measure memo this took 55 ms at depth 14, 0.8 s at 18 and 12 s at 22 (and
+  // 20 s with wrapping). The bounds below are about 100x the measured cost (about 0.5 ms at
+  // depth 22 on the development machine) so they only trip on a complexity regression.
+  struct Shape {
+    int depth;
+    bool wrap;
+    Align align;
+  };
+  const Shape shapes[] = {{14, false, Align::Start}, {16, false, Align::Start}, {18, false, Align::Start},
+                          {22, false, Align::Start}, {22, true, Align::Start},  {22, false, Align::Center},
+                          {22, false, Align::End},   {22, true, Align::Center}, {40, false, Align::Start}};
+  for (const Shape& sh : shapes) {
+    TestMeasure m;
+    WidgetTree t(TreeLimits{256, 1000});
+    const WidgetId root = addRoot(t, sized(800, 600));
+    const WidgetId inner = buildAlternatingNest(t, m, root, sh.depth, sh.align, sh.wrap);
+    double best = 1e9;
+    LayoutStats stats;
+    for (int run = 0; run < 2; ++run) {
+      const auto t0 = std::chrono::steady_clock::now();
+      stats = layoutTree(t, root, LayoutInput{800, 600}, &m);
+      best = std::min(best, std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
+    }
+    const size_t nodes = t.nodeCount();
+    std::fprintf(stderr, "INFO nest depth %d wrap %d align %d: %zu nodes, %zu measure calls, %zu hits, best %.3f ms\n",
+                 sh.depth, sh.wrap ? 1 : 0, static_cast<int>(sh.align), nodes, stats.measureCalls, stats.cacheHits,
+                 best);
+    expect(stats.measureCalls < 30 * nodes, "measure calls stay linear in the node count");
+    expect(best < (sh.depth >= 22 ? 50.0 : 20.0), "deep Start/Center/End nests lay out in a few milliseconds");
+    expect(absOf(t, inner).w > 0 && absOf(t, inner).h > 0, "the innermost container is sized and placed");
+  }
+
+  // A second layout of the same tree gives the same rectangles (cache state never changes results).
+  TestMeasure m;
+  WidgetTree t(TreeLimits{256, 1000});
+  const WidgetId root = addRoot(t, sized(800, 600));
+  buildAlternatingNest(t, m, root, 16, Align::Start, false);
+  run(t, root, 800, 600, &m);
+  std::vector<Rect> first;
+  t.forEachDescendant(root, [&](WidgetId id) { first.push_back(absOf(t, id)); });
+  run(t, root, 800, 600, &m);
+  size_t i = 0;
+  bool same = true;
+  t.forEachDescendant(root, [&](WidgetId id) { same = same && absOf(t, id) == first[i++]; });
+  expect(same, "repeated layout of a deep nest is stable");
+}
+
 void deepNesting() {
   // The deepest supported tree (512 levels) of content-sized containers around a text leaf:
   // measuring recurses once per level, so this guards the stack use per level.
@@ -819,6 +885,7 @@ int main() {
   runCase("aspect_and_auto_margins", aspectAndAutoMargins);
   runCase("measure_callbacks", measureCallbacks);
   runCase("cache_keeps_nesting_linear", cacheKeepsNestingLinear);
+  runCase("start_aligned_nesting_scales", startAlignedNestingScales);
   runCase("deep_nesting", deepNesting);
   runCase("hostile_inputs", hostileInputs);
   runCase("measured_performance", measuredPerformance);

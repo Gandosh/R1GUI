@@ -1,8 +1,9 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the per-widget scratch state of the layout engine (measure cache, commit stamp).
 // Why: re-measuring a content-sized subtree for every ancestor variant would be exponential in
-//   nesting depth; a tiny per-node cache keyed by the constraint tuple keeps layout linear, and
-//   the commit stamp lets an incremental pass skip clean subtrees entirely.
+//   nesting depth; a tiny per-node cache keyed by the constraint tuple (backed by the engine's
+//   pass-scoped memo for entries it drops) keeps layout linear, and the commit stamp lets an
+//   incremental pass skip clean subtrees entirely.
 // Callers: tree::Widget embeds one; only layout::FlexLayout reads or writes it.
 // Invariants: a cache entry is valid only while its epoch equals the tree's layout epoch AND the
 //   widget is not layout-dirty; a full layout pass bumps the epoch, which discards all entries.
@@ -43,6 +44,7 @@ struct NodeLayoutState {
   uint8_t cacheNext = 0;
   uint32_t cacheEpoch = 0;
   uint32_t cachePass = 0;  // pass that last (re)filled the cache; only trusted for dirty widgets
+  uint32_t spillPass = 0;  // pass whose memo holds entries pushed out of `cache` (see LayoutEngine.h)
 
   // Last committed (final) size and the epoch it was committed in; epoch 0 = never laid out.
   uint32_t commitEpoch = 0;

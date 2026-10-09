@@ -62,8 +62,14 @@ void Invalidator::queueLayoutRoot(WidgetId id) { pendingLayout_.push_back(id); }
 
 void Invalidator::requestLayout(WidgetId widget) {
   Widget* w = tree_.get(widget);
-  if (w == nullptr || w->layoutDirty) return;  // already dirty: its chain is already queued
+  if (w == nullptr) return;
+  const bool wasDirty = w->layoutDirty;
   w->layoutDirty = true;
+  // The widget's own bit is not proof that its ancestors are marked and a boundary is queued: it
+  // may have been dirtied under a different parent (reparent) or as the stop of a descendant's
+  // request. So the climb always starts at the parent; it ends cheaply at the first dirty ancestor,
+  // whose own chain is queued by the same rule.
+  bool marked = !wasDirty;
   WidgetId last = widget;
   // The widget's own size inputs changed, so its parent is always affected; climb from there
   // until a relayout boundary absorbs the change.
@@ -72,12 +78,13 @@ void Invalidator::requestLayout(WidgetId widget) {
     if (c->layoutDirty) return;
     c->layoutDirty = true;
     last = cur;
+    marked = true;
     if (layout::isRelayoutBoundary(tree_, cur)) {
       queueLayoutRoot(cur);
       return;
     }
   }
-  queueLayoutRoot(last);  // reached the root
+  if (marked) queueLayoutRoot(last);  // reached the root (an already queued dirty root is not queued twice)
 }
 
 void Invalidator::requestFullLayout() {
