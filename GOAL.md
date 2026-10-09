@@ -76,7 +76,7 @@ All specs are behavior-only, with a provenance-log entry per spec.
 - [x] 3.11 [Frame-time, idle CPU and memory baseline recorded](Goal/evidence/P3_S11.md)
 - [x] 3.12 [Preview: themed window with a panel of static widgets](Goal/evidence/P3_S12.md)
 
-**P3 owner gate: PENDING** — [phase close record](Goal/evidence/P3_close.md)
+**P3 owner gate: ACCEPTED** (2026-10-09) — [phase close record](Goal/evidence/P3_close.md)
 
 ## Phase 4: Widgets
 
