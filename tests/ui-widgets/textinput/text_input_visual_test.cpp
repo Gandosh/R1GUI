@@ -47,5 +47,6 @@ int main() {
     R1_EXPECT_MATCHES(makeBuild(TextInputSize::Sm, 242, "Search local components", "", false, false), spec("widget-text-input-sm-focus", VisualState::Focus));
     R1_EXPECT_MATCHES(makeBuild(TextInputSize::Sm, 242, "Search local components", "btn", true, true), spec("widget-text-input-sm-filled-focus", VisualState::Idle));
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // Debug trees run with validation layers
   return r1test::finish();
 }

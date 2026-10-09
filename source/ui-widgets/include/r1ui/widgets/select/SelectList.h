@@ -37,7 +37,6 @@ class SelectList : public WidgetObject {
 
   // The highlighted entry (keyboard or hover), if any.
   std::optional<size_t> highlighted() const { return highlight_; }
-  void setHighlighted(std::optional<size_t> entryIndex);
   double scrollOffset() const { return scroll_; }
   // Absolute logical rectangle of the row of `entryIndex`, empty when it is not visible.
   core::layout::Rect rowRect(size_t entryIndex) const;

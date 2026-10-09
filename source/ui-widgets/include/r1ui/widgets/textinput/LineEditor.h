@@ -97,10 +97,8 @@ class LineEditor {
   // ---- view -------------------------------------------------------------------------------------
   // Shapes the display text at `pixelSize` when the layout is stale. Returns false when shaping failed.
   bool ensureLayout(float pixelSize);
-  float pixelSize() const { return pixelSize_; }
   // Scrolls so the caret lies inside a field `contentWidth` wide.
   void scrollCaretIntoView(float contentWidth);
-  float scrollX() const { return editor_.scrollX(); }
   // x of the caret relative to the content left edge (scroll applied); nullopt without a layout.
   bool caretOffsetX(float& x) const;
 

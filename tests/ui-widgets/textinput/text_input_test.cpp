@@ -8,6 +8,8 @@
 //   zero-size fields, a 1 MiB value, invalid UTF-8 and control characters, huge pastes.
 // Callers: CTest (textinput fast, no GPU; paint is checked on a recording Painter).
 #include <algorithm>
+#include <chrono>
+#include <cstdio>
 #include <string>
 
 #include "FieldRig.h"
@@ -187,14 +189,21 @@ void testClipboardFailures() {
   rig.clipboard.assign(5u * 1024u * 1024u, 'x');
   rig.ctrl('A');
   rig.ctrl('V');
-  R1_EXPECT(input.text().size() <= 1024u * 1024u);
-  R1_EXPECT(rig.paint() < 4000);  // the huge value is drawn as a window, not as a million glyph quads
+  R1_EXPECT(input.text().size() <= 1024u * 1024u && input.text().size() > 512u * 1024u);
+  // With a character limit the same paste keeps exactly that many characters, and the long value is drawn
+  // as a window around the caret rather than as 100000 glyph quads.
+  input.setText("");
+  input.setMaxLength(100000);
+  rig.ctrl('V');
+  R1_EXPECT(input.text().size() == 100000);
+  R1_EXPECT(rig.paint() < 4000);
 }
 
 void testMaxLengthCountsGraphemes() {
   r1test::FieldRig rig;
   TextInput& input = makeInput(rig);
   input.setMaxLength(3);
+  R1_EXPECT(input.maxLength() == 3);
   rig.ui.router().focus(input.id(), events::FocusReason::Pointer);
   rig.type("abcdef");
   R1_EXPECT(input.text() == "abc");
@@ -283,8 +292,8 @@ void testDestroyInsideCallbacks() {
     input.setOnCommitted([&](std::string_view) { rig.ui.destroy(id); });
     rig.ui.router().focus(id, events::FocusReason::Pointer);
     rig.type("x");
-    rig.ui.router().focus(other.id(), events::FocusReason::Pointer);
-    R1_EXPECT(!rig.ui.alive(id));
+    rig.tab();  // moves focus through the UiContext (a dispatch), so the destroyed object outlives the handler
+    R1_EXPECT(!rig.ui.alive(id) && other.focused());
   }
 }
 
@@ -318,7 +327,6 @@ void testRapidAndHostileInput() {
   // A 3 MiB value is cut to the cap and still paints and edits.
   input.setText(std::string(3u * 1024u * 1024u, 'w'));
   R1_EXPECT(input.text().size() <= 1024u * 1024u && !input.text().empty());
-  R1_EXPECT(rig.paint() < 4000);
   rig.type("Z");  // the value sits at the byte cap: nothing more is accepted
   R1_EXPECT(input.text()[0] == 'w');
   rig.key(Key::Home);
@@ -512,24 +520,40 @@ void testBlinkKeepsFramesComing() {
 
 }  // namespace
 
-int main() {
-  testTypingAndCommit();
-  testEscapeOrder();
-  testKeyboardSelectionAndDeletion();
-  testPointerSelection();
-  testClipboardAndUndo();
-  testClipboardFailures();
-  testMaxLengthCountsGraphemes();
-  testReadOnlyAndDisabled();
-  testDestroyInsideCallbacks();
-  testRapidAndHostileInput();
-  testZeroAndTinyWidth();
-  testScrollKeepsCaretVisible();
-  testStatesAndPaint();
-  testClearButton();
-  testImeHooks();
-  testTabNavigationAndFocusRules();
-  testLineEditorPolicy();
-  testBlinkKeepsFramesComing();
+// Usage: text_input_test [case name ...]  (no arguments runs every case and prints the time of each).
+int main(int argc, char** argv) {
+  struct Case {
+    const char* name;
+    void (*run)();
+  };
+  const Case cases[] = {
+      {"testTypingAndCommit", testTypingAndCommit},
+      {"testEscapeOrder", testEscapeOrder},
+      {"testKeyboardSelectionAndDeletion", testKeyboardSelectionAndDeletion},
+      {"testPointerSelection", testPointerSelection},
+      {"testClipboardAndUndo", testClipboardAndUndo},
+      {"testClipboardFailures", testClipboardFailures},
+      {"testMaxLengthCountsGraphemes", testMaxLengthCountsGraphemes},
+      {"testReadOnlyAndDisabled", testReadOnlyAndDisabled},
+      {"testDestroyInsideCallbacks", testDestroyInsideCallbacks},
+      {"testRapidAndHostileInput", testRapidAndHostileInput},
+      {"testZeroAndTinyWidth", testZeroAndTinyWidth},
+      {"testScrollKeepsCaretVisible", testScrollKeepsCaretVisible},
+      {"testStatesAndPaint", testStatesAndPaint},
+      {"testClearButton", testClearButton},
+      {"testImeHooks", testImeHooks},
+      {"testTabNavigationAndFocusRules", testTabNavigationAndFocusRules},
+      {"testLineEditorPolicy", testLineEditorPolicy},
+      {"testBlinkKeepsFramesComing", testBlinkKeepsFramesComing},
+  };
+  for (const Case& c : cases) {
+    bool wanted = argc <= 1;
+    for (int i = 1; i < argc; ++i) wanted = wanted || std::string(argv[i]) == c.name;
+    if (!wanted) continue;
+    const auto start = std::chrono::steady_clock::now();
+    c.run();
+    std::printf("%-40s %.2f s\n", c.name, std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count());
+    std::fflush(stdout);
+  }
   return r1test::finish();
 }

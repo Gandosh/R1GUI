@@ -30,5 +30,6 @@ int main() {
     std::printf("gallery %-5s %zu distinct colours -> %s\n", theme == r1ui::theme::ThemeId::Dark ? "dark" : "light", colours.size(), (paths.artifactDir / name).string().c_str());
     r1test::report(colours.size() > 60, "gallery is not blank", __FILE__, __LINE__);
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // Debug trees run with validation layers
   return r1test::finish();
 }

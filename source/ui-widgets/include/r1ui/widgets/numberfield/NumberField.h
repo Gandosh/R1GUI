@@ -162,7 +162,7 @@ class NumberField : public WidgetObject {
   void commitEdit();
   void revertEdit();
   void applyEditEdit(const LineEdit& edit);
-  void scrollEditIntoView();
+  void settleScroll();
   void refreshEditText();
 
   // ---- scrub ----
@@ -193,6 +193,7 @@ class NumberField : public WidgetObject {
   std::string editStart_;
   bool pressed_ = false;
   bool textDragging_ = false;
+  bool scrollPending_ = false;
   bool scrubbing_ = false;
   Part pressedPart_ = Part::None;
   Part hoverPart_ = Part::None;

@@ -120,6 +120,8 @@ class TextInput : public WidgetObject {
   void commitIfChanged();
   void clearText();
   void showCaretNow();
+  // Scrolls the text so the caret is visible, when an edit moved it since the last time.
+  void settleScroll();
 
   TextInputTone tone_;
   TextInputSize size_;
@@ -131,6 +133,7 @@ class TextInput : public WidgetObject {
   bool dragging_ = false;
   bool clearPressed_ = false;
   bool clearHover_ = false;
+  bool scrollPending_ = false;
   TextCallback onTextChanged_;
   TextCallback onCommitted_;
 };

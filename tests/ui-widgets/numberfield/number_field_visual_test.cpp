@@ -91,5 +91,6 @@ int main() {
     R1_EXPECT_MATCHES(mixed, spec("widget-number-field-x-mixed-hover", VisualState::Hover));
     R1_EXPECT_MATCHES(bound, spec("widget-number-field-width-bound-idle", VisualState::Hover));
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // Debug trees run with validation layers
   return r1test::finish();
 }

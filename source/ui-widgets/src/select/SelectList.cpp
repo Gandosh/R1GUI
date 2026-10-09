@@ -154,8 +154,6 @@ core::layout::Rect SelectList::rowRect(size_t entryIndex) const {
   return {r.x, static_cast<int32_t>(std::lround(y)), r.w, static_cast<int32_t>(std::lround(rowTop_[*row + 1] - rowTop_[*row]))};
 }
 
-void SelectList::setHighlighted(std::optional<size_t> entryIndex) { moveHighlight(entryIndex); }
-
 void SelectList::moveHighlight(std::optional<size_t> next) {
   const Select* s = owner();
   if (next && (s == nullptr || *next >= s->model().entries().size() || !SelectModel::selectable(s->model().entries()[*next]))) return;

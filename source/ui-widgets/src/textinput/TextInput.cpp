@@ -90,6 +90,7 @@ void TextInput::setSelection(size_t anchor, size_t caret) {
 
 bool TextInput::setPreedit(std::string_view utf8, size_t cursorInPreedit) {
   const bool ok = lineEditor_.model().setPreedit(utf8, cursorInPreedit);
+  scrollPending_ = true;
   showCaretNow();
   requestPaint();
   return ok;
@@ -135,6 +136,7 @@ TextInput::Geometry TextInput::geometry() const {
 }
 
 core::layout::Rect TextInput::caretRect() {
+  settleScroll();
   const theme::ResolvedStyle& rs = ui().services().resolve(styleKey(), styleState());
   if (!lineEditor_.ensureLayout(static_cast<float>(rs.text.fontSize * ui().scale()))) return {};
   float x = 0.0f;
@@ -163,13 +165,18 @@ void TextInput::apply(const LineEdit& edit) {
   }
   if (edit.caretMoved) {
     showCaretNow();
-    const Geometry g = geometry();
-    const theme::ResolvedStyle& rs = ui().services().resolve(styleKey(), styleState());
-    if (lineEditor_.ensureLayout(static_cast<float>(rs.text.fontSize * ui().scale()))) {
-      lineEditor_.scrollCaretIntoView(static_cast<float>((g.contentRight - g.contentLeft) * ui().scale()));
-    }
+    scrollPending_ = true;  // settled at the next paint or caret query, so a burst of typing shapes once
     requestPaint();
   }
+}
+
+void TextInput::settleScroll() {
+  if (!scrollPending_) return;
+  scrollPending_ = false;
+  const theme::ResolvedStyle& rs = ui().services().resolve(styleKey(), styleState());
+  if (!lineEditor_.ensureLayout(static_cast<float>(rs.text.fontSize * ui().scale()))) return;
+  const Geometry g = geometry();
+  lineEditor_.scrollCaretIntoView(static_cast<float>((g.contentRight - g.contentLeft) * ui().scale()));
 }
 
 void TextInput::commitIfChanged() {
@@ -208,6 +215,7 @@ void TextInput::onStateChanged(uint16_t previous) {
 }
 
 void TextInput::paint(PaintContext& ctx) {
+  settleScroll();
   const theme::ResolvedStyle& rs = ctx.style(styleKey());
   const render::Rect box = ctx.box();
   paintFieldBox(ctx, rs, animatedFieldColors(ctx, rs, 0), box);
@@ -370,11 +378,7 @@ void TextInput::onFocusOut(Event&) {
   commitIfChanged();
   if (!ui().alive(id())) return;
   lineEditor_.model().setSelection(0, 0);
-  const theme::ResolvedStyle& rs = ui().services().resolve(styleKey(), styleState());
-  if (lineEditor_.ensureLayout(static_cast<float>(rs.text.fontSize * ui().scale()))) {
-    const Geometry g = geometry();
-    lineEditor_.scrollCaretIntoView(static_cast<float>((g.contentRight - g.contentLeft) * ui().scale()));
-  }
+  scrollPending_ = true;  // the unfocused field shows the start of its text
   requestPaint();
 }
 

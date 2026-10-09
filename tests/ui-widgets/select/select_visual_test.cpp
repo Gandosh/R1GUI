@@ -137,5 +137,6 @@ int main() {
     R1_EXPECT_MATCHES(trigger, spec("widget-select-trigger-hover", VisualState::Hover));
     expectOpenList(theme);
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // Debug trees run with validation layers
   return r1test::finish();
 }
