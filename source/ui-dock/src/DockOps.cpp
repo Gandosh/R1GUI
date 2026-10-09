@@ -29,7 +29,9 @@ std::string configError(const DockConfig& c) {
                   c.crossInsetMin <= c.crossInsetMax && nonNegative(c.edgeTargetThickness) &&
                   positive(c.ghostMaxLongSide) && positive(c.ghostMinScale) && c.ghostMinScale <= 1.0 &&
                   positive(c.defaultFloatWidth) && positive(c.defaultFloatHeight) && positive(c.minFloatSize) &&
-                  c.minFloatSize <= kMaxCoordinate && c.handleThickness <= kMaxCoordinate;
+                  c.minFloatSize <= kMaxCoordinate && c.handleThickness <= kMaxCoordinate && positive(c.minTabWidth) &&
+                  positive(c.appPageStripHeight) && positive(c.appPageMaxTabWidth) && nonNegative(c.touchHandleBand) &&
+                  nonNegative(c.visibleMargin) && nonNegative(c.hoverActivateSeconds) && positive(c.keyboardResizeStep);
   return ok ? std::string() : "dock configuration has a non-finite, negative or inconsistent value";
 }
 
@@ -54,6 +56,39 @@ std::vector<Node> ordered(Node existing, Node added, Side side) {
 void detachTab(Node& stack, size_t tab) {
   stack.tabs.erase(stack.tabs.begin() + core::checkedCast<std::ptrdiff_t>(tab));
   if (tab < stack.active) --stack.active;
+}
+
+// Describes where `panel` (about to close) sits so it can reopen there (spec 02 rule 41): the other
+// tabs of its stack; when it is alone, a panel of the neighbouring region and the side it was on;
+// when it is alone in a floating window, the window rectangle.
+ClosedSlot rememberSlot(const std::vector<Area>& areas, const detail::PanelLocation& loc, PanelId panel) {
+  ClosedSlot slot;
+  slot.panel = panel;
+  slot.index = loc.tab;
+  const Area& area = areas[loc.area];
+  const Node& stack = *detail::nodeAt(area, loc.path);
+  for (PanelId other : stack.tabs) {
+    if (other != panel) slot.neighbours.push_back(other);
+  }
+  if (area.id != kMainAreaId) {
+    slot.floating = true;
+    slot.floatRect = area.rect;
+  }
+  if (slot.neighbours.empty() && !loc.path.empty()) {
+    Path parentPath = loc.path;
+    const uint32_t at = parentPath.back();
+    parentPath.pop_back();
+    const Node& parent = *detail::nodeAt(area, parentPath);
+    const bool after = static_cast<size_t>(at) + 1 < parent.children.size();
+    const Node& sibling = parent.children[after ? at + 1 : at - 1];
+    slot.anchor = detail::firstPanelOf(sibling);
+    if (parent.axis == Axis::Row) {
+      slot.anchorSide = after ? Side::Left : Side::Right;
+    } else {
+      slot.anchorSide = after ? Side::Top : Side::Bottom;
+    }
+  }
+  return slot;
 }
 
 }  // namespace
@@ -105,27 +140,42 @@ bool DockLayout::isDocked(PanelId id) const { return detail::findPanel(areas_, i
 bool operator==(const DockLayout& a, const DockLayout& b) {
   if (a.areas_.size() != b.areas_.size() || a.panels_.size() != b.panels_.size()) return false;
   for (size_t i = 0; i < a.panels_.size(); ++i) {
-    if (a.panels_[i].id != b.panels_[i].id) return false;
+    if (a.panels_[i].id != b.panels_[i].id || a.panels_[i].locked != b.panels_[i].locked) return false;
   }
   // Floating area ids are bookkeeping handed out in creation order; equality is about content.
   for (size_t i = 0; i < a.areas_.size(); ++i) {
-    if (a.areas_[i].rect != b.areas_[i].rect || a.areas_[i].root != b.areas_[i].root) return false;
+    if (a.areas_[i].rect != b.areas_[i].rect || a.areas_[i].root != b.areas_[i].root ||
+        a.areas_[i].window != b.areas_[i].window) {
+      return false;
+    }
   }
-  return true;
+  return a.closed_ == b.closed_ && a.meta_ == b.meta_;
 }
 
 Status DockLayout::validate() const {
   std::string error = detail::validateAreas(areas_, panels_, config_);
+  if (error.empty()) error = detail::validateClosed(closed_, areas_, panels_);
   return error.empty() ? Status::success() : Status::failure(std::move(error));
 }
 
 Status DockLayout::commit(std::vector<Area> candidate, uint32_t nextAreaId) {
+  return commitWith(std::move(candidate), nextAreaId, closed_);
+}
+
+// Panels that are docked in the candidate lose their closed slot (docking forgets it); the rest
+// of the memory must still describe known, closed panels.
+Status DockLayout::commitWith(std::vector<Area> candidate, uint32_t nextAreaId, std::vector<ClosedSlot> closed) {
   if (std::string error = detail::withinLimits(candidate); !error.empty()) return Status::failure(std::move(error));
   detail::normaliseAreas(candidate);
   if (std::string error = detail::validateAreas(candidate, panels_, config_); !error.empty()) {
     return Status::failure(std::move(error));
   }
+  std::erase_if(closed, [&](const ClosedSlot& s) { return detail::findPanel(candidate, s.panel).has_value(); });
+  if (std::string error = detail::validateClosed(closed, candidate, panels_); !error.empty()) {
+    return Status::failure(std::move(error));
+  }
   areas_ = std::move(candidate);
+  closed_ = std::move(closed);
   nextAreaId_ = nextAreaId;
   return Status::success();
 }
@@ -137,6 +187,11 @@ Status DockLayout::dock(PanelId panelId, const DropZone& zone) {
   std::vector<Area> candidate = areas_;
   uint32_t nextId = nextAreaId_;
   const std::optional<detail::PanelLocation> source = detail::findPanel(candidate, panelId);
+  const PanelInfo& info = *panel(panelId);
+  if (source && info.locked) return Status::failure("panel " + std::to_string(panelId) + " is locked");
+  if (zone.kind == DropKind::Float && !info.canFloat) {
+    return Status::failure("panel " + std::to_string(panelId) + " cannot float");
+  }
 
   // Resolve the target before touching the tree; paths stay valid until normalisation.
   std::optional<size_t> targetArea = detail::areaIndex(candidate, zone.area);
@@ -224,13 +279,19 @@ Status DockLayout::closePanel(PanelId panelId) {
   const PanelInfo* info = panel(panelId);
   if (info == nullptr) return Status::failure("unknown panel " + std::to_string(panelId));
   if (!info->canClose) return Status::failure("panel " + std::to_string(panelId) + " cannot be closed");
+  if (info->locked) return Status::failure("panel " + std::to_string(panelId) + " is locked");
   std::vector<Area> candidate = areas_;
   const std::optional<detail::PanelLocation> loc = detail::findPanel(candidate, panelId);
   if (!loc) return Status::failure("panel " + std::to_string(panelId) + " is not docked");
+  std::vector<ClosedSlot> closed = closed_;
+  if (info->kind != PanelKind::Document) {  // spec 02 rule 41: documents are forgotten
+    std::erase_if(closed, [&](const ClosedSlot& s) { return s.panel == panelId; });
+    closed.push_back(rememberSlot(candidate, *loc, panelId));
+  }
   // Spec 02 rule 5: when the front tab closes the right neighbour (else left) takes over; the
   // index stays put and normalisation clamps it to the last tab.
   detachTab(*detail::nodeAt(candidate[loc->area], loc->path), loc->tab);
-  return commit(std::move(candidate), nextAreaId_);
+  return commitWith(std::move(candidate), nextAreaId_, std::move(closed));
 }
 
 Status DockLayout::activateTab(PanelId panelId) {
@@ -261,19 +322,56 @@ Status DockLayout::moveSplitter(const SplitterHandle& handle, double delta, cons
   if (found == layout.splits.end()) return Status::failure("splitter has no layout");
   const std::vector<double> sizes = detail::splitSizes(*split, found->bounds, config_);
 
+  // Decision D11: a collapsed neighbour is brought back by the handle (its old weight restores its
+  // old size); the drag itself never reduces anything below the floor or to nothing.
+  const size_t i = handle.index;
+  Node& left = split->children[i];
+  Node& right = split->children[i + 1];
+  if (left.collapsed || right.collapsed) {
+    left.collapsed = false;
+    right.collapsed = false;
+    return commit(std::move(candidate), nextAreaId_);
+  }
+
   // Spec 05 rules 8-11: only the two neighbours change, clamped so neither drops below the
   // floor (or below where it already is), and their combined weight is preserved.
-  const size_t i = handle.index;
   const double before = sizes[i];
   const double total = before + sizes[i + 1];
   if (total <= 0.0 || delta == 0.0) return Status::success();
   const double lo = std::min(config_.minPanelSize, before);
   const double hi = total - std::min(config_.minPanelSize, sizes[i + 1]);
   const double after = std::clamp(before + delta, lo, hi);
-  const double combined = split->children[i].weight + split->children[i + 1].weight;
+  const double combined = left.weight + right.weight;
   const double first = std::clamp(combined * after / total, combined * 1.0e-6, combined * (1.0 - 1.0e-6));
-  split->children[i].weight = first;
-  split->children[i + 1].weight = combined - first;
+  left.weight = first;
+  right.weight = combined - first;
+  const bool anyPinned = std::any_of(split->children.begin(), split->children.end(), [](const Node& c) { return c.pinned; });
+  if (anyPinned) {
+    // With pins in play the flexible children share what the pins leave, so the pair's new sizes
+    // are written back as pixels: pinned neighbours store them, every flexible child's weight
+    // becomes its pixel size so the siblings keep exactly the size they have.
+    std::vector<double> px = sizes;
+    px[i] = after;
+    px[i + 1] = total - after;
+    double flexibleTotal = 0.0;
+    double weightTotal = 0.0;
+    for (size_t k = 0; k < px.size(); ++k) {
+      Node& c = split->children[k];
+      if (c.collapsed) continue;
+      if (c.pinned) {
+        c.pinnedSize = px[k];
+      } else {
+        flexibleTotal += px[k];
+        weightTotal += c.weight;
+      }
+    }
+    if (flexibleTotal > 0.0) {
+      for (size_t k = 0; k < px.size(); ++k) {
+        Node& c = split->children[k];
+        if (!c.collapsed && !c.pinned) c.weight = std::max(weightTotal * px[k] / flexibleTotal, kMinWeight);
+      }
+    }
+  }
   return commit(std::move(candidate), nextAreaId_);
 }
 

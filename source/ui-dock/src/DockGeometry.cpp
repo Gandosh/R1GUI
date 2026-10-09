@@ -67,19 +67,38 @@ std::vector<double> distribute(double usable, const std::vector<double>& weights
 
 struct LayoutPass {
   const DockConfig& config;
+  const std::vector<PanelInfo>& panels;
   LayoutResult& out;
   uint32_t area;
 };
 
-void layoutStack(LayoutPass& pass, const Node& node, const Rect& bounds) {
+bool isApplicationPage(const LayoutPass& pass, PanelId id) {
+  for (const PanelInfo& p : pass.panels) {
+    if (p.id == id) return p.kind == PanelKind::ApplicationPage;
+  }
+  return false;
+}
+
+// Spec 02 rule 9 and decision D12: equal tab widths capped at 160 x 25 (the first tab decides
+// whether the application-page cap of 210 x 50 applies); tabs shrink to the minimum width, beyond
+// which the strip overflows and the host scrolls it.
+void layoutStack(LayoutPass& pass, const Node& node, const Rect& bounds, const Path& path, bool collapsed) {
   StackLayout stack;
   stack.area = pass.area;
+  stack.path = path;
   stack.bounds = bounds;
-  const double stripHeight = std::min(pass.config.tabStripHeight, bounds.h);
+  stack.collapsed = collapsed;
+  const bool appPage = isApplicationPage(pass, node.tabs.front());
+  const double stripHeight = std::min(appPage ? pass.config.appPageStripHeight : pass.config.tabStripHeight, bounds.h);
+  const double maxWidth = appPage ? pass.config.appPageMaxTabWidth : pass.config.maxTabWidth;
   stack.strip = {bounds.x, bounds.y, bounds.w, stripHeight};
   stack.body = {bounds.x, bounds.y + stripHeight, bounds.w, bounds.h - stripHeight};
   const double count = static_cast<double>(node.tabs.size());
-  const double tabWidth = std::min(pass.config.maxTabWidth, stack.strip.w / count);
+  const double fitted = stack.strip.w / count;
+  const double tabWidth = fitted >= pass.config.minTabWidth ? std::min(maxWidth, fitted)
+                                                              : std::min(maxWidth, pass.config.minTabWidth);
+  stack.tabsWidth = tabWidth * count;
+  stack.overflow = stack.strip.w > 0.0 && stack.tabsWidth > stack.strip.w + 0.5;
   for (size_t i = 0; i < node.tabs.size(); ++i) {
     stack.tabs.push_back({node.tabs[i],
                           {stack.strip.x + tabWidth * static_cast<double>(i), stack.strip.y, tabWidth, stripHeight},
@@ -88,9 +107,9 @@ void layoutStack(LayoutPass& pass, const Node& node, const Rect& bounds) {
   pass.out.stacks.push_back(std::move(stack));
 }
 
-void layoutNode(LayoutPass& pass, const Node& node, const Rect& bounds, Path& path) {
+void layoutNode(LayoutPass& pass, const Node& node, const Rect& bounds, Path& path, bool collapsed = false) {
   if (node.kind == Node::Kind::Stack) {
-    layoutStack(pass, node, bounds);
+    layoutStack(pass, node, bounds, path, collapsed);
     return;
   }
   pass.out.splits.push_back({pass.area, path, node.axis, bounds});
@@ -105,7 +124,7 @@ void layoutNode(LayoutPass& pass, const Node& node, const Rect& bounds, Path& pa
     const Rect childRect = row ? Rect{start, bounds.y, end - start, bounds.h}
                                : Rect{bounds.x, start, bounds.w, end - start};
     path.push_back(core::checkedCast<uint32_t>(i));
-    layoutNode(pass, node.children[i], childRect, path);
+    layoutNode(pass, node.children[i], childRect, path, node.children[i].collapsed);
     path.pop_back();
     if (i + 1 < node.children.size()) {
       const Rect bar = row ? Rect{end, bounds.y, thickness, bounds.h} : Rect{bounds.x, end, bounds.w, thickness};
@@ -180,13 +199,50 @@ Rect floatZoneRect(const LayoutResult& layout, const DragQuery& q, const DockCon
 
 namespace detail {
 
+// Collapsed children take no space (decision D11) but keep their handle, so dragging it brings them
+// back. Pinned children keep their stored pixel size (decision D10) unless that would leave the
+// flexible children below their minimum, in which case the pins are ignored for this pass.
 std::vector<double> splitSizes(const Node& split, const Rect& bounds, const DockConfig& config) {
-  std::vector<double> weights;
-  weights.reserve(split.children.size());
-  for (const Node& child : split.children) weights.push_back(child.weight);
+  const size_t n = split.children.size();
   const double length = split.axis == Axis::Row ? bounds.w : bounds.h;
-  const double usable = length - config.handleThickness * static_cast<double>(weights.size() - 1);
-  return distribute(usable, weights, config.minPanelSize);
+  const double usable = length - config.handleThickness * static_cast<double>(n - 1);
+  std::vector<double> sizes(n, 0.0);
+  std::vector<size_t> flexible;
+  double pinnedTotal = 0.0;
+  size_t pinnedCount = 0;
+  for (size_t i = 0; i < n; ++i) {
+    const Node& child = split.children[i];
+    if (child.collapsed) continue;
+    if (child.pinned) {
+      pinnedTotal += child.pinnedSize;
+      ++pinnedCount;
+    } else {
+      flexible.push_back(i);
+    }
+  }
+  const auto share = [&](const std::vector<size_t>& indices, double space) {
+    std::vector<double> weights;
+    weights.reserve(indices.size());
+    for (size_t i : indices) weights.push_back(split.children[i].weight);
+    const std::vector<double> part = distribute(space, weights, config.minPanelSize);
+    for (size_t k = 0; k < indices.size(); ++k) sizes[indices[k]] = part[k];
+  };
+  const double free = usable - pinnedTotal;
+  const bool pinsFit = pinnedCount > 0 && !flexible.empty() &&
+                       free >= config.minPanelSize * static_cast<double>(flexible.size());
+  if (pinsFit) {
+    for (size_t i = 0; i < n; ++i) {
+      if (split.children[i].pinned && !split.children[i].collapsed) sizes[i] = split.children[i].pinnedSize;
+    }
+    share(flexible, free);
+    return sizes;
+  }
+  std::vector<size_t> visible;
+  for (size_t i = 0; i < n; ++i) {
+    if (!split.children[i].collapsed) visible.push_back(i);
+  }
+  share(visible, usable);
+  return sizes;
 }
 
 }  // namespace detail
@@ -196,12 +252,22 @@ bool dragExceedsThreshold(Point press, Point now, const DockConfig& config) {
   return std::isfinite(distance) && distance > config.dragThreshold;
 }
 
-std::optional<HandleLayout> hitTestHandle(const LayoutResult& layout, Point point) {
+std::optional<HandleLayout> hitTestHandle(const LayoutResult& layout, Point point, double extraBand) {
+  const double extra = std::isfinite(extraBand) && extraBand > 0.0 ? extraBand : 0.0;
   for (size_t i = layout.areas.size(); i-- > 0;) {
     const AreaLayout& area = layout.areas[i];
     if (!area.bounds.contains(point)) continue;
     for (const HandleLayout& h : layout.handles) {
-      if (h.handle.area == area.id && h.rect.contains(point)) return h;
+      if (h.handle.area != area.id) continue;
+      Rect band = h.rect;
+      if (h.handle.axis == Axis::Row) {
+        band.x -= extra;
+        band.w += 2.0 * extra;
+      } else {
+        band.y -= extra;
+        band.h += 2.0 * extra;
+      }
+      if (band.contains(point)) return h;
     }
     return std::nullopt;  // the topmost area under the pointer owns it
   }
@@ -215,7 +281,7 @@ LayoutResult DockLayout::computeLayout(const Rect& mainRect) const {
     const Rect bounds = sanitiseRect(floating ? area.rect : mainRect);
     result.areas.push_back({area.id, floating, !area.root.has_value(), bounds});
     if (!area.root) continue;
-    LayoutPass pass{config_, result, area.id};
+    LayoutPass pass{config_, panels_, result, area.id};
     Path path;
     layoutNode(pass, *area.root, bounds, path);
   }
