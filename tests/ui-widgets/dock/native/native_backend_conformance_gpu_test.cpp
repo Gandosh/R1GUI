@@ -11,6 +11,10 @@
 //   source): no real mouse or keyboard event is injected, no window outlives the test.
 #include <dwmapi.h>
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
 #include "BackendConformance.h"
 #include "NativeRig.h"
 
@@ -328,6 +332,98 @@ void stacking_follows_the_os() {
   R1_EXPECT(above(ha, hwndOf(rig->window.get())) && above(hc, hwndOf(rig->window.get())), "both stay above their owner");
 }
 
+// Hostile input at the backend's boundary: invalid text, absurd or non-finite numbers, unknown ids. None
+// may crash, throw or leave a window in a state the OS would not show.
+void hostile_inputs() {
+  std::string skip;
+  auto rig = NativeRig::create(skip);
+  NativeFloatingBackend& b = *rig->backend;
+  const dock::Point p = rig->pointInMain();
+  const double inf = std::numeric_limits<double>::infinity();
+  const double nan = std::nan("");
+
+  FloatRequest r = request({p.x - 100, p.y - 60, 300, 200});
+  r.title = std::string("bad \xFF\xFE utf-8 \xC0\xAF and a NUL \0 inside", 34);
+  const FloatCreateResult odd = b.createWindow(r);
+  R1_EXPECT(odd.ok, "a title that is not valid UTF-8 is shown with replacement characters, not refused");
+  R1_EXPECT(odd.ok && b.setTitle(odd.id, std::string(200000, 'x')) && b.setTitle(odd.id, "\xED\xA0\x80 lone surrogate") && b.setTitle(odd.id, ""));
+  for (const dock::Point min : {dock::Point{-5, -5}, dock::Point{nan, 10}, dock::Point{inf, inf}, dock::Point{1e300, 1e300}, dock::Point{0, 0}}) {
+    FloatRequest q = request({p.x, p.y, 200, 150}, min);
+    const FloatCreateResult c = b.createWindow(q);
+    if (c.ok) {
+      const dock::Rect content = *b.contentRect(c.id);
+      R1_EXPECT(finiteRect(content) && content.w >= 1 && content.h >= 1 && content.w < 1e8 && content.h < 1e8, "an absurd minimum size ends in a sane rectangle");
+      b.destroyWindow(c.id);
+    } else {
+      R1_EXPECT(!c.error.empty());
+    }
+  }
+  if (odd.ok) {
+    for (const dock::Rect bad : {dock::Rect{inf, 0, 100, 100}, dock::Rect{0, -inf, 100, 100}, dock::Rect{0, 0, nan, 100}, dock::Rect{0, 0, 100, inf}}) {
+      R1_EXPECT(!b.setContentRect(odd.id, bad), "a non-finite rectangle is refused");
+    }
+    for (const dock::Rect wild : {dock::Rect{-1e300, -1e300, 1e300, 1e300}, dock::Rect{1e300, 1e300, -50, -50}, dock::Rect{-1e7, 1e7, 0, 0}, dock::Rect{3e9, 3e9, 3e9, 3e9}}) {
+      b.setContentRect(odd.id, wild);
+      const dock::Rect now = *b.contentRect(odd.id);
+      R1_EXPECT(finiteRect(now) && now.w >= 64 - 1e-9 && now.w < 1e8 && now.h < 1e8, "a wild rectangle is limited, never stored raw");
+      const platform::Rect outer = b.nativeWindow(odd.id)->windowRect();
+      bool reachable = false;
+      for (const platform::MonitorInfo& m : rig->backend->screenSpace().monitors()) {
+        const int ox = std::min(outer.x + outer.width, m.workArea.x + m.workArea.width) - std::max(outer.x, m.workArea.x);
+        const int oy = std::min(outer.y + outer.height, m.workArea.y + m.workArea.height) - std::max(outer.y, m.workArea.y);
+        // The margin never exceeds the window's own size (a 64 px window cannot show 100 px).
+        reachable = reachable || (ox >= std::min(100, outer.width) && oy >= std::min(100, outer.height));
+      }
+      R1_EXPECT(reachable, "and the window stays reachable on a monitor");
+    }
+    R1_EXPECT(b.topmostWindowAt({nan, nan}, {}) == std::nullopt && b.topmostWindowAt({inf, -inf}, {}) == std::nullopt);
+    R1_EXPECT(std::isnan(b.toWindow(odd.id, {nan, 1}).x) && std::isnan(b.toScreen(odd.id, {1, nan}).y), "NaN in, NaN out");
+  }
+  const FloatId bogus[] = {0xFFFFFFFFu, 0x80000000u, 7777};
+  for (const FloatId id : bogus) {
+    R1_EXPECT(!b.destroyWindow(id) && !b.bringToFront(id) && !b.setVisible(id, false) && !b.content(id) && !b.nativeWindow(id));
+    R1_EXPECT(b.topmostWindowAt(p, std::span<const FloatId>(&id, 1)) == std::optional<FloatId>(kMainWindow), "an excluded id that does not exist excludes nothing");
+  }
+  rig->settle(4);
+}
+
+// Windows are created and destroyed over and over (the dock does it for every floated tab): the number
+// of USER objects of the process must not grow, and nothing may stay parked.
+void create_destroy_cycles() {
+  std::string skip;
+  auto rig = NativeRig::create(skip);
+  NativeFloatingBackend& b = *rig->backend;
+  const dock::Point p = rig->pointInMain();
+  const auto userObjects = [] { return GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS); };
+  const auto gdiObjects = [] { return GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS); };
+  // One warm-up cycle: the first window registers style rows, loads fonts and icons.
+  const FloatCreateResult warm = b.createWindow(request({p.x - 100, p.y - 60, 300, 200}));
+  rig->settle(3);
+  b.destroyWindow(warm.id);
+  rig->settle(3);
+  const DWORD usersBefore = userObjects();
+  const DWORD gdiBefore = gdiObjects();
+  const size_t widgetsBefore = rig->ui->widgetCount();
+  for (int i = 0; i < 40; ++i) {
+    const FloatCreateResult made = b.createWindow(request({p.x - 100 + i, p.y - 60, 300, 200}));
+    R1_EXPECT(made.ok);
+    if (!made.ok) break;
+    rig->settle(2);
+    if (i % 2 == 0) {
+      b.destroyWindow(made.id);
+    } else {
+      DestroyWindow(hwndOf(b.nativeWindow(made.id)));  // the OS destroys every other one
+    }
+    rig->settle(2);
+  }
+  R1_EXPECT(b.windowCount() == 0 && b.parkedCount() == 0, "every window is gone and nothing is parked");
+  R1_EXPECT(userObjects() <= usersBefore + 2, "USER objects of the process do not grow over 40 create/destroy cycles");
+  R1_EXPECT(gdiObjects() <= gdiBefore + 2, "nor GDI objects");
+  R1_EXPECT(rig->ui->widgetCount() == widgetsBefore, "the main context did not grow");
+  std::printf("  40 create/destroy cycles: USER objects %lu -> %lu, GDI objects %lu -> %lu\n", static_cast<unsigned long>(usersBefore), static_cast<unsigned long>(userObjects()),
+              static_cast<unsigned long>(gdiBefore), static_cast<unsigned long>(gdiObjects()));
+}
+
 }  // namespace
 
 int main() try {
@@ -349,6 +445,8 @@ int main() try {
   minimizing_the_main_window();
   unreachable_windows_come_back();
   stacking_follows_the_os();
+  hostile_inputs();
+  create_destroy_cycles();
   return r1test::finish();
 } catch (const std::exception& e) {
   std::fprintf(stderr, "uncaught exception: %s\n", e.what());

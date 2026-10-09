@@ -122,6 +122,7 @@ int main(int argc, char** argv) try {
     d.factory = [id, title = d.title](UiContext& ui, WidgetId parent) { return ui.create<ColorPanel>(parent, id, title).id(); };
     registry.add(std::move(d));
   }
+  rig->ui->destroy(rig->mainBox);  // the rig's placeholder content box: the dock fills the window
   DockHost& host = rig->ui->create<DockHost>(rig->ui->root(), registry, *rig->backend);
   size_t changes = 0;
   host.setOnChanged([&](DockChange) { ++changes; });

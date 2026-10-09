@@ -125,6 +125,28 @@ Manual run: `native_harness_gpu_test.exe --interactive --seconds 120` (R1UI_GPU 
 * **No minimize button**; a floating window minimizes only with the main window (owned).
 * **Popups are clipped to their window** (docs/dev/widgets.md section 11): a menu opened from a small floating window cannot extend outside it. The dock's tab context menu works inside the window.
 * **Escape while the window of a dragged sole tab is hidden** is handled by the application's global key handler, not by the backend.
-* **Snap layouts, real DPI changes, shadows and `WM_DISPLAYCHANGE` with a real monitor change** could not be verified on the machine this was built on (see the evidence in `Goal/evidence/P5_S02.md` for the real-desktop run): both monitors report 100 %, so a scale change between monitors is covered by the pure tests and the platform's own DPI handling only. The DWM shadow comes from the platform's 1 px frame extension; whether it is drawn is the window manager's choice.
+* **Snap layouts, real DPI changes, shadows and `WM_DISPLAYCHANGE` with a real monitor change** could not be verified on the machine this was built on (section 11 lists what the real-desktop run did and did not cover): both monitors report 100 %, so a scale change between monitors is covered by the pure tests and the platform's own DPI handling only. The DWM shadow comes from the platform's 1 px frame extension; whether it is drawn is the window manager's choice.
 * **Owner other than the main window:** `FloatRequest::owner` is accepted but every floating window is owned by the main window.
 * **Pointer sampling polls the OS pointer** every 8 ms while a tab drag runs; there is no hook, so a drag moved faster than the poll is delivered as the sequence of the polls plus the strip's own events (the strip's events carry every movement).
+
+## 11. Real-desktop run (2026-10-10, this machine)
+
+`native_drive.ps1` against `native_harness_gpu_test.exe --interactive` (RTX 4080; real input through `SetCursorPos` and `mouse_event`, results read with `EnumWindows`, `GetWindowRect`, DWM attributes and `PrintWindow`). The machine has **two monitors** (`SM_CMONITORS` = 2): `\.\DISPLAY1` 3440x1440 at 0,0 (primary) and `\.\DISPLAY2` 1920x1080 at 795,1440, **both at 100 % scale**. Result of the final run: 31 checks passed, 0 failed.
+
+| Step | Observed |
+|---|---|
+| Baseline | one visible top-level window of the harness |
+| Tab out of the main window, dropped on empty desktop space | a second top-level window appeared (450x335 outer), style `0x14CF0000`, `WS_EX_TOOLWINDOW` set and `WS_EX_APPWINDOW` clear, `GW_OWNER` = the main window, `DWMWA_WINDOW_CORNER_PREFERENCE` = 2 (`DWMWCP_ROUND`), placed where the ghost was dropped; the model holds Panel 2 in a floating area whose rectangle equals the window's content rectangle |
+| Move by the title bar | the OS move loop ran; the window moved by exactly the pointer's (160, 90); the model followed; the harness drew 188 live steps over the whole run |
+| Resize by the bottom-right corner | 450x335 -> 570x405 for a (120, 70) drag |
+| Tab dragged back onto the second region's strip | the window disappeared (one top-level window left), Panel 2 docked in that strip |
+| Tab from one floating window to another | two floating windows, three top-level windows; after the drop the emptied window was destroyed (one left) and Panels 2 and 5 shared it |
+| Close with the window's X | the window closed, the panels went into the closed-panel memory |
+| Minimize the main window with a floating window open | no visible window of the harness while minimized, both back after the restore |
+| Drag a window to the second monitor | `monitorAt` changed from DISPLAY1 to DISPLAY2, DPI scale 1.00 on both, logical size kept |
+| Close the main window | the harness exited with code 0, no process left |
+
+Before every press the script checks that the point belongs to a harness window (and brings the harness forward once if something else is in front); an earlier run stopped on that check instead of clicking elsewhere.
+
+**Not verified on this machine:** a window crossing monitors of different scale (both are 100 %, so `WM_DPICHANGED` was never delivered; the handler, the swapchain rebuild and the scale report are covered by the platform's own tests and the pure coordinate tests, not by a real scale change), snap layouts (the maximize button reports `HTMAXBUTTON` through the platform, but a snap-layout flyout needs the physical hover and was not exercised), the DWM shadow (requested through the 1 px frame extension; captures from `PrintWindow` do not show it), a real display change (`WM_DISPLAYCHANGE` was simulated with a window message and by calling `onDisplayChanged` after moving a window off every monitor), Alt+F4 with a real keyboard (sent as `SC_CLOSE`), and high-DPI rendering of the title bar.
+
