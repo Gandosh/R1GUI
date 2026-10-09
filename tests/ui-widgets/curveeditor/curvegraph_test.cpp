@@ -888,11 +888,15 @@ void testCullingWithManyKeys() {
                editor.graph().lastDrawnPointCount());
   R1_EXPECT(editor.graph().lastDrawnKeyCount() < 100 && editor.graph().lastDrawnPointCount() < 8 * 800);
   R1_EXPECT(outMs < 500.0);
-  // Selecting a thousand keys, moving them, paints and stays valid.
+  // Selecting every key, moving them all, paints and stays valid.
   editor.graph().setView({0.0, 20.0, -4.0, 4.0});
+  const auto t2 = std::chrono::steady_clock::now();
   editor.graph().selectAll();
   editor.graph().nudgeSelected(0.5, 0.0, "Nudge keys");
-  R1_EXPECT(curve::valid(editor.graph().curves()[0]));
+  const double allMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t2).count();
+  std::fprintf(stdout, "curve editor: select all and nudge 100000 keys took %.1f ms\n", allMs);
+  R1_EXPECT(curve::valid(editor.graph().curves()[0]) && editor.graph().selection().size() == 100000);
+  R1_EXPECT(allMs < 5000.0);  // was quadratic: a lookup by key id per selected key
   paint();
 }
 

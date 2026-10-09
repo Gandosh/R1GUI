@@ -268,9 +268,29 @@ void testFlatten() {
   R1_EXPECT(!p.empty());
 }
 
+// KeyLookup finds keys by id in several curves in O(log n), also with unsorted ids and hostile arguments.
+void testKeyLookup() {
+  Curve a;
+  a.id = 7;
+  for (uint32_t i = 0; i < 1000; ++i) a.keys.push_back(key(1000 - i, i * 0.5, 0.0));  // ids descending
+  Curve b;
+  b.id = 9;
+  b.keys.push_back(key(5, 0.0, 1.0));
+  const std::vector<Curve> curves{a, b};
+  const KeyLookup lookup(curves);
+  R1_EXPECT(lookup.indexOf(7, 1000) == 0 && lookup.indexOf(7, 1) == 999 && lookup.indexOf(7, 500) == 500);
+  R1_EXPECT(lookup.indexOf(9, 5) == 0);
+  R1_EXPECT(lookup.indexOf(7, 0) == npos && lookup.indexOf(7, 1001) == npos && lookup.indexOf(9, 1) == npos);
+  R1_EXPECT(lookup.indexOf(8, 5) == npos && lookup.curve(8) == nullptr && lookup.curve(9) == &curves[1]);
+  for (uint32_t id = 1; id <= 1000; ++id) R1_EXPECT(lookup.indexOf(7, id) == indexOfKey(curves[0], id));
+  const std::vector<Curve> none;
+  R1_EXPECT(KeyLookup(none).indexOf(1, 1) == npos);
+}
+
 }  // namespace
 
 int main() {
+  testKeyLookup();
   testHermiteAnalytic();
   testWeightedBezier();
   testLinearConstantAndEnds();

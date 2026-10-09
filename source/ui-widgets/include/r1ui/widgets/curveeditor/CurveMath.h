@@ -32,6 +32,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "r1ui/widgets/colorpicker/ColorModel.h"
@@ -92,6 +93,27 @@ double clampCoordinate(double v);  // NaN -> 0
 size_t segmentIndex(const Curve& curve, double t);
 // Index of the key with `id`, or npos.
 size_t indexOfKey(const Curve& curve, uint32_t id);
+
+// Id lookups for loops over many keys: one O(n log n) build per curve, then O(log n) per lookup (the
+// plain indexOfKey is a linear scan, which makes "for every selected key" quadratic). The index is a
+// snapshot: it is valid only while the curve's key order and ids do not change.
+class KeyLookup {
+ public:
+  explicit KeyLookup(const std::vector<Curve>& curves) : curves_(curves) {}
+  // The curve with `id`, or nullptr.
+  const Curve* curve(uint32_t id) const;
+  // Index of key `keyId` in curve `curveId`, or npos.
+  size_t indexOf(uint32_t curveId, uint32_t keyId) const;
+
+ private:
+  struct Entry {
+    uint32_t curveId = 0;
+    std::vector<std::pair<uint32_t, uint32_t>> byId;  // (key id, index), sorted by key id
+  };
+  const Entry* entryFor(uint32_t curveId) const;
+  const std::vector<Curve>& curves_;
+  mutable std::vector<Entry> entries_;
+};
 
 struct Slopes {
   double in = 0.0;

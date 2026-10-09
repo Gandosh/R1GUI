@@ -302,13 +302,12 @@ void CurveGraph::paintIndicators(PaintContext& ctx, const curve::Mapping& m) {
     bool any = false;
     double lo = 0.0;
     double hi = 0.0;
+    const curve::KeyLookup lookup(curves_);
     for (const curve::Selected& s : selection_.items()) {
       if (s.part != Part::Key) continue;
-      const Curve* c = curve::findCurve(curves_, s.curve);
-      if (c == nullptr) continue;
-      const size_t i = curve::indexOfKey(*c, s.key);
+      const size_t i = lookup.indexOf(s.curve, s.key);
       if (i == curve::npos) continue;
-      const double v = c->keys[i].value;
+      const double v = lookup.curve(s.curve)->keys[i].value;
       lo = any ? std::min(lo, v) : v;
       hi = any ? std::max(hi, v) : v;
       any = true;

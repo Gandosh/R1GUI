@@ -155,7 +155,12 @@ void testTranslate() {
   const auto t0 = std::chrono::steady_clock::now();
   for (int i = 0; i < 200; ++i) translateKeys(big, {50000}, 0.001, 0.0);
   const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
-  R1_EXPECT(valid(big) && ms < 2000.0);
+#ifdef NDEBUG
+  constexpr double kSlack = 1.0;
+#else
+  constexpr double kSlack = 40.0;  // unoptimised code with checked iterators is far slower; the bound only guards the complexity
+#endif
+  R1_EXPECT(valid(big) && ms < 2000.0 * kSlack);
   std::fprintf(stdout, "curve ops: 200 single key drags over 100000 keys took %.1f ms\n", ms);
   // Moving 1000 keys across the curve (the sort path) stays valid.
   std::vector<uint32_t> many;

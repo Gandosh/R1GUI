@@ -107,12 +107,8 @@ bool Selection::anyPartSelected(uint32_t curve, uint32_t key) const {
 }
 
 void Selection::prune(const std::vector<Curve>& curves) {
-  items_.erase(std::remove_if(items_.begin(), items_.end(),
-                              [&](const Selected& s) {
-                                const Curve* c = findCurve(curves, s.curve);
-                                return c == nullptr || indexOfKey(*c, s.key) == npos;
-                              }),
-               items_.end());
+  const KeyLookup lookup(curves);
+  items_.erase(std::remove_if(items_.begin(), items_.end(), [&](const Selected& s) { return lookup.indexOf(s.curve, s.key) == npos; }), items_.end());
 }
 
 // ---- lookup -----------------------------------------------------------------------------------
@@ -286,27 +282,36 @@ void makeIndependent(Curve& c, size_t i) {
   k.mode = TangentMode::Independent;
 }
 
+// Calls `fn(index, part)` for every selected part whose key exists in `c`. The parts are sorted by key id
+// here, so one pass over the keys with a binary search replaces a linear lookup per part.
+template <typename Fn>
+void forEachSelectedKey(const Curve& c, const std::vector<Selected>& partsIn, Fn&& fn) {
+  std::vector<Selected> parts = partsIn;
+  std::sort(parts.begin(), parts.end(), [](const Selected& a, const Selected& b) { return a.key != b.key ? a.key < b.key : a.part < b.part; });
+  for (size_t i = 0; i < c.keys.size(); ++i) {
+    const uint32_t id = c.keys[i].id;
+    auto it = std::lower_bound(parts.begin(), parts.end(), id, [](const Selected& a, uint32_t key) { return a.key < key; });
+    for (; it != parts.end() && it->key == id; ++it) fn(i, *it);
+  }
+}
+
 }  // namespace
 
 size_t flattenTangents(Curve& c, const std::vector<Selected>& parts) {
   size_t changed = 0;
-  for (const Selected& s : parts) {
-    const size_t i = indexOfKey(c, s.key);
-    if (i == npos) continue;
+  forEachSelectedKey(c, parts, [&](size_t i, const Selected& s) {
     makeIndependent(c, i);
     Key& k = c.keys[i];
     if (s.part != Part::Out) k.inSlope = 0.0;
     if (s.part != Part::In) k.outSlope = 0.0;
     ++changed;
-  }
+  });
   return changed;
 }
 
 size_t straightenTangents(Curve& c, const std::vector<Selected>& parts) {
   size_t changed = 0;
-  for (const Selected& s : parts) {
-    const size_t i = indexOfKey(c, s.key);
-    if (i == npos) continue;
+  forEachSelectedKey(c, parts, [&](size_t i, const Selected& s) {
     makeIndependent(c, i);
     Key& k = c.keys[i];
     if (s.part != Part::In && i + 1 < c.keys.size()) {
@@ -318,7 +323,7 @@ size_t straightenTangents(Curve& c, const std::vector<Selected>& parts) {
       k.inSlope = std::clamp((k.value - p.value) / (k.time - p.time), -kMaxSlope, kMaxSlope);
     }
     ++changed;
-  }
+  });
   return changed;
 }
 

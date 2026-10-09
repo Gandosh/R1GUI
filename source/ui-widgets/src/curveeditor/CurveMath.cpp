@@ -150,6 +150,35 @@ size_t indexOfKey(const Curve& c, uint32_t id) {
   return npos;
 }
 
+const Curve* KeyLookup::curve(uint32_t id) const {
+  for (const Curve& c : curves_) {
+    if (c.id == id) return &c;
+  }
+  return nullptr;
+}
+
+const KeyLookup::Entry* KeyLookup::entryFor(uint32_t curveId) const {
+  for (const Entry& e : entries_) {
+    if (e.curveId == curveId) return &e;
+  }
+  const Curve* c = curve(curveId);
+  if (c == nullptr) return nullptr;
+  Entry entry;
+  entry.curveId = curveId;
+  entry.byId.reserve(c->keys.size());
+  for (size_t i = 0; i < c->keys.size(); ++i) entry.byId.emplace_back(c->keys[i].id, static_cast<uint32_t>(i));
+  std::sort(entry.byId.begin(), entry.byId.end());
+  entries_.push_back(std::move(entry));
+  return &entries_.back();
+}
+
+size_t KeyLookup::indexOf(uint32_t curveId, uint32_t keyId) const {
+  const Entry* e = entryFor(curveId);
+  if (e == nullptr) return npos;
+  const auto it = std::lower_bound(e->byId.begin(), e->byId.end(), std::make_pair(keyId, uint32_t{0}));
+  return it != e->byId.end() && it->first == keyId ? it->second : npos;
+}
+
 Slopes effectiveSlopes(const Curve& c, size_t i) {
   if (i >= c.keys.size()) return {};
   const Key& k = c.keys[i];

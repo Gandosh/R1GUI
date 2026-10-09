@@ -17,6 +17,7 @@
 
 #include "TestSupport.h"
 #include "r1ui/render/Painter.h"
+#include "r1ui/widgets/thumbnailgrid/GalleryEditors.h"
 #include "r1ui/widgets/thumbnailgrid/ThumbnailGrid.h"
 
 namespace {
@@ -900,9 +901,24 @@ void testHistoryHooks() {
   R1_EXPECT(f.grid->history().canBack() && *f.grid->history().back() == 1);
 }
 
+// The gallery entry builds all four editors, lays them out and paints them without throwing.
+void testGallery() {
+  r1test::TestUi t(1400, 900);
+  const size_t before = t.ui.widgetCount();
+  buildGalleryEditors(t.ui, t.ui.root());
+  R1_EXPECT(t.ui.widgetCount() > before + 4);
+  t.layout();
+  r1ui::render::Painter painter;
+  painter.begin(1400, 900);
+  t.ui.paint(painter);
+  t.ui.finishPaint();
+  painter.end();
+}
+
 }  // namespace
 
 int main() {
+  testGallery();
   testZoomByStops();
   testZoomKeepsFirstVisible();
   testVirtualisationWithManyItems();

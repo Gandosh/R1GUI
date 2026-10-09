@@ -144,12 +144,11 @@ struct Bounds {
 
 void CurveGraph::frameSelected() {
   Bounds b;
+  const curve::KeyLookup lookup(curves_);
   for (const Selected& s : selection_.items()) {
     if (s.part != Part::Key) continue;
-    const Curve* c = curve::findCurve(curves_, s.curve);
-    if (c == nullptr) continue;
-    const size_t i = curve::indexOfKey(*c, s.key);
-    if (i != curve::npos) b.add(c->keys[i].time, c->keys[i].value);
+    const size_t i = lookup.indexOf(s.curve, s.key);
+    if (i != curve::npos) b.add(lookup.curve(s.curve)->keys[i].time, lookup.curve(s.curve)->keys[i].value);
   }
   if (!b.any) {
     frameAll();
@@ -277,6 +276,7 @@ SelectionInfo CurveGraph::selectionInfo() const {
   SelectionInfo info;
   std::vector<uint32_t> curveIds;
   bool first = true;
+  const curve::KeyLookup lookup(curves_);
   const bool keysSelected = selection_.hasKeys();
   uint32_t lastOwner = 0;
   uint32_t lastOwnerCurve = 0;
@@ -284,10 +284,9 @@ SelectionInfo CurveGraph::selectionInfo() const {
     if (keysSelected ? s.part != Part::Key : (s.curve == lastOwnerCurve && s.key == lastOwner)) continue;
     lastOwnerCurve = s.curve;
     lastOwner = s.key;
-    const Curve* c = curve::findCurve(curves_, s.curve);
-    if (c == nullptr) continue;
-    const size_t i = curve::indexOfKey(*c, s.key);
+    const size_t i = lookup.indexOf(s.curve, s.key);
     if (i == curve::npos) continue;
+    const Curve* c = lookup.curve(s.curve);
     const Key& k = c->keys[i];
     if (std::find(curveIds.begin(), curveIds.end(), c->id) == curveIds.end()) curveIds.push_back(c->id);
     ++info.keyCount;
@@ -764,10 +763,9 @@ void CurveGraph::setSelectedValue(double value) {
   if (!std::isfinite(value)) return;
   editSelectedKeys("Set key value", [&](Curve& c, const std::vector<uint32_t>& ids) {
     bool any = false;
-    for (const uint32_t id : ids) {
-      const size_t i = curve::indexOfKey(c, id);
-      if (i == curve::npos) continue;
-      c.keys[i].value = curve::clampCoordinate(value);
+    for (curve::Key& k : c.keys) {
+      if (!std::binary_search(ids.begin(), ids.end(), k.id)) continue;  // the ids come sorted from the selection
+      k.value = curve::clampCoordinate(value);
       any = true;
     }
     return any;
