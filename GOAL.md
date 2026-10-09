@@ -26,7 +26,7 @@ Evidence files are created when a slice is worked: `Goal/evidence/P<phase>_S<nn>
 - [x] 0.14 [Local clean-build check replaces hosted CI; GitHub is storage only (owner, 2026-10-09)](Goal/evidence/P0_S14.md)
 - [x] 0.15 [Preview: minimal Vulkan window opens, resizes and closes cleanly](Goal/evidence/P0_S15.md)
 
-**P0 owner gate: PENDING** — [phase close record](Goal/evidence/P0_close.md)
+**P0 owner gate: ACCEPTED** (2026-10-09) — [phase close record](Goal/evidence/P0_close.md)
 
 ## Phase 1: Visual spec extraction
 
@@ -44,20 +44,20 @@ Evidence files are created when a slice is worked: `Goal/evidence/P<phase>_S<nn>
 
 All specs are behavior-only, with a provenance-log entry per spec.
 
-- [ ] 2.1 [Focus, keyboard navigation, shortcut routing and conflicts](Goal/evidence/P2_S01.md)
-- [ ] 2.2 [Docking: tabs, splits, drag previews, drop targets](Goal/evidence/P2_S02.md)
-- [ ] 2.3 [Floating panels and dragging to a second monitor (multi-window, DPI, monitor changes)](Goal/evidence/P2_S03.md)
-- [ ] 2.4 [Saved, reloadable and switchable layouts](Goal/evidence/P2_S04.md)
-- [ ] 2.5 [Panel resize and adaptive behavior](Goal/evidence/P2_S05.md)
-- [ ] 2.6 [User-customizable menus and toolbars: create, resize, place, remove buttons](Goal/evidence/P2_S06.md)
-- [ ] 2.7 [Commands: one registration drives menu item, toolbar button and shortcut](Goal/evidence/P2_S07.md)
-- [ ] 2.8 [Drag and drop, selection, multi-selection](Goal/evidence/P2_S08.md)
-- [ ] 2.9 [Property binding, live-updating panels, mixed values, undo grouping](Goal/evidence/P2_S09.md)
-- [ ] 2.10 [Tooltips, popups, context menus, modal behavior](Goal/evidence/P2_S10.md)
-- [ ] 2.11 [Curve editor behavior](Goal/evidence/P2_S11.md)
-- [ ] 2.12 [Asset browser and thumbnail behavior](Goal/evidence/P2_S12.md)
-- [ ] 2.13 [Unreal reference reads via separate reader session (only after 0.1)](Goal/evidence/P2_S13.md)
-- [ ] 2.14 [Preview: click-through of the interaction specs](Goal/evidence/P2_S14.md)
+- [x] 2.1 [Focus, keyboard navigation, shortcut routing and conflicts](Goal/evidence/P2_S01.md)
+- [x] 2.2 [Docking: tabs, splits, drag previews, drop targets](Goal/evidence/P2_S02.md)
+- [x] 2.3 [Floating panels and dragging to a second monitor (multi-window, DPI, monitor changes)](Goal/evidence/P2_S03.md)
+- [x] 2.4 [Saved, reloadable and switchable layouts](Goal/evidence/P2_S04.md)
+- [x] 2.5 [Panel resize and adaptive behavior](Goal/evidence/P2_S05.md)
+- [x] 2.6 [User-customizable menus and toolbars: create, resize, place, remove buttons](Goal/evidence/P2_S06.md)
+- [x] 2.7 [Commands: one registration drives menu item, toolbar button and shortcut](Goal/evidence/P2_S07.md)
+- [x] 2.8 [Drag and drop, selection, multi-selection](Goal/evidence/P2_S08.md)
+- [x] 2.9 [Property binding, live-updating panels, mixed values, undo grouping](Goal/evidence/P2_S09.md)
+- [x] 2.10 [Tooltips, popups, context menus, modal behavior](Goal/evidence/P2_S10.md)
+- [x] 2.11 [Curve editor behavior](Goal/evidence/P2_S11.md)
+- [x] 2.12 [Asset browser and thumbnail behavior](Goal/evidence/P2_S12.md)
+- [x] 2.13 [Unreal reference reads via separate reader session (only after 0.1)](Goal/evidence/P2_S13.md)
+- [x] 2.14 [Preview: click-through of the interaction specs](Goal/evidence/P2_S14.md)
 
 **P2 owner gate: PENDING** — [phase close record](Goal/evidence/P2_close.md)
 

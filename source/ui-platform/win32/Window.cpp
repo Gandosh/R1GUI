@@ -1,6 +1,7 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the Win32 implementation of r1ui::platform::Window (class registration, window proc,
-//   per-monitor-v2 DPI awareness, size/mouse/key state, bounded key and click queues).
+//   per-monitor-v2 DPI awareness, size/mouse/key state, bounded key, click and pointer-event
+//   queues, pointer capture while a button is held, cursor shape).
 // Why: first backend for Windows-first delivery; behind the neutral Window.h interface.
 // Callers: any module via Window.h. Calls: user32/kernel32 only.
 // Lifetime: Impl owns the HWND and destroys it in the Window destructor; the window proc
@@ -47,12 +48,37 @@ struct Window::Impl {
   float mouseY = 0.0f;
   std::vector<KeyEvent> keyQueue;
   std::vector<MouseClick> clickQueue;
+  std::vector<MouseEvent> mouseQueue;
+  CursorShape cursor = CursorShape::Arrow;
+  int buttonsDown = 0;  // buttons currently held; capture lasts until it reaches zero
 
   // Appends to a queue, dropping the oldest entry once the bound is reached.
   template <class T>
   static void push(std::vector<T>& queue, const T& item) {
     if (queue.size() >= kMaxQueuedEvents) queue.erase(queue.begin());
     queue.push_back(item);
+  }
+
+  // Records a pointer event; a move replaces a directly preceding move.
+  void pushMouse(MouseEvent::Type type, MouseButton button, LPARAM lp) {
+    const MouseEvent event{type, button, static_cast<float>(GET_X_LPARAM(lp)), static_cast<float>(GET_Y_LPARAM(lp))};
+    mouseX = event.x;
+    mouseY = event.y;
+    if (type == MouseEvent::Type::Move && !mouseQueue.empty() && mouseQueue.back().type == MouseEvent::Type::Move) {
+      mouseQueue.back() = event;
+      return;
+    }
+    push(mouseQueue, event);
+  }
+
+  void buttonChange(MouseButton button, bool down, LPARAM lp) {
+    if (down) {
+      if (buttonsDown++ == 0) SetCapture(this->hwnd);
+    } else if (buttonsDown > 0 && --buttonsDown == 0) {
+      ReleaseCapture();
+    }
+    pushMouse(down ? MouseEvent::Type::Down : MouseEvent::Type::Up, button, lp);
+    if (down && button == MouseButton::Left) push(clickQueue, MouseClick{mouseX, mouseY});
   }
 
   static LRESULT CALLBACK proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
@@ -65,14 +91,29 @@ struct Window::Impl {
           self->resized = true;
           return 0;
         case WM_MOUSEMOVE:
-          self->mouseX = static_cast<float>(GET_X_LPARAM(lp));
-          self->mouseY = static_cast<float>(GET_Y_LPARAM(lp));
+          self->pushMouse(MouseEvent::Type::Move, MouseButton::Left, lp);
           return 0;
-        case WM_LBUTTONDOWN:
-          self->mouseX = static_cast<float>(GET_X_LPARAM(lp));
-          self->mouseY = static_cast<float>(GET_Y_LPARAM(lp));
-          push(self->clickQueue, MouseClick{self->mouseX, self->mouseY});
+        case WM_LBUTTONDOWN: self->buttonChange(MouseButton::Left, true, lp); return 0;
+        case WM_LBUTTONUP: self->buttonChange(MouseButton::Left, false, lp); return 0;
+        case WM_MBUTTONDOWN: self->buttonChange(MouseButton::Middle, true, lp); return 0;
+        case WM_MBUTTONUP: self->buttonChange(MouseButton::Middle, false, lp); return 0;
+        case WM_RBUTTONDOWN: self->buttonChange(MouseButton::Right, true, lp); return 0;
+        case WM_RBUTTONUP: self->buttonChange(MouseButton::Right, false, lp); return 0;
+        case WM_CAPTURECHANGED:
+          if (self->buttonsDown > 0) {  // capture taken by the OS while buttons were held
+            self->buttonsDown = 0;
+            push(self->mouseQueue, MouseEvent{MouseEvent::Type::CaptureLost, MouseButton::Left, self->mouseX, self->mouseY});
+          }
           return 0;
+        case WM_SETCURSOR:
+          if (LOWORD(lp) == HTCLIENT) {
+            const wchar_t* id = self->cursor == CursorShape::ResizeHorizontal ? IDC_SIZEWE
+                                : self->cursor == CursorShape::ResizeVertical ? IDC_SIZENS
+                                                                              : IDC_ARROW;
+            SetCursor(LoadCursorW(nullptr, id));
+            return TRUE;
+          }
+          break;
         case WM_KEYDOWN:
           if (wp == VK_ESCAPE) self->escape = true;
           if (wp <= 0xFF) push(self->keyQueue, KeyEvent{static_cast<uint32_t>(wp)});
@@ -146,6 +187,8 @@ float Window::mouseY() const { return impl_->mouseY; }
 bool Window::escapePressed() const { return impl_->escape; }
 std::vector<KeyEvent> Window::takeKeyEvents() { return std::exchange(impl_->keyQueue, {}); }
 std::vector<MouseClick> Window::takeMouseClicks() { return std::exchange(impl_->clickQueue, {}); }
+std::vector<MouseEvent> Window::takeMouseEvents() { return std::exchange(impl_->mouseQueue, {}); }
+void Window::setCursor(CursorShape shape) { impl_->cursor = shape; }
 void Window::setTitle(const std::string& utf8Title) {
   SetWindowTextW(impl_->hwnd, widen(utf8Title).c_str());
 }

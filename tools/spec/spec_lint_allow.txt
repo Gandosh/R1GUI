@@ -1,0 +1,6 @@
+# allowed ordinary UI vocabulary that looks like an identifier
+OpenPencil
+macOS
+iPhone
+DirectX
+GitHub

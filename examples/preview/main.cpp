@@ -1,8 +1,9 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: the R1GUI interactive preview entry point. Phase 1 content: a viewer with two modes,
-//   (1) design-token colour swatches for the dark/light theme and (2) the reference screenshots.
-//   Tab switches mode, T toggles dark/light, Left/Right (or clicking the window halves) step
-//   through screenshots, Esc or the close button exits.
+// Owns: the R1GUI interactive preview entry point: a viewer with three modes, (1) design-token
+//   colour swatches for the dark/light theme, (2) the reference screenshots and (3) the docking
+//   sandbox (DockSandbox.h). Tab cycles the modes, T toggles dark/light, Left/Right (or clicking
+//   the window halves) step through screenshots, Esc (outside an active sandbox tab drag) or
+//   the close button exits.
 // Why: owner requirement that every phase ends with something launchable to interact with; built
 //   from the real modules (ui-theme tokens, ui-platform window and input, ui-render drawing).
 // Callers: the OS. The renderer frees the displayed image when it is destroyed. Calls: r1ui::theme::Tokens, r1ui::platform::Window, r1ui::render::Renderer.
@@ -20,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "DockSandbox.h"
 #include "RawImage.h"
 #include "r1ui/core/CheckedCast.h"
 #include "r1ui/platform/Window.h"
@@ -39,7 +41,7 @@ constexpr int kSwatch = 48;
 constexpr int kGap = 8;
 constexpr int kMargin = 24;
 
-enum class Mode { Swatches, Screens };
+enum class Mode { Swatches, Screens, Sandbox };
 
 fs::path executableDir() {
   std::wstring buffer(32768, L'\0');
@@ -74,8 +76,9 @@ r1ui::render::Rgba8 flatten(const Color& color, const Color& background) {
 class Viewer {
  public:
   Viewer(Window& window, r1ui::render::Renderer& renderer, r1ui::theme::Tokens tokens,
-         const fs::path& referenceDir)
-      : window_(window), renderer_(renderer), tokens_(std::move(tokens)) {
+         const fs::path& referenceDir, fs::path layoutFile)
+      : window_(window), renderer_(renderer), tokens_(std::move(tokens)),
+        sandbox_(window, tokens_, layoutFile) {
     for (ThemeId theme : {ThemeId::Dark, ThemeId::Light}) {
       screens_[static_cast<size_t>(theme)] = listScreens(referenceDir, theme);
       if (screens_[static_cast<size_t>(theme)].empty()) {
@@ -89,6 +92,8 @@ class Viewer {
   Viewer(const Viewer&) = delete;
   Viewer& operator=(const Viewer&) = delete;
 
+  bool quitRequested() const { return quit_; }
+
   // One iteration: apply input, then draw the current mode.
   void frame() {
     handleInput();
@@ -98,6 +103,8 @@ class Viewer {
     content.clear = {canvas.r / 255.0f, canvas.g / 255.0f, canvas.b / 255.0f};
     if (mode_ == Mode::Swatches) {
       drawSwatches(content, canvas);
+    } else if (mode_ == Mode::Sandbox) {
+      sandbox_.draw(content, theme_);
     } else {
       content.image = image_;
     }
@@ -112,12 +119,20 @@ class Viewer {
     namespace keys = r1ui::platform::keys;
     for (const auto& event : window_.takeKeyEvents()) {
       switch (event.virtualKey) {
-        case keys::kTab: mode_ = mode_ == Mode::Swatches ? Mode::Screens : Mode::Swatches; break;
+        case keys::kTab: mode_ = mode_ == Mode::Swatches ? Mode::Screens : mode_ == Mode::Screens ? Mode::Sandbox : Mode::Swatches; break;
+        case keys::kEscape:
+          if (!(mode_ == Mode::Sandbox && sandbox_.onKey(event.virtualKey))) quit_ = true;
+          break;
         case keys::kT: theme_ = theme_ == ThemeId::Dark ? ThemeId::Light : ThemeId::Dark; break;
         case keys::kLeft: if (mode_ == Mode::Screens) step(-1); break;
         case keys::kRight: if (mode_ == Mode::Screens) step(+1); break;
-        default: break;
+        default:
+          if (mode_ == Mode::Sandbox) sandbox_.onKey(event.virtualKey);
+          break;
       }
+    }
+    for (const auto& event : window_.takeMouseEvents()) {
+      if (mode_ == Mode::Sandbox) sandbox_.onMouse(event);
     }
     for (const auto& click : window_.takeMouseClicks()) {
       if (mode_ == Mode::Screens) step(click.x < static_cast<float>(window_.clientWidth()) / 2 ? -1 : +1);
@@ -184,6 +199,8 @@ class Viewer {
       } else {
         title = std::string("R1GUI Preview - tokens (") + theme + ")  Tab: screens, T: theme";
       }
+    } else if (mode_ == Mode::Sandbox) {
+      title = sandbox_.title();
     } else {
       title = std::string(theme) + " " + screens()[index_].stem().string() + " (" +
               std::to_string(index_ + 1) + "/" + std::to_string(screens().size()) + ")";
@@ -197,6 +214,8 @@ class Viewer {
   Window& window_;
   r1ui::render::Renderer& renderer_;
   r1ui::theme::Tokens tokens_;
+  DockSandbox sandbox_;
+  bool quit_ = false;
   std::vector<fs::path> screens_[2];
   Mode mode_ = Mode::Swatches;
   ThemeId theme_ = ThemeId::Dark;
@@ -218,11 +237,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
       throw std::runtime_error("Design tokens are missing or invalid:\n" + tokens.error +
                                "\n\nRebuild the r1gui-preview target to copy assets next to the executable.");
     }
-    Window window({.title = "R1GUI Preview - Phase 1", .width = 1280, .height = 720});
+    Window window({.title = "R1GUI Preview", .width = 1280, .height = 720});
     r1ui::render::Renderer renderer(window);
-    Viewer viewer(window, renderer, std::move(*tokens.tokens), exeDir / "reference");
+    Viewer viewer(window, renderer, std::move(*tokens.tokens), exeDir / "reference", exeDir / "layout.json");
 
-    while (window.pumpEvents() && !window.escapePressed()) {
+    while (window.pumpEvents() && !viewer.quitRequested()) {
       window.consumeResized();  // the renderer compares sizes itself; this just clears the flag
       viewer.frame();
       if (window.clientWidth() == 0) Sleep(16);  // minimized: avoid spinning

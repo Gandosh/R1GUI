@@ -5,5 +5,7 @@ if(Python3_FOUND)
            COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/imgdiff.py --selftest)
   add_test(NAME spec.assets_consistency
            COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/assets_check.py)
-  set_tests_properties(spec.imgdiff_selftest spec.assets_consistency PROPERTIES LABELS "fast")
+  add_test(NAME spec.interaction_lint
+           COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/spec_lint.py)
+  set_tests_properties(spec.imgdiff_selftest spec.assets_consistency spec.interaction_lint PROPERTIES LABELS "fast")
 endif()

@@ -6,8 +6,8 @@ if(NOT TARGET r1ui::render)
   return()
 endif()
 
-add_executable(r1gui-preview WIN32 main.cpp RawImage.cpp)
-target_link_libraries(r1gui-preview PRIVATE r1ui::platform r1ui::render r1ui::theme r1ui::core r1ui_options)
+add_executable(r1gui-preview WIN32 main.cpp RawImage.cpp DockSandbox.cpp)
+target_link_libraries(r1gui-preview PRIVATE r1ui::platform r1ui::render r1ui::theme r1ui::dock r1ui::core r1ui_options)
 
 set(PREVIEW_OUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set(PREVIEW_TOKENS_SRC ${CMAKE_SOURCE_DIR}/assets/theme/tokens.json)

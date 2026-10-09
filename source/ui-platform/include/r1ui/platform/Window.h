@@ -22,6 +22,9 @@ inline constexpr uint32_t kEscape = 0x1B;
 inline constexpr uint32_t kLeft = 0x25;
 inline constexpr uint32_t kRight = 0x27;
 inline constexpr uint32_t kT = 0x54;
+inline constexpr uint32_t kL = 0x4C;
+inline constexpr uint32_t kR = 0x52;
+inline constexpr uint32_t kS = 0x53;
 }  // namespace keys
 
 struct KeyEvent {
@@ -32,6 +35,25 @@ struct MouseClick {
   float x = 0.0f;  // client-space physical pixels at the time of the left-button press
   float y = 0.0f;
 };
+
+enum class MouseButton { Left, Middle, Right };
+
+// One pointer event in arrival order. While any button is held the window captures the pointer,
+// so Move and Up keep arriving (with coordinates outside the client area) after it leaves.
+struct MouseEvent {
+  enum class Type {
+    Down,
+    Up,
+    Move,
+    CaptureLost  // the OS took the capture away (focus loss): treat any drag as cancelled
+  };
+  Type type = Type::Move;
+  MouseButton button = MouseButton::Left;  // Down/Up only
+  float x = 0.0f;  // client-space physical pixels; negative or beyond the size while captured
+  float y = 0.0f;
+};
+
+enum class CursorShape { Arrow, ResizeHorizontal, ResizeVertical };
 
 struct WindowDesc {
   std::string title = "R1GUI";  // UTF-8
@@ -68,6 +90,12 @@ class Window {
   // holds at most kMaxQueuedEvents; the oldest events are dropped beyond that.
   std::vector<KeyEvent> takeKeyEvents();
   std::vector<MouseClick> takeMouseClicks();
+  // Hands over and clears the pointer events (button down/up, moves, capture loss), oldest
+  // first, bounded like the other queues; consecutive moves are coalesced into the latest.
+  // Independent of takeMouseClicks: a left press appears in both queues.
+  std::vector<MouseEvent> takeMouseEvents();
+  // Cursor shown over the client area until changed again.
+  void setCursor(CursorShape shape);
   void setTitle(const std::string& utf8Title);
   NativeHandle nativeHandle() const;
 
