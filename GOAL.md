@@ -63,18 +63,18 @@ All specs are behavior-only, with a provenance-log entry per spec.
 
 ## Phase 3: Core toolkit
 
-- [ ] 3.1 [ui-platform: Win32 window, input, clipboard, cursors, DPI; borderless windows with our own title bar (owner, 2026-10-09)](Goal/evidence/P3_S01.md)
-- [ ] 3.2 [ui-render: Vulkan device, swapchain per window, frame loop](Goal/evidence/P3_S02.md)
-- [ ] 3.3 [ui-render: 2D batcher (rects, rounded rects, borders, shadows, clipping)](Goal/evidence/P3_S03.md)
-- [ ] 3.4 [ui-text: font loading, shaping, glyph atlas](Goal/evidence/P3_S04.md)
-- [ ] 3.5 [ui-text: single-line editing](Goal/evidence/P3_S05.md)
-- [ ] 3.6 [ui-core: retained widget tree with generation-checked handles](Goal/evidence/P3_S06.md)
-- [ ] 3.7 [ui-core: flexbox-style layout (Yoga evaluation vs own)](Goal/evidence/P3_S07.md)
-- [ ] 3.8 [ui-core: event routing, hit testing, focus, pointer capture](Goal/evidence/P3_S08.md)
-- [ ] 3.9 [ui-core: invalidation, redraw only what changed](Goal/evidence/P3_S09.md)
-- [ ] 3.10 [ui-theme: tokens.json loader and style resolution](Goal/evidence/P3_S10.md)
-- [ ] 3.11 [Frame-time, idle CPU and memory baseline recorded](Goal/evidence/P3_S11.md)
-- [ ] 3.12 [Preview: themed window with a panel of static widgets](Goal/evidence/P3_S12.md)
+- [x] 3.1 [ui-platform: Win32 window, input, clipboard, cursors, DPI; borderless windows with our own title bar (owner, 2026-10-09)](Goal/evidence/P3_S01.md)
+- [x] 3.2 [ui-render: Vulkan device, swapchain per window, frame loop](Goal/evidence/P3_S02.md)
+- [x] 3.3 [ui-render: 2D batcher (rects, rounded rects, borders, shadows, clipping)](Goal/evidence/P3_S03.md)
+- [x] 3.4 [ui-text: font loading, shaping, glyph atlas](Goal/evidence/P3_S04.md)
+- [x] 3.5 [ui-text: single-line editing](Goal/evidence/P3_S05.md)
+- [x] 3.6 [ui-core: retained widget tree with generation-checked handles](Goal/evidence/P3_S06.md)
+- [x] 3.7 [ui-core: flexbox-style layout (Yoga evaluation vs own)](Goal/evidence/P3_S07.md)
+- [x] 3.8 [ui-core: event routing, hit testing, focus, pointer capture](Goal/evidence/P3_S08.md)
+- [x] 3.9 [ui-core: invalidation, redraw only what changed](Goal/evidence/P3_S09.md)
+- [x] 3.10 [ui-theme: tokens.json loader and style resolution](Goal/evidence/P3_S10.md)
+- [x] 3.11 [Frame-time, idle CPU and memory baseline recorded](Goal/evidence/P3_S11.md)
+- [x] 3.12 [Preview: themed window with a panel of static widgets](Goal/evidence/P3_S12.md)
 
 **P3 owner gate: PENDING** — [phase close record](Goal/evidence/P3_close.md)
 

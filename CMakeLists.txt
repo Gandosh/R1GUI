@@ -16,6 +16,9 @@ add_library(r1ui_options INTERFACE)
 target_compile_definitions(r1ui_options INTERFACE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
 if(MSVC)
   target_compile_options(r1ui_options INTERFACE /W4 /permissive- /utf-8 /Zc:__cplusplus)
+  # The widget tree allows nesting to 512 levels and layout recurses per level; Debug frames are large, so
+  # executables (tests and apps) reserve an 8 MiB main-thread stack instead of the 1 MiB default.
+  target_link_options(r1ui_options INTERFACE /STACK:8388608)
   if(R1UI_WARNINGS_AS_ERRORS)
     target_compile_options(r1ui_options INTERFACE /WX)
   endif()
