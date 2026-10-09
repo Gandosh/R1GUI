@@ -1,6 +1,6 @@
 # P4 group g3: section, scroll, splitter, tabbar, toolbar, tree (slices 4.6, 4.7, 4.10, 4.11)
 
-Date: 2026-10-09. Branch `worktree-agent-ab52c33c1c5fbed04`, builds `build/p4-g3` (dev) and `build/p4-g3d` (debug, validation layers on), GPU `RTX 3090`.
+Date: 2026-10-09. worktree branch, builds `build/p4-g3` (dev) and `build/p4-g3d` (debug, validation layers on), GPU `RTX 3090`.
 
 ## What was built
 

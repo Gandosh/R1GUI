@@ -1,6 +1,6 @@
 # P4 group g4: menu, popover, tooltip, dialog, toast
 
-Worktree branch `worktree-agent-adcebcff211032c4f` (fast-forwarded to main 05cb725 first: the worktree had been cut from an older commit without the widget foundation). Machine: RTX 3090, `R1UI_GPU="RTX 3090"`.
+Worktree worktree branch (fast-forwarded to main 05cb725 first: the worktree had been cut from an older commit without the widget foundation). Machine: RTX 3090, `R1UI_GPU="RTX 3090"`.
 
 ## What was built
 
