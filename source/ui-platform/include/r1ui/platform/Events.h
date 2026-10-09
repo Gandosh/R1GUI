@@ -39,7 +39,8 @@ enum class EventType : uint8_t {
   Resized,        // rect = {0, 0, client width, client height}; 0x0 when minimized
   Moved,          // rect = outer window rectangle in screen physical pixels
   DpiChanged,     // dpiScale = new scale, rect = the suggested rectangle already applied
-  CloseRequested  // the user or OS asked the window to close
+  CloseRequested, // the user or OS asked the window to close
+  DisplayChanged  // monitors were added, removed or rearranged, or their resolution changed
 };
 
 struct Event {
@@ -78,6 +79,7 @@ inline int eventRank(const Event& e) {
     case EventType::CaptureLost:
     case EventType::Resized:
     case EventType::DpiChanged:
+    case EventType::DisplayChanged:
     case EventType::CloseRequested: return 2;
   }
   return 1;

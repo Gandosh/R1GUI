@@ -12,6 +12,7 @@
 
 #include "WindowImpl.h"
 #include "r1ui/platform/Monitors.h"
+#include "r1ui/platform/Utf.h"
 
 namespace r1ui::platform {
 
@@ -21,7 +22,7 @@ Rect toRect(const RECT& r) { return {r.left, r.top, r.right - r.left, r.bottom -
 
 BOOL CALLBACK collect(HMONITOR monitor, HDC, LPRECT, LPARAM param) {
   try {
-    MONITORINFO mi{};
+    MONITORINFOEXW mi{};
     mi.cbSize = sizeof(mi);
     if (GetMonitorInfoW(monitor, &mi) == FALSE) return TRUE;
     MonitorInfo info;
@@ -29,6 +30,7 @@ BOOL CALLBACK collect(HMONITOR monitor, HDC, LPRECT, LPARAM param) {
     info.workArea = toRect(mi.rcWork);
     info.dpiScale = dpiScaleFromDpi(monitorDpi(monitor));
     info.primary = (mi.dwFlags & MONITORINFOF_PRIMARY) != 0;
+    if (auto name = utf16ToUtf8(std::u16string_view(reinterpret_cast<const char16_t*>(mi.szDevice)))) info.name = std::move(*name);
     reinterpret_cast<std::vector<MonitorInfo>*>(param)->push_back(info);
     return TRUE;
   } catch (...) {

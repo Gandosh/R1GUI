@@ -8,6 +8,7 @@
 #pragma once
 
 #include <span>
+#include <string>
 #include <vector>
 
 #include "r1ui/platform/Geometry.h"
@@ -19,6 +20,7 @@ struct MonitorInfo {
   Rect workArea;          // bounds minus taskbar and docked bars
   float dpiScale = 1.0f;  // 1.0 = 96 dpi
   bool primary = false;
+  std::string name;       // OS device name, e.g. "\\.\DISPLAY1" (UTF-8); empty when unknown
 };
 
 // Current monitors, primary first. Empty only if the OS reports none (non-interactive session).
