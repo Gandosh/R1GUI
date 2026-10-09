@@ -42,7 +42,7 @@ int main() {
     return p.id();
   };
   for (const auto theme : {r1ui::theme::ThemeId::Dark, r1ui::theme::ThemeId::Light}) {
-    R1_EXPECT_REGION_MATCHES(picker, (r1test::visual::VisualSpec{.reference = "screen-color-picker-open", .theme = theme, .profile = "screen", .ignore = outsidePopover(), .luminance = true}), kPopoverW * kPopoverH, 0.03);
+    R1_EXPECT_REGION_MATCHES(picker, (r1test::visual::VisualSpec{.reference = "screen-color-picker-open", .theme = theme, .profile = "screen", .ignore = outsidePopover(), .luminance = true}), kPopoverW * kPopoverH);
   }
 
   // The fill-picker tab crops (36 x 36: a 24 px tab in 6 px of padding).

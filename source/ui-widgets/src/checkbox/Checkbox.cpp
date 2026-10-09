@@ -19,6 +19,7 @@ using theme::State::kNone;
 using theme::StyleProperty;
 
 constexpr double kLabelGap = 8.0;
+constexpr float kCheckWidth = 2.15f;  // stroke width of the check mark in logical px
 
 constexpr theme::StyleRuleEntry kRows[] = {
     {"checkbox.label", kNone, StyleProperty::Foreground, "color:surface"},
@@ -93,12 +94,17 @@ void Checkbox::paint(PaintContext& ctx) {
     p.fillRoundedRect(box, radii, ctx.animatedColor(0, hovered() ? native.checkedHover : ctx.color("accent")));
     const float s = ctx.scale();
     const render::Color mark = native.mark;
-    const float w = 1.9f * s;
     if (mixed()) {
-      p.line(box.x + 3.0f * s, box.y + 6.5f * s, box.x + 10.0f * s, box.y + 6.5f * s, w, mark);
+      p.line(box.x + 3.0f * s, box.y + 6.5f * s, box.x + 10.0f * s, box.y + 6.5f * s, 1.9f * s, mark);
     } else {
-      p.line(box.x + 2.9f * s, box.y + 6.8f * s, box.x + 5.1f * s, box.y + 9.9f * s, w, mark);
-      p.line(box.x + 5.1f * s, box.y + 9.9f * s, box.x + 10.4f * s, box.y + 2.6f * s, w, mark);
+      // The browser strokes the check as a polyline of width 2.15 with round caps and joins (fitted to
+      // the coverage of the reference crops: the stroke is two lines plus a disc at each vertex).
+      const float w = kCheckWidth * s;
+      const float xs[3] = {box.x + 3.3f * s, box.x + 5.12f * s, box.x + 9.9f * s};
+      const float ys[3] = {box.y + 7.05f * s, box.y + 9.07f * s, box.y + 3.27f * s};
+      p.line(xs[0], ys[0], xs[1], ys[1], w, mark);
+      p.line(xs[1], ys[1], xs[2], ys[2], w, mark);
+      for (int i = 0; i < 3; ++i) p.fillRoundedRect({xs[i] - w * 0.5f, ys[i] - w * 0.5f, w, w}, render::CornerRadii::uniform(w * 0.5f), mark);
     }
   } else {
     p.fillRoundedRect(box, radii, native.fill);

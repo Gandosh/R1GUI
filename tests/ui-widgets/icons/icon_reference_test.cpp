@@ -93,9 +93,10 @@ void testCustomIcons() {
   R1_EXPECT(svg.ok);
   if (!svg.ok) return;
   const std::vector<uint8_t> cov = rasterizeIcon(svg.icon, 14);
-  // Nested diamond: ink on the outline and a solid centre, empty between them.
+  // Nested diamond: ink on the outline and on a small inner diamond around the centre (the reference
+  // shows a ring, not a solid dot), empty between them.
   const auto at = [&](int x, int y) { return cov[static_cast<size_t>(y) * 14 + static_cast<size_t>(x)]; };
-  R1_EXPECT(at(7, 7) > 200 || at(6, 6) > 200);  // centre
+  R1_EXPECT(at(7, 7) > 100 || at(6, 6) > 100);  // inner diamond at the centre
   R1_EXPECT(at(0, 7) > 40 || at(1, 7) > 40);    // left tip of the outer diamond
   R1_EXPECT(at(7, 3) < 80 && at(3, 7) < 80);    // gap between the outline and the centre
 }

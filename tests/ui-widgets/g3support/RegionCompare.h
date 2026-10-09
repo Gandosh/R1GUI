@@ -56,7 +56,7 @@ inline bool expectMatchesRegion(const BuildFn& build, const RegionSpec& spec, co
     return fail("region outside the reference image");
   }
   std::string error;
-  const auto tolerance = image::loadTolerance(p.referenceDir / "tolerance.json", spec.profile, error);
+  const auto tolerance = image::loadTolerance(image::toleranceFilePath(p.referenceDir), spec.profile, error);
   if (!tolerance) return fail(error);
 
   image::Image ref;

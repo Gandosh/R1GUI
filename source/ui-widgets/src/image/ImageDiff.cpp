@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <fstream>
 #include <iterator>
 
@@ -15,12 +16,28 @@ namespace r1ui::widgets::image {
 
 namespace {
 
+// The value of an environment variable, empty when it is unset (_dupenv_s: getenv is deprecated).
+std::string environmentValue(const char* name) {
+  char* value = nullptr;
+  size_t length = 0;
+  std::string result;
+  if (_dupenv_s(&value, &length, name) == 0 && value != nullptr) result = value;
+  std::free(value);
+  return result;
+}
+
 void applyProfile(const core::JsonValue& object, Tolerance& tolerance) {
   if (const core::JsonValue* c = object.find("channelTolerance")) tolerance.channelTolerance = static_cast<int>(c->numberValue());
   if (const core::JsonValue* f = object.find("maxFailingFraction")) tolerance.maxFailingFraction = f->numberValue();
 }
 
 }  // namespace
+
+std::filesystem::path toleranceFilePath(const std::filesystem::path& referenceDir) {
+  const std::string fromEnv = environmentValue("R1UI_TOLERANCE_FILE");
+  if (!fromEnv.empty()) return fromEnv;
+  return referenceDir / "tolerance.json";
+}
 
 std::optional<Tolerance> loadTolerance(const std::filesystem::path& toleranceFile, std::string_view profile, std::string& error) {
   std::ifstream in(toleranceFile, std::ios::binary);
@@ -81,6 +98,7 @@ DiffMetrics compare(const Image& reference, const Image& candidate, const Tolera
     const uint8_t* r = reference.rgba.data() + i * 4;
     const uint8_t* c = candidate.rgba.data() + i * 4;
     const int d = std::max({std::abs(r[0] - c[0]), std::abs(r[1] - c[1]), std::abs(r[2] - c[2])});
+    ++m.histogram[static_cast<size_t>(d)];
     if (d == 0) continue;
     total += static_cast<uint64_t>(d);
     m.maxChannelDiff = std::max(m.maxChannelDiff, d);
@@ -126,12 +144,26 @@ Image makeDiffImage(const Image& candidate, const DiffMetrics& metrics) {
   return out;
 }
 
+std::string sweepSuffix(const DiffMetrics& m, double areaPixels) {
+  if (environmentValue("R1UI_DIFF_SWEEP").empty() || !(areaPixels > 0.0)) return {};
+  // A pixel fails at tolerance t when its largest channel difference exceeds t.
+  std::string line = " sweep";
+  char buffer[32];
+  for (int t = 0; t <= 128; t += 8) {
+    uint64_t failing = 0;
+    for (size_t d = static_cast<size_t>(t) + 1; d < m.histogram.size(); ++d) failing += m.histogram[d];
+    std::snprintf(buffer, sizeof buffer, " %d:%.3f", t, 100.0 * static_cast<double>(failing) / areaPixels);
+    line += buffer;
+  }
+  return line;
+}
+
 std::string describe(const DiffMetrics& m) {
   if (!m.error.empty()) return "compare error: " + m.error;
   char buffer[200];
   std::snprintf(buffer, sizeof buffer, "%ux%u failing %zu (%.3f%%) max %d mean %.3f %s", m.width, m.height, m.failingPixels,
                 m.failingFraction * 100.0, m.maxChannelDiff, m.meanDiff, m.pass ? "PASS" : "FAIL");
-  return buffer;
+  return std::string(buffer) + sweepSuffix(m, static_cast<double>(size_t{m.width} * m.height));
 }
 
 }  // namespace r1ui::widgets::image

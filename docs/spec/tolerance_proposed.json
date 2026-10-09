@@ -1,0 +1,10 @@
+{
+  "_note": "PROPOSED profiles from tools/spec/tolerance_proposal.py over the Phase 4 calibration run; see docs/spec/tolerance_proposal.md. Not the committed file (tests/reference/tolerance.json); use with R1UI_TOLERANCE_FILE.",
+  "default": { "channelTolerance": 8, "maxFailingFraction": 0.005 },
+  "profiles": {
+    "flat": { "channelTolerance": 2, "maxFailingFraction": 0.0 },
+    "text": { "channelTolerance": 72, "maxFailingFraction": 0.06 },
+    "icons": { "channelTolerance": 24, "maxFailingFraction": 0.06 },
+    "screen": { "channelTolerance": 16, "maxFailingFraction": 0.04 }
+  }
+}
