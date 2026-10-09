@@ -50,6 +50,10 @@ class Selection {
   bool hasKeys() const;
   // Ids of the selected keys (part Key) of `curve`.
   std::vector<uint32_t> keysOf(uint32_t curve) const;
+  // Like keysOf, but when the curve has no selected key the keys that own its selected tangent handles
+  // (so interpolation, tangent mode and weight commands also work on a handle selection).
+  std::vector<uint32_t> keysOrOwnersOf(uint32_t curve) const;
+  bool anyPartSelected(uint32_t curve, uint32_t key) const;
   // Drops items whose curve or key no longer exists (after an edit that removed data).
   void prune(const std::vector<Curve>& curves);
   friend bool operator==(const Selection&, const Selection&) = default;

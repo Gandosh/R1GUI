@@ -223,7 +223,7 @@ void CurveGraph::paintCurve(PaintContext& ctx, const curve::Mapping& m, const Cu
   }
 }
 
-void CurveGraph::paintKeys(PaintContext& ctx, const curve::Mapping& m, const Curve& c) {
+void CurveGraph::paintKeys(PaintContext& ctx, const curve::Mapping& m, const Curve& c, bool handlesPass) {
   if (c.keys.empty()) return;
   const render::Rect box = ctx.box();
   render::Painter& painter = ctx.painter();
@@ -234,16 +234,19 @@ void CurveGraph::paintKeys(PaintContext& ctx, const curve::Mapping& m, const Cur
   size_t i1 = curve::segmentIndex(c, m.view.tMax + reach * tpp);
   if (i1 == curve::npos) return;
   const size_t visible = i1 - i0 + 1;
-  const bool dense = static_cast<double>(visible) * (kKeySize * 0.7) > m.w;  // markers would merge into a blob
-  const float size = ctx.px(kKeySize);
+  const bool dense = static_cast<double>(visible) * 2.0 > m.w;  // fewer than 2 px per key: the markers would merge into a blob
+  // Markers are drawn on whole pixels (centre on a pixel centre) so that they stay crisp.
+  const float size = std::max(1.0f, std::round(ctx.px(kKeySize)));
+  const float handleSize = std::max(1.0f, std::round(ctx.px(5.0)));
+  const auto snapped = [](float v) { return std::floor(v) + 0.5f; };
   const render::Color accent = ctx.color("accent");
   const render::Color white{1, 1, 1, 1};
   const render::Color base = rgba(c.colour);
   const bool editable = curveEditable(c);
 
   const auto drawKey = [&](const Key& k, bool selected) {
-    const float cx = box.x + ctx.px(m.toX(k.time));
-    const float cy = box.y + ctx.px(m.toY(k.value));
+    const float cx = snapped(box.x + ctx.px(m.toX(k.time)));
+    const float cy = snapped(box.y + ctx.px(m.toY(k.value)));
     const render::Rect r{cx - size * 0.5f, cy - size * 0.5f, size, size};
     if (selected) {
       painter.fillRect(r, accent);
@@ -260,31 +263,36 @@ void CurveGraph::paintKeys(PaintContext& ctx, const curve::Mapping& m, const Cur
     for (const bool out : {false, true}) {
       curve::Point p;
       if (!handlePosition(c.id, k.id, out, p)) continue;
-      const float kx = box.x + ctx.px(m.toX(k.time));
-      const float ky = box.y + ctx.px(m.toY(k.value));
-      const float hx = box.x + ctx.px(clampPx(p.x));
-      const float hy = box.y + ctx.px(clampPx(p.y));
+      const float kx = snapped(box.x + ctx.px(m.toX(k.time)));
+      const float ky = snapped(box.y + ctx.px(m.toY(k.value)));
+      const float hx = snapped(box.x + ctx.px(clampPx(p.x)));
+      const float hy = snapped(box.y + ctx.px(clampPx(p.y)));
       const bool selected = selection_.contains({c.id, k.id, out ? Part::Out : Part::In});
       painter.line(kx, ky, hx, hy, ctx.hairline(), withAlpha(base, 0.7f));
-      const float d = ctx.px(5.0);
-      const render::Rect hr{hx - d * 0.5f, hy - d * 0.5f, d, d};
-      painter.fillRoundedRect(hr, render::CornerRadii::uniform(d * 0.5f), selected ? accent : base);
-      painter.border(hr, render::CornerRadii::uniform(d * 0.5f), ctx.hairline(), selected ? white : withAlpha(white, 0.8f));
+      const render::Rect hr{hx - handleSize * 0.5f, hy - handleSize * 0.5f, handleSize, handleSize};
+      painter.fillRoundedRect(hr, render::CornerRadii::uniform(handleSize * 0.5f), selected ? accent : base);
+      painter.border(hr, render::CornerRadii::uniform(handleSize * 0.5f), ctx.hairline(), selected ? white : withAlpha(white, 0.8f));
     }
   };
 
+  const auto handlesShownFor = [&](const Key& k, bool selected) {
+    if (!editable) return false;
+    if (settings_.tangents == TangentVisibility::All) return !dense || selected;
+    return settings_.tangents == TangentVisibility::Selected && (selected || selection_.anyPartSelected(c.id, k.id));
+  };
+  // The handles of every curve go under the markers of every curve: a tangent line never crosses a key square.
   for (size_t i = i0; i <= i1 && i < c.keys.size(); ++i) {
     const Key& k = c.keys[i];
     const bool selected = selection_.containsKey(c.id, k.id);
-    if (dense && !selected) continue;
-    drawKey(k, selected);
-    const bool handlesShown = editable && (settings_.tangents == TangentVisibility::All || (settings_.tangents == TangentVisibility::Selected && (selected || selection_.contains({c.id, k.id, Part::In}) || selection_.contains({c.id, k.id, Part::Out}))));
-    if (handlesShown && !dense) drawHandles(i);
-    else if (handlesShown && selected) drawHandles(i);
+    if (handlesPass) {
+      if (handlesShownFor(k, selected)) drawHandles(i);
+    } else if (!dense || selected) {
+      drawKey(k, selected);
+    }
   }
 }
 
-void CurveGraph::paintOverlays(PaintContext& ctx, const curve::Mapping& m) {
+void CurveGraph::paintIndicators(PaintContext& ctx, const curve::Mapping& m) {
   const render::Rect box = ctx.box();
   render::Painter& painter = ctx.painter();
   const render::Color accent = ctx.color("accent");
@@ -325,7 +333,13 @@ void CurveGraph::paintOverlays(PaintContext& ctx, const curve::Mapping& m) {
     const float w = ctx.px(7.0);
     painter.fillRect({x - w * 0.5f + hair * 0.5f, box.y, w, ctx.px(5.0)}, accent);
   }
-  // Marquee.
+}
+
+void CurveGraph::paintMarquee(PaintContext& ctx) {
+  const render::Rect box = ctx.box();
+  render::Painter& painter = ctx.painter();
+  const render::Color accent = ctx.color("accent");
+  const float hair = ctx.hairline();
   if (gesture_.kind == Gesture::Kind::Marquee && gesture_.active) {
     const double x0 = std::min(gesture_.startX, gesture_.marqueeX);
     const double y0 = std::min(gesture_.startY, gesture_.marqueeY);
@@ -358,8 +372,10 @@ void CurveGraph::paint(PaintContext& ctx) {
   };
   std::stable_sort(order.begin(), order.end(), [&](const Curve* a, const Curve* b) { return rank(a) < rank(b); });
   for (const Curve* c : order) paintCurve(ctx, m, *c, rank(c) > 0);
-  for (const Curve* c : order) paintKeys(ctx, m, *c);
-  paintOverlays(ctx, m);
+  paintIndicators(ctx, m);  // over the curves, under the tangent handles and the markers
+  for (const Curve* c : order) paintKeys(ctx, m, *c, true);
+  for (const Curve* c : order) paintKeys(ctx, m, *c, false);
+  paintMarquee(ctx);
   painter.popClip();
 }
 

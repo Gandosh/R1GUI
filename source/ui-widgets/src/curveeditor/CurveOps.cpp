@@ -93,6 +93,19 @@ std::vector<uint32_t> Selection::keysOf(uint32_t curve) const {
   return ids;
 }
 
+std::vector<uint32_t> Selection::keysOrOwnersOf(uint32_t curve) const {
+  std::vector<uint32_t> ids = keysOf(curve);
+  if (!ids.empty()) return ids;
+  for (const Selected& s : items_) {
+    if (s.curve == curve && (ids.empty() || ids.back() != s.key)) ids.push_back(s.key);  // sorted by key
+  }
+  return ids;
+}
+
+bool Selection::anyPartSelected(uint32_t curve, uint32_t key) const {
+  return contains({curve, key, Part::Key}) || contains({curve, key, Part::In}) || contains({curve, key, Part::Out});
+}
+
 void Selection::prune(const std::vector<Curve>& curves) {
   items_.erase(std::remove_if(items_.begin(), items_.end(),
                               [&](const Selected& s) {

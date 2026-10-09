@@ -277,8 +277,13 @@ SelectionInfo CurveGraph::selectionInfo() const {
   SelectionInfo info;
   std::vector<uint32_t> curveIds;
   bool first = true;
+  const bool keysSelected = selection_.hasKeys();
+  uint32_t lastOwner = 0;
+  uint32_t lastOwnerCurve = 0;
   for (const Selected& s : selection_.items()) {
-    if (s.part != Part::Key) continue;
+    if (keysSelected ? s.part != Part::Key : (s.curve == lastOwnerCurve && s.key == lastOwner)) continue;
+    lastOwnerCurve = s.curve;
+    lastOwner = s.key;
     const Curve* c = curve::findCurve(curves_, s.curve);
     if (c == nullptr) continue;
     const size_t i = curve::indexOfKey(*c, s.key);
@@ -367,7 +372,7 @@ Selected CurveGraph::hitItem(double x, double y) const {
     if (i0 == curve::npos) i0 = 0;
     for (size_t i = i0; i < c.keys.size() && c.keys[i].time <= t1; ++i) {
       const Key& k = c.keys[i];
-      const bool keySelected = selection_.containsKey(c.id, k.id);
+      const bool keySelected = selection_.anyPartSelected(c.id, k.id);
       const bool handlesShown = settings_.tangents == TangentVisibility::All || (settings_.tangents == TangentVisibility::Selected && keySelected);
       if (handlesShown) {
         for (const bool out : {false, true}) {
@@ -515,7 +520,7 @@ void CurveGraph::endInteraction(bool committed) {
   if (!committed) notifySelection();
 }
 
-void CurveGraph::editSelectedKeys(const char* label, const std::function<bool(Curve&, const std::vector<uint32_t>&)>& op) {
+void CurveGraph::editSelectedKeys(const char* label, const std::function<bool(Curve&, const std::vector<uint32_t>&)>& op, bool ownersToo) {
   struct Pending {
     size_t index;
     Curve edited;
@@ -524,7 +529,7 @@ void CurveGraph::editSelectedKeys(const char* label, const std::function<bool(Cu
   for (size_t i = 0; i < curves_.size(); ++i) {
     const Curve& c = curves_[i];
     if (!curveEditable(c)) continue;
-    const std::vector<uint32_t> ids = selection_.keysOf(c.id);
+    const std::vector<uint32_t> ids = ownersToo ? selection_.keysOrOwnersOf(c.id) : selection_.keysOf(c.id);
     if (ids.empty()) continue;
     Curve work = c;
     if (!op(work, ids) || work == c) continue;
@@ -694,7 +699,7 @@ void CurveGraph::nudgeSelected(double dt, double dv, const char* label) {
 
 void CurveGraph::setSelectedInterpolation(curve::Interp interp) {
   editSelectedKeys(interp == curve::Interp::Constant ? "Constant interpolation" : interp == curve::Interp::Linear ? "Linear interpolation" : "Cubic interpolation",
-                   [&](Curve& c, const std::vector<uint32_t>& ids) { return curve::setInterpolation(c, ids, interp) > 0; });
+                   [&](Curve& c, const std::vector<uint32_t>& ids) { return curve::setInterpolation(c, ids, interp) > 0; }, true);
 }
 
 void CurveGraph::setSelectedTangentMode(curve::TangentMode mode) {
@@ -702,13 +707,13 @@ void CurveGraph::setSelectedTangentMode(curve::TangentMode mode) {
     const size_t a = curve::setInterpolation(c, ids, curve::Interp::Cubic);
     const size_t b = curve::setTangentMode(c, ids, mode);
     return a + b > 0;
-  });
+  }, true);
 }
 
 void CurveGraph::toggleWeights() {
   const SelectionInfo info = selectionInfo();
   const bool target = info.mixedWeighted ? true : !info.weighted;
-  editSelectedKeys("Toggle tangent weights", [&](Curve& c, const std::vector<uint32_t>& ids) { return curve::setWeighted(c, ids, target) > 0; });
+  editSelectedKeys("Toggle tangent weights", [&](Curve& c, const std::vector<uint32_t>& ids) { return curve::setWeighted(c, ids, target) > 0; }, true);
 }
 
 void CurveGraph::flattenSelectedTangents() {
@@ -719,7 +724,7 @@ void CurveGraph::flattenSelectedTangents() {
     }
     (void)ids;
     return curve::flattenTangents(c, parts) > 0;
-  });
+  }, true);
 }
 
 void CurveGraph::straightenSelectedTangents() {
@@ -729,7 +734,7 @@ void CurveGraph::straightenSelectedTangents() {
       if (s.curve == c.id) parts.push_back(s);
     }
     return curve::straightenTangents(c, parts) > 0;
-  });
+  }, true);
 }
 
 void CurveGraph::snapSelectedToFrames() {
@@ -1017,7 +1022,7 @@ void CurveGraph::updateHandleDrag(double x, double y) {
 void CurveGraph::onPointerMove(Event& e) {
   const core::tree::WidgetId self = id();
   Gesture& g = gesture_;
-  if (g.kind == Gesture::Kind::None || !pressed()) {
+  if (g.kind == Gesture::Kind::None) {
     if (g.kind == Gesture::Kind::None) updateHover(e.localX, e.localY);
     return;
   }

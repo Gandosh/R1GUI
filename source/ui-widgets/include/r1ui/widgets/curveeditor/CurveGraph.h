@@ -239,13 +239,17 @@ class CurveGraph : public WidgetObject {
   void zoomWheel(double x, double y, double notches, uint8_t modifiers);
   void setViewInternal(const curve::View& v);
   std::vector<uint32_t> selectedCurveIds() const;
-  void editSelectedKeys(const char* label, const std::function<bool(curve::Curve&, const std::vector<uint32_t>&)>& op);
+  // Applies `op` to a copy of each editable curve that has selected keys (or, with ownersToo and no
+  // selected key, selected tangent handles) and commits the changed ones as one interaction.
+  void editSelectedKeys(const char* label, const std::function<bool(curve::Curve&, const std::vector<uint32_t>&)>& op, bool ownersToo = false);
 
   // ---- painting (CurveGraphPaint.cpp) ----
   void paintGrid(PaintContext& ctx, const curve::Mapping& m);
   void paintCurve(PaintContext& ctx, const curve::Mapping& m, const curve::Curve& c, bool emphasised);
-  void paintKeys(PaintContext& ctx, const curve::Mapping& m, const curve::Curve& c);
-  void paintOverlays(PaintContext& ctx, const curve::Mapping& m);
+  // handlesPass: tangent handles of the curve; otherwise its key markers (the caller does all handles first).
+  void paintKeys(PaintContext& ctx, const curve::Mapping& m, const curve::Curve& c, bool handlesPass);
+  void paintIndicators(PaintContext& ctx, const curve::Mapping& m);  // value indicators and the scrub marker
+  void paintMarquee(PaintContext& ctx);
   void curvePolyline(const curve::Mapping& m, const curve::Curve& c, std::vector<curve::Point>& out) const;
 
   std::vector<curve::Curve> curves_;
