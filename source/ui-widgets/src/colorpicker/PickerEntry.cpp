@@ -269,9 +269,12 @@ void PickerEntry::onFocusIn(Event& e) {
 void PickerEntry::onFocusOut(Event&) {
   selecting_ = false;
   editor_->cancelPreedit();
+  const core::tree::WidgetId self = id();
   commit();
+  if (!ui().alive(self)) return;
   editor_->setSelection(0, 0);
   requestPaint();
+  if (onBlurred) onBlurred();
 }
 
 void PickerEntry::onPointerDown(Event& e) {
@@ -307,13 +310,35 @@ void PickerEntry::onKeyDown(Event& e) {
   const bool ctrl = hasCtrl(e.modifiers);
   bool used = true;
   switch (static_cast<int>(e.key)) {
-    case static_cast<int>(Key::Enter):
+    case static_cast<int>(Key::Enter): {
+      const core::tree::WidgetId self = id();
       if (dirty_) commit();
       else editor_->selectAll();
+      if (!ui().alive(self)) {
+        e.markHandled();
+        return;
+      }
+      if (onSubmit) onSubmit();
+      if (!ui().alive(self)) {
+        e.markHandled();
+        return;
+      }
       break;
+    }
     case static_cast<int>(Key::Escape):
-      if (dirty_) revert();
-      else used = false;
+      if (onCancel) {
+        if (dirty_) revert();
+        const core::tree::WidgetId self = id();
+        onCancel();
+        if (!ui().alive(self)) {
+          e.markHandled();
+          return;
+        }
+      } else if (dirty_) {
+        revert();
+      } else {
+        used = false;
+      }
       break;
     case static_cast<int>(Key::Left): editor_->move(ctrl ? r1ui::text::Motion::WordLeft : r1ui::text::Motion::Left, shift); break;
     case static_cast<int>(Key::Right): editor_->move(ctrl ? r1ui::text::Motion::WordRight : r1ui::text::Motion::Right, shift); break;

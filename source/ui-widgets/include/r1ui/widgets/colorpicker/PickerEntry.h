@@ -65,6 +65,14 @@ class PickerEntry : public WidgetObject {
   std::function<void(int steps)> onStep;
   // The entry took keyboard focus (a row that contains it can select itself).
   std::function<void()> onFocused;
+  // Enter was pressed (after a dirty text was committed; not called when the commit destroyed the entry).
+  std::function<void()> onSubmit;
+  // The entry lost keyboard focus (after a dirty text was committed).
+  std::function<void()> onBlurred;
+  // Escape: when set, a dirty entry is reverted and the callback runs (the owner decides what cancelling
+  // means, e.g. closing an inline rename); the key is always consumed. When unset Escape only reverts
+  // a dirty entry and is otherwise left to the enclosing popup.
+  std::function<void()> onCancel;
 
   // ---- input ----
   void onPointerDown(Event& e) override;
