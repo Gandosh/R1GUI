@@ -12,13 +12,9 @@
 #include <string>
 #include <vector>
 
-#include "TestSupport.h"
+#include "ExpectWithMessage.h"
 #include "r1ui/widgets/dock/DockHost.h"
 #include "r1ui/widgets/dock/InWindowFloatingBackend.h"
-
-// The dock tests state what each expectation is about: R1_EXPECT(condition, "what").
-#undef R1_EXPECT
-#define R1_EXPECT(cond, ...) ::r1test::report(static_cast<bool>(cond), #cond " " #__VA_ARGS__, __FILE__, __LINE__)
 
 namespace dock_widget_test {
 

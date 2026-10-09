@@ -74,7 +74,6 @@ class InWindowFloatingBackend final : public IFloatingBackend {
 
   // The frame widget of a window (title bar, buttons), for tests that drive real pointer input.
   core::tree::WidgetId frameWidget(FloatId window) const;
-  const InWindowFloatingOptions& options() const { return options_; }
 
  private:
   friend class FloatingFrame;

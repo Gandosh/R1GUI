@@ -60,11 +60,6 @@ uint8_t FloatingFrame::phases() const { return core::events::kListenCapture | co
 
 // ---- geometry ---------------------------------------------------------------------------------
 
-dock::Rect FloatingFrame::titleRect() const {
-  const dock::Rect r = toDockRect(ui().absRect(id()));
-  return {r.x, r.y, r.w, titleHeight_};
-}
-
 dock::Rect FloatingFrame::closeButtonRect() const {
   const dock::Rect r = toDockRect(ui().absRect(id()));
   return {r.right() - kButtonMargin - kButton, r.y + (titleHeight_ - kButton) / 2.0, kButton, kButton};
@@ -80,7 +75,7 @@ FloatingFrame::Hit FloatingFrame::hitTest(double x, double y) const {
   if (!(x >= r.x && x < r.right() && y >= r.y && y < r.bottom())) return {};
   const auto inside = [&](const dock::Rect& b) { return x >= b.x && x < b.right() && y >= b.y && y < b.bottom(); };
   if (inside(closeButtonRect())) return {Part::Close, kNone};
-  if (maximizable_ && inside(maximizeButtonRect())) return {Part::Maximize, kNone};
+  if (inside(maximizeButtonRect())) return {Part::Maximize, kNone};
   if (resizable_ && !maximized_) {
     unsigned edges = kNone;
     if (x < r.x + band_) edges |= kLeft;
@@ -139,7 +134,7 @@ void FloatingFrame::paint(PaintContext& ctx) {
     if (bs.background.a > 0) painter.fillRoundedRect(bb, render::CornerRadii::uniform(ctx.px(bs.radius)), ctx.color(bs.background));
     ctx.drawIcon(icon, 14.0, bb, ctx.color(bs.text.color));
   };
-  if (maximizable_) button(Part::Maximize, maximizeButtonRect(), maximized_ ? "minimize" : "maximize");
+  button(Part::Maximize, maximizeButtonRect(), maximized_ ? "minimize" : "maximize");
   button(Part::Close, closeButtonRect(), "x");
   painter.border(box, all, ctx.hairline(), ctx.color(body.border.color));
 }
@@ -243,7 +238,7 @@ void FloatingFrame::onClick(Event& e) {
 }
 
 void FloatingFrame::onDoubleClick(Event& e) {
-  if (e.button != Button::Left || e.target != id() || !maximizable_) return;
+  if (e.button != Button::Left || e.target != id()) return;
   if (hitTest(e.x, e.y).part == Part::Title) {
     e.markHandled();
     backend_->userToggledMaximize(window_);

@@ -60,12 +60,9 @@ class PanelRegistry {
   size_t size() const { return panels_.size(); }
   // The model's view of the panels, in registration order.
   std::vector<dock::PanelInfo> infos() const;
-  // Bumped by every successful change; the host compares it to notice added panels.
-  uint32_t revision() const { return revision_; }
 
  private:
   std::vector<PanelDescriptor> panels_;
-  uint32_t revision_ = 0;
 };
 
 }  // namespace r1ui::widgets

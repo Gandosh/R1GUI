@@ -34,6 +34,8 @@ struct Rect {
   double y = 0.0;
   double w = 0.0;
   double h = 0.0;
+  double right() const { return x + w; }
+  double bottom() const { return y + h; }
   // Half-open: the left/top edge is inside, the right/bottom edge is not.
   bool contains(Point p) const { return p.x >= x && p.x < x + w && p.y >= y && p.y < y + h; }
   friend bool operator==(const Rect&, const Rect&) = default;

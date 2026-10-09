@@ -23,7 +23,6 @@ bool PanelRegistry::add(PanelDescriptor d) {
   d.title = sanitizeUtf8(d.title, kMaxTitleBytes);
   d.icon = sanitizeUtf8(d.icon, kMaxTitleBytes);
   panels_.push_back(std::move(d));
-  ++revision_;
   return true;
 }
 
@@ -31,7 +30,6 @@ bool PanelRegistry::setTitle(dock::PanelId id, std::string title) {
   for (PanelDescriptor& p : panels_) {
     if (p.id == id) {
       p.title = sanitizeUtf8(title, kMaxTitleBytes);
-      ++revision_;
       return true;
     }
   }
@@ -42,7 +40,6 @@ bool PanelRegistry::setIcon(dock::PanelId id, std::string icon) {
   for (PanelDescriptor& p : panels_) {
     if (p.id == id) {
       p.icon = sanitizeUtf8(icon, kMaxTitleBytes);
-      ++revision_;
       return true;
     }
   }

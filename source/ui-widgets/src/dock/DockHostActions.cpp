@@ -266,6 +266,12 @@ bool DockHost::setPanelLocked(dock::PanelId panel, bool locked) {
   return true;
 }
 
+bool DockHost::setWindowRect(uint32_t area, const dock::Rect& contentRect) {
+  if (!commitOp(layout_->setAreaRect(area, contentRect))) return false;
+  afterModelChanged(DockChange::Window);
+  return true;
+}
+
 bool DockHost::togglePinned(dock::PanelId panel) {
   const std::optional<dock::PanelSlot> slot = layout_->locate(panel);
   if (!slot) return false;

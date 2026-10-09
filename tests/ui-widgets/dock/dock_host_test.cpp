@@ -213,7 +213,6 @@ void escape_restores_everything() {
   R1_EXPECT(rig.t.ui.keyDown(Key::Escape));
   rig.settle();
   R1_EXPECT(!rig.host->dragging(), "Escape ends the drag");
-  if (!(rig.host->layout() == before)) std::fprintf(stderr, "before: %s\nafter:  %s\n", before.toJson().c_str(), rig.host->layout().toJson().c_str());
   R1_EXPECT(rig.host->layout() == before, "the layout is exactly as before (decision D9)");
   R1_EXPECT(windowCount(rig) == 0 && rig.host->layout().locate(2)->tab == 1);
   rig.up(rig.tabCenter(4));  // the release after the cancel changes nothing

@@ -130,7 +130,6 @@ class DockTabStrip : public WidgetObject {
     bool armed = false;
     size_t index = 0;
     double grabX = 0.0, grabY = 0.0;
-    double sx = 0.0, sy = 0.0;
   };
   struct Drag {
     bool active = false;

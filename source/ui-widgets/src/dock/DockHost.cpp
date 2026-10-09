@@ -95,7 +95,6 @@ DockHost::DockHost(PanelRegistry& registry, IFloatingBackend& backend, DockHostO
   }
   if (!created.ok()) created = dock::DockLayout::create({}, options_.config);
   layout_ = std::move(*created.layout);
-  registryRevision_ = registry_.revision();
 }
 
 DockHost::~DockHost() { *alive_ = false; }
@@ -410,7 +409,10 @@ dock::Status DockHost::setLayout(dock::DockLayout layout) {
   }
   if (known.size() != layout.panels().size()) return dock::Status::failure("the layout was built for a different set of panels");
 
-  if (drag_.active) endDragState();
+  if (drag_.active) {
+    endDragState();
+    notify(DockChange::DragEnded);  // deferred saving resumes
+  }
   if (resize_.active) resize_ = {};
   closeMenus();
   // Park every content that lives in the host's own context, then rebuild all floating windows.
@@ -429,7 +431,6 @@ dock::Status DockHost::setLayout(dock::DockLayout layout) {
     it = areas_.erase(it);
   }
   layout_ = std::move(layout);
-  registryRevision_ = registry_.revision();
   afterModelChanged(DockChange::Arrangement, false, false);
   return dock::Status::success();
 }

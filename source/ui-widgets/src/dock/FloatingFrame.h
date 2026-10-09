@@ -28,8 +28,8 @@ class FloatingFrame : public WidgetObject {
  public:
   static std::span<const theme::StyleRuleEntry> styleRows();
 
-  FloatingFrame(InWindowFloatingBackend& backend, FloatId window, double titleHeight, double border, double radius, double band)
-      : backend_(&backend), window_(window), titleHeight_(titleHeight), border_(border), radius_(radius), band_(band) {}
+  FloatingFrame(InWindowFloatingBackend& backend, FloatId window, double titleHeight, double radius, double band)
+      : backend_(&backend), window_(window), titleHeight_(titleHeight), radius_(radius), band_(band) {}
 
   const char* typeName() const override { return "FloatingFrame"; }
   void onAttached() override;
@@ -45,7 +45,6 @@ class FloatingFrame : public WidgetObject {
   void onCaptureLost(Event& e) override;
 
   void setTitle(std::string title) { title_ = std::move(title); requestPaint(); }
-  void setMaximizable(bool on) { maximizable_ = on; requestPaint(); }
   void setResizable(bool on) { resizable_ = on; }
   void setMaximized(bool on) { maximized_ = on; requestPaint(); }
   // A hidden frame is not drawn but stays in the tree and keeps its children (and any pointer capture inside them) alive: the window of a tab being dragged hides this way.
@@ -53,7 +52,6 @@ class FloatingFrame : public WidgetObject {
   float paintOpacity() const override { return hidden_ ? 0.0f : 1.0f; }
   dock::Rect closeButtonRect() const;
   dock::Rect maximizeButtonRect() const;
-  dock::Rect titleRect() const;
 
  private:
   enum Edge : unsigned { kNone = 0, kLeft = 1, kRight = 2, kTop = 4, kBottom = 8 };
@@ -69,11 +67,9 @@ class FloatingFrame : public WidgetObject {
   InWindowFloatingBackend* backend_;
   FloatId window_;
   double titleHeight_;
-  double border_;
   double radius_;
   double band_;
   std::string title_;
-  bool maximizable_ = true;
   bool resizable_ = true;
   bool maximized_ = false;
   bool hidden_ = false;

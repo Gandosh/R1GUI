@@ -241,7 +241,8 @@ DockTabStrip::Hit DockTabStrip::hitTest(double x, double y) const {
     if (isLifted(i)) continue;
     const dock::Rect t = tabRect(i);
     if (x < t.x || x >= t.right()) continue;
-    const bool showsClose = tabs_[i].closable && !tabs_[i].locked && (i == active_ || hover_.index == i);
+    // The pointer is over this tab, so its close button is showing (hovered or front tabs show it).
+    const bool showsClose = tabs_[i].closable && !tabs_[i].locked;
     const dock::Rect c = closeRect(i);
     if (showsClose && x >= c.x && x < c.right() && y >= c.y && y < c.bottom()) return {Part::Close, i};
     return {Part::Tab, i};
@@ -331,7 +332,7 @@ void DockTabStrip::onPointerDown(Event& e) {
       const bool locked = tabs_[hit.index].locked;
       ui().router().focus(id(), core::events::FocusReason::Pointer);
       if (!locked) {
-        press_ = {true, hit.index, e.x - t.x, e.y - t.y, e.x, e.y};
+        press_ = {true, hit.index, e.x - t.x, e.y - t.y};
         ui().router().capturePointer(id());
       }
       e.markHandled();

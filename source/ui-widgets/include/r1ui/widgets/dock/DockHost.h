@@ -108,6 +108,8 @@ class DockHost : public WidgetObject, public dock::ILayoutTarget, private IDockI
   // Moves the panel's whole stack into one new floating window.
   bool moveStackToNewWindow(dock::PanelId panel);
   bool setPanelLocked(dock::PanelId panel, bool locked);
+  // Moves and resizes a floating window (content rectangle, screen coordinates); the backend may limit it.
+  bool setWindowRect(uint32_t area, const dock::Rect& contentRect);
   bool togglePinned(dock::PanelId panel);
   bool toggleCollapsed(dock::PanelId panel);
   // Keyboard navigation between tab strips (spec 01); false when there is nothing to move to.
@@ -194,7 +196,6 @@ class DockHost : public WidgetObject, public dock::ILayoutTarget, private IDockI
   const AreaRec* areaRecForWindow(FloatId window) const;
   void setActivePanel(dock::PanelId panel);
   dock::PanelId frontOfStackHolding(dock::PanelId panel) const;
-  void adoptContentsForRebuild();
   MenuController& menuFor(UiContext& ui);
   void closeMenus();
   bool commitOp(const dock::Status& status);
@@ -223,7 +224,6 @@ class DockHost : public WidgetObject, public dock::ILayoutTarget, private IDockI
     UiContext* hoverUi = nullptr;
     uint32_t hoverTimer = 0;
     std::vector<dock::PanelId> activated;  // fronts changed by hovering, restored on Escape
-    core::tree::WidgetId savedFocus;
     UiContext* overlayUi = nullptr;
     core::tree::WidgetId overlay;
   };
@@ -264,7 +264,6 @@ class DockHost : public WidgetObject, public dock::ILayoutTarget, private IDockI
   std::string lastError_;
   std::function<void(DockChange)> onChanged_;
   std::function<dock::DockLayout()> defaultLayout_;
-  uint32_t registryRevision_ = 0;
   bool inRelayout_ = false;
   bool detached_ = false;
   std::shared_ptr<bool> alive_ = std::make_shared<bool>(true);

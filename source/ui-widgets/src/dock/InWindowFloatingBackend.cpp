@@ -146,7 +146,7 @@ FloatCreateResult InWindowFloatingBackend::createWindow(const FloatRequest& requ
   w.content = {request.contentRect.x, request.contentRect.y, std::max(request.contentRect.w, w.minSize.x), std::max(request.contentRect.h, w.minSize.y)};
   w.content = clampRect(w, w.content);
   try {
-    w.frame = ui_.create<FloatingFrame>(layer_, *this, w.id, options_.titleHeight, options_.border, options_.radius, options_.resizeBand).id();
+    w.frame = ui_.create<FloatingFrame>(layer_, *this, w.id, options_.titleHeight, options_.radius, options_.resizeBand).id();
     w.holder = ui_.create<FloatingHolder>(w.frame).id();
   } catch (const std::exception& ex) {
     if (ui_.alive(w.frame)) ui_.destroy(w.frame);
