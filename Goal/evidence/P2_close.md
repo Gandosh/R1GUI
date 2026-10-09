@@ -1,6 +1,6 @@
 # Phase 2 close record
 
-**Status:** TECHNICAL PASS; owner gate PENDING   **Date:** 2026-10-09
+**Status:** TECHNICAL PASS; owner gate ACCEPTED (owner, 2026-10-09)   **Date:** 2026-10-09
 
 ## Slices
 | Slice | Status | Evidence |

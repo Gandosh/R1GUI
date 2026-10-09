@@ -59,7 +59,7 @@ All specs are behavior-only, with a provenance-log entry per spec.
 - [x] 2.13 [Unreal reference reads via separate reader session (only after 0.1)](Goal/evidence/P2_S13.md)
 - [x] 2.14 [Preview: click-through of the interaction specs](Goal/evidence/P2_S14.md)
 
-**P2 owner gate: PENDING** — [phase close record](Goal/evidence/P2_close.md)
+**P2 owner gate: ACCEPTED** (2026-10-09) — [phase close record](Goal/evidence/P2_close.md)
 
 ## Phase 3: Core toolkit
 
