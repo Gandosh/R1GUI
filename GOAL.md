@@ -63,7 +63,7 @@ All specs are behavior-only, with a provenance-log entry per spec.
 
 ## Phase 3: Core toolkit
 
-- [ ] 3.1 [ui-platform: Win32 window, input, clipboard, cursors, DPI](Goal/evidence/P3_S01.md)
+- [ ] 3.1 [ui-platform: Win32 window, input, clipboard, cursors, DPI; borderless windows with our own title bar (owner, 2026-10-09)](Goal/evidence/P3_S01.md)
 - [ ] 3.2 [ui-render: Vulkan device, swapchain per window, frame loop](Goal/evidence/P3_S02.md)
 - [ ] 3.3 [ui-render: 2D batcher (rects, rounded rects, borders, shadows, clipping)](Goal/evidence/P3_S03.md)
 - [ ] 3.4 [ui-text: font loading, shaping, glyph atlas](Goal/evidence/P3_S04.md)
