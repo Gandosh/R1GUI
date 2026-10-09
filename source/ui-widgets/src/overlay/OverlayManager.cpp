@@ -64,7 +64,7 @@ OverlayHandle OverlayManager::open(const OverlayOptions& options) {
   entry.focusPending = options.focusOnOpen;
   const bool tooltip = options.surface == OverlaySurface::Tooltip;
   if (options.modal) entry.blocker = ui_.create<OverlayBlocker>(layer_, options.scrim).id();
-  OverlayHost& host = ui_.create<OverlayHost>(layer_, options.surface, options.fadeInMs, options.interactive);
+  OverlayHost& host = ui_.create<OverlayHost>(layer_, options.surface, options.fadeInMs, options.interactive, options.shadow);
   entry.host = host.id();
 
   core::layout::Style& s = host.style();
@@ -172,6 +172,7 @@ OverlayManager::PressOutcome OverlayManager::pressOutside(WidgetId hit) {
     const size_t index = indexOf(id);
     if (index >= entries_.size()) continue;
     const Entry& e = entries_[index];
+    if (!e.options.interactive) continue;  // a tooltip above a menu must not shield it from the press
     if (!e.options.dismissOnOutsidePress) break;
     const WidgetId anchor = e.options.anchorWidget;
     const bool inAnchor = anchor.valid() && hit.valid() && (hit == anchor || ui_.tree().isAncestor(anchor, hit));
@@ -183,8 +184,17 @@ OverlayManager::PressOutcome OverlayManager::pressOutside(WidgetId hit) {
 }
 
 bool OverlayManager::escape(bool afterWidgets) {
-  if (entries_.empty()) return false;
-  const Entry& top = entries_.back();
+  // Tooltips (non-interactive overlays) never take part in dismissal: look past them, otherwise a
+  // visible tooltip would make Escape ignore the menu or dialog under it.
+  const auto topmostInteractive = [this]() {
+    for (size_t i = entries_.size(); i-- > 0;) {
+      if (entries_[i].options.interactive) return i;
+    }
+    return entries_.size();
+  };
+  const size_t topIndex = topmostInteractive();
+  if (topIndex >= entries_.size()) return false;
+  const Entry& top = entries_[topIndex];
   if (!top.options.dismissOnEscape) return false;
   if (!afterWidgets && !top.options.escapeFirst) return false;
   if (!top.options.closeAllOnEscape) {
@@ -192,7 +202,9 @@ bool OverlayManager::escape(bool afterWidgets) {
     return true;
   }
   // The whole contiguous menu stack closes at once (spec 01 rule 43).
-  while (!entries_.empty() && entries_.back().options.closeAllOnEscape) close(OverlayId{entries_.back().id}, DismissReason::Escape);
+  for (size_t index = topmostInteractive(); index < entries_.size() && entries_[index].options.closeAllOnEscape; index = topmostInteractive()) {
+    close(OverlayId{entries_[index].id}, DismissReason::Escape);
+  }
   return true;
 }
 

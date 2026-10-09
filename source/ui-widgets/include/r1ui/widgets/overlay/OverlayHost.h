@@ -17,6 +17,7 @@
 #pragma once
 
 #include <span>
+#include <string>
 
 #include "r1ui/theme/StyleSheet.h"
 #include "r1ui/widgets/overlay/OverlayManager.h"
@@ -34,8 +35,9 @@ class OverlayHost final : public WidgetObject {
  public:
   static std::span<const theme::StyleRuleEntry> styleRows();
 
-  OverlayHost(OverlaySurface surface, double fadeInMs, bool interactive)
-      : surface_(surface), fadeInMs_(fadeInMs), interactive_(interactive) {}
+  // `shadow` names a shadow token that replaces the surface's default (empty = default).
+  OverlayHost(OverlaySurface surface, double fadeInMs, bool interactive, std::string shadow = {})
+      : surface_(surface), fadeInMs_(fadeInMs), interactive_(interactive), shadow_(std::move(shadow)) {}
   const char* typeName() const override { return "OverlayHost"; }
   void onAttached() override;
   float paintOpacity() const override;
@@ -50,6 +52,7 @@ class OverlayHost final : public WidgetObject {
   OverlaySurface surface_;
   double fadeInMs_;
   bool interactive_;
+  std::string shadow_;
   bool shown_ = false;
   uint64_t shownAtMs_ = 0;
 };

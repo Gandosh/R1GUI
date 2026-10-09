@@ -33,6 +33,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "r1ui/core/layout/Geometry.h"
@@ -82,6 +83,7 @@ struct OverlayOptions {
 
   // ---- look ----
   OverlaySurface surface = OverlaySurface::Popover;
+  std::string shadow;                      // shadow token ("overlay", "xl", ...) replacing the surface's default; empty = default
   double fadeInMs = 0.0;                   // opacity ramp after the first paint (tooltips: 100)
 
   std::function<void(DismissReason)> onClosed;
