@@ -1,0 +1,18 @@
+# ui-props: headless module (no OS, GPU or widget types). Sources under src/ are globbed so adding a file
+# needs no CMake edit; tests under tests/ui-props/ are globbed by tests/ui-props/CMakeLists.txt.
+file(GLOB_RECURSE R1UI_PROPS_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+if(R1UI_PROPS_SOURCES)
+  add_library(ui-props STATIC ${R1UI_PROPS_SOURCES})
+else()
+  add_library(ui-props INTERFACE)
+endif()
+add_library(r1ui::props ALIAS ui-props)
+if(R1UI_PROPS_SOURCES)
+  target_include_directories(ui-props PUBLIC include)
+  target_compile_features(ui-props PUBLIC cxx_std_20)
+  target_link_libraries(ui-props PUBLIC r1ui::core PRIVATE r1ui_options)
+else()
+  target_include_directories(ui-props INTERFACE include)
+  target_compile_features(ui-props INTERFACE cxx_std_20)
+  target_link_libraries(ui-props INTERFACE r1ui::core)
+endif()

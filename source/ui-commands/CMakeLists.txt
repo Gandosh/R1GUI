@@ -1,0 +1,18 @@
+# ui-commands: headless module (no OS, GPU or widget types). Sources under src/ are globbed so adding a file
+# needs no CMake edit; tests under tests/ui-commands/ are globbed by tests/ui-commands/CMakeLists.txt.
+file(GLOB_RECURSE R1UI_COMMANDS_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+if(R1UI_COMMANDS_SOURCES)
+  add_library(ui-commands STATIC ${R1UI_COMMANDS_SOURCES})
+else()
+  add_library(ui-commands INTERFACE)
+endif()
+add_library(r1ui::commands ALIAS ui-commands)
+if(R1UI_COMMANDS_SOURCES)
+  target_include_directories(ui-commands PUBLIC include)
+  target_compile_features(ui-commands PUBLIC cxx_std_20)
+  target_link_libraries(ui-commands PUBLIC r1ui::core PRIVATE r1ui_options)
+else()
+  target_include_directories(ui-commands INTERFACE include)
+  target_compile_features(ui-commands INTERFACE cxx_std_20)
+  target_link_libraries(ui-commands INTERFACE r1ui::core)
+endif()
