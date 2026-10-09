@@ -87,8 +87,6 @@ r1test::visual::Build flyoutAt(int row) {
     o.maxHeightFraction = 0.0;
     const OverlayHandle h = ui.overlays().open(o);
     FlyoutList& list = ui.create<FlyoutList>(h.host, std::vector<FlyoutItem>{{.label = "Frame", .icon = "frame", .shortcut = "F"}, {.label = "Section", .icon = "layout-grid", .shortcut = "S"}}, [](size_t) {});
-    list.style().margin[layout::kLeft] = list.style().margin[layout::kRight] = layout::Length::px(1);  // as openFlyout does
-    list.style().margin[layout::kTop] = list.style().margin[layout::kBottom] = layout::Length::px(1);
     list.setHighlighted(row);
     ui.frame();
     (void)parent;

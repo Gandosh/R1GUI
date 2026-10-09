@@ -109,6 +109,9 @@ class TreeView : public WidgetObject {
   void onDragStart(Event& e) override;
   void onCaptureLost(Event& e) override;
   void onKeyDown(Event& e) override;
+  // Letters are text only while a rename field is open; otherwise they stay application shortcuts
+  // (type-to-search still works when the application does not claim the key).
+  bool wantsTextInput() const override { return rename_.active(); }
   void onTextInput(Event& e) override;
   void onFocusOut(Event& e) override;
   void onStateChanged(uint16_t previous) override;

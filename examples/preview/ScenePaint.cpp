@@ -1,6 +1,6 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: painting of the widget tree: the depth-first walk with clipping and culling, and the look
-//   of every node kind (box, text, icon, icon button, swatch, text field, title-bar glyphs).
+//   of every node kind (box, text, title-bar glyphs).
 // Why: all colours, radii and fonts are read from the resolved style of the node (StyleSheet over
 //   the active theme), so nothing here knows a colour value; only shapes and placement live here.
 // Callers: Scene::paint (PreviewApp frame, Bench, tests/preview offscreen render).
@@ -22,8 +22,6 @@ using r1ui::render::Rect;
 
 namespace {
 
-constexpr float kSelectionAlpha = 0.4f;
-
 bool outside(const Rect& r, int viewportWidth, int viewportHeight) {
   return r.x >= static_cast<float>(viewportWidth) || r.y >= static_cast<float>(viewportHeight) || r.x + r.w <= 0.0f ||
          r.y + r.h <= 0.0f;
@@ -31,8 +29,8 @@ bool outside(const Rect& r, int viewportWidth, int viewportHeight) {
 
 }  // namespace
 
+// The caller starts the text engine frame (TextEngine::beginFrame) before the first draw of the frame.
 void Scene::paint(Painter& painter) {
-  text_.beginFrame();
   paintWidget(painter, ids_.root);
 }
 
@@ -61,7 +59,6 @@ void Scene::paintBox(Painter& painter, Node& node, const Rect& rect) {
 
 void Scene::paintNode(Painter& painter, WidgetId id, Node& node, const Rect& rect) {
   const float line = std::max(1.0f, std::round(scale_));
-  if (node.borderTop) painter.fillRect({rect.x, rect.y, rect.w, line}, themeColor("border"));
   if (node.borderBottom) painter.fillRect({rect.x, rect.y + rect.h - line, rect.w, line}, themeColor("border"));
   const tree::Widget* widget = tree_.get(id);
   switch (node.kind) {
@@ -81,46 +78,12 @@ void Scene::paintNode(Painter& painter, WidgetId id, Node& node, const Rect& rec
       if (overflow) painter.popClip();
       break;
     }
-    case NodeKind::Icon: {
-      const r1ui::theme::ResolvedStyle& style = resolved(node.textCache, node.textStyle, r1ui::theme::State::kNone);
-      const int px = std::max(1, static_cast<int>(std::lround(static_cast<float>(node.iconPx) * scale_)));
-      icons_.draw(painter, node.icon, rect.x + (rect.w - static_cast<float>(px)) * 0.5f, rect.y + (rect.h - static_cast<float>(px)) * 0.5f, px,
-                  color(style.text.color));
-      break;
-    }
-    case NodeKind::IconButton: {
-      paintBox(painter, node, rect);
-      const r1ui::theme::ResolvedStyle& style = resolved(node.boxCache, node.style, node.state);
-      const int px = std::max(1, static_cast<int>(std::lround(static_cast<float>(node.iconPx) * scale_)));
-      icons_.draw(painter, node.icon, rect.x + (rect.w - static_cast<float>(px)) * 0.5f, rect.y + (rect.h - static_cast<float>(px)) * 0.5f, px,
-                  color(style.text.color));
-      break;
-    }
-    case NodeKind::Swatch: {
-      const CornerRadii radii = CornerRadii::uniform(static_cast<float>(resolved(node.boxCache, node.style, 0).radius) * scale_);
-      painter.fillRoundedRect(rect, radii, Color::fromHex((node.swatchRgb << 8) | 0xFFu));
-      paintBox(painter, node, rect);
-      break;
-    }
-    case NodeKind::TextField: paintTextField(painter, node, rect); break;
     case NodeKind::ChromeGlyph: {
       paintBox(painter, node, rect);
       paintChromeGlyph(painter, node, rect, color(resolved(node.boxCache, node.style, node.state).text.color));
       break;
     }
   }
-}
-
-void Scene::paintTextField(Painter& painter, Node& node, const Rect& rect) {
-  paintBox(painter, node, rect);
-  const r1ui::theme::ResolvedStyle& text = resolved(node.textCache, node.textStyle, r1ui::theme::State::kNone);
-  const r1ui::theme::ResolvedStyle& box = resolved(node.boxCache, node.style, node.state);
-  Color selection = themeColor("accent");
-  selection.a = kSelectionAlpha;
-  const NameFieldColors colors{color(text.text.color), themeColor("muted"), selection, color(text.text.color)};
-  const float px = static_cast<float>(text.text.fontSize) * scale_;
-  name_->paint(painter, rect, static_cast<float>(box.paddingX) * scale_, 6.0f * scale_, px,
-               static_cast<float>(text.text.lineHeight) * scale_, node.text, colors);
 }
 
 // The four caption glyphs are drawn with lines and 1 px borders, like the OS ones.

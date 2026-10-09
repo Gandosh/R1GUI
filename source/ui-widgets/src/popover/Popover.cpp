@@ -39,8 +39,7 @@ PopoverHandle openPopover(UiContext& ui, const PopoverOptions& options) {
   if (!handle.valid()) return {};
   if (WidgetObject* host = ui.object(handle.host)) {
     core::layout::Style& s = host->style();
-    const double pad = sane(options.padding) + 1.0;  // + the 1 px border, which has no layout effect
-    for (double& p : s.padding) p = pad;
+    for (double& p : s.padding) p += sane(options.padding);  // on top of the host border
     if (options.width > 0.0 && std::isfinite(options.width)) s.width = core::layout::Length::px(options.width);
     host->requestLayout();
   }

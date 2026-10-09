@@ -13,3 +13,4 @@ function(r1ui_preview_test name source test label)
 endfunction()
 
 r1ui_preview_test(preview-scene-test scene_test.cpp preview.scene gpu)
+r1ui_preview_test(preview-modes-test modes_test.cpp preview.modes fast)

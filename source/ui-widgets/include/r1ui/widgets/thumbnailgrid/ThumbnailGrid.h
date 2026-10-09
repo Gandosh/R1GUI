@@ -170,6 +170,7 @@ class ThumbnailGrid : public WidgetObject {
   void onDoubleClick(Event& e) override;
   void onCaptureLost(Event& e) override;
   void onKeyDown(Event& e) override;
+  bool wantsTextInput() const override { return true; }
   void onTextInput(Event& e) override;
   void onFocusIn(Event& e) override;
   void onFocusOut(Event& e) override;

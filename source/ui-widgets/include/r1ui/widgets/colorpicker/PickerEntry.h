@@ -78,6 +78,7 @@ class PickerEntry : public WidgetObject {
   void onPointerDown(Event& e) override;
   void onPointerMove(Event& e) override;
   void onKeyDown(Event& e) override;
+  bool wantsTextInput() const override { return true; }
   void onTextInput(Event& e) override;
   void onFocusIn(Event& e) override;
   void onFocusOut(Event& e) override;

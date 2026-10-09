@@ -145,9 +145,29 @@ bool UiContext::textInput(char32_t codePoint, uint8_t modifiers) {
   return router_.textInput(codePoint, modifiers, nowMs_);
 }
 
+bool UiContext::focusWidget(WidgetId id, events::FocusReason reason) {
+  DispatchGuard guard(*this);
+  return router_.focus(id, reason);
+}
+
+void UiContext::clearFocus() {
+  DispatchGuard guard(*this);
+  router_.clearFocus();
+}
+
+// A focused widget that takes typed text gets every unmodified letter, digit and space: they are
+// text for it, never application shortcuts (typing "t" in a field must not switch the theme).
 bool UiContext::onGlobalKey(const events::Event& event, events::Router& router) {
   if (event.key == events::Key::Escape && overlays_.escape(true)) return true;
-  return appKeys_ != nullptr && appKeys_->onGlobalKey(event, router);
+  if (appKeys_ == nullptr) return false;
+  const uint32_t key = static_cast<uint32_t>(event.key);
+  const bool printable = key == 32 || (key >= 48 && key <= 57) || (key >= 65 && key <= 90);
+  const bool commandMods = (event.modifiers & (events::Mod::kCtrl | events::Mod::kAlt | events::Mod::kMeta)) != 0;
+  if (printable && !commandMods) {
+    const WidgetObject* focused = object(router.focused());
+    if (focused != nullptr && focused->wantsTextInput()) return false;
+  }
+  return appKeys_->onGlobalKey(event, router);
 }
 
 Cursor UiContext::cursor() const {

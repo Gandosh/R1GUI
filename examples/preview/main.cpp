@@ -1,13 +1,14 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the R1GUI interactive preview entry point and its command line:
-//   (no arguments)            the preview: a borderless window with the Phase 3 widget panel (mode
-//                             Widgets), token swatches, reference screens and the docking sandbox.
-//                             Tab cycles the modes, T toggles dark/light, Esc quits (or leaves the
-//                             Name field / cancels a dock tab drag).
-//   --bench <directory>       the performance baseline (Bench.h); writes phase3_baseline.json/.md
-//   --panel-shot <directory>  offscreen renders of the Widgets scene for visual comparison
+//   (no arguments)            the preview: a borderless window with the widget gallery (default mode),
+//                             the composed Widgets screen, token swatches, reference screens and the
+//                             docking sandbox. Tab cycles the modes, T toggles dark/light, Esc leaves
+//                             a focused widget, then quits (or cancels a dock tab drag).
+//   --bench <directory>       the performance baseline (Bench.h); writes phase4_baseline.json/.md
+//   --shot <directory>        offscreen renders of the Widgets screen and the gallery pages (both
+//                             themes) for visual comparison
 // Why: owner requirement that every phase ends with something launchable to interact with, built
-//   from the real modules (ui-core, ui-theme, ui-text, ui-render, ui-platform, ui-dock).
+//   from the real modules (ui-core, ui-theme, ui-text, ui-render, ui-platform, ui-dock, ui-widgets).
 // Callers: the OS. Errors: any failure (missing asset, device lost, bad paint call) becomes one
 //   message box naming the problem and exit code 1, never a crash or a silent exit.
 #include <windows.h>
@@ -19,7 +20,7 @@
 #include <vector>
 
 #include "Bench.h"
-#include "PanelShot.h"
+#include "Shots.h"
 #include "PreviewApp.h"
 #include "r1ui/render/RenderDevice.h"
 
@@ -54,13 +55,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
   try {
     const std::vector<std::wstring> args = commandLine();
     if (args.size() == 2 && args[0] == L"--bench") return preview::runBench(std::filesystem::path(args[1]));
-    if (args.size() == 2 && args[0] == L"--panel-shot") {
-      preview::renderPanelShot(args[1], r1ui::theme::ThemeId::Dark);
-      preview::renderPanelShot(args[1], r1ui::theme::ThemeId::Light);
+    if (args.size() == 2 && args[0] == L"--shot") {
+      preview::renderShots(args[1], r1ui::theme::ThemeId::Dark);
+      preview::renderShots(args[1], r1ui::theme::ThemeId::Light);
       return 0;
     }
     if (!args.empty()) {
-      showError("Unknown arguments. Usage: r1gui-preview [--bench <directory> | --panel-shot <directory>]");
+      showError("Unknown arguments. Usage: r1gui-preview [--bench <directory> | --shot <directory>]");
       return 2;
     }
     preview::PreviewApp app(preview::AppOptions{});
