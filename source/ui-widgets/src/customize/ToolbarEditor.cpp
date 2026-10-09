@@ -1,19 +1,19 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: implementation of ToolbarEditor.h: the strip of cells, its drag and drop, the eye badges, the
-//   keyboard, the context menu, and the header controls that set the size step and the gap.
+// Owns: implementation of ToolbarEditor.h, part 1: the strip's model mirror, geometry and painting, and the
+//   ToolbarEditor header (size step and gap controls). The strip's pointer, keyboard, context menu and
+//   drop logic are in ToolbarEditorInput.cpp.
 // Invariants: cells_ mirror Customization::editView() as of the last rebuild() (called on every model or
 //   edit-mode notification); the strip's size is always set from the cells, so layout never needs a
-//   measure callback; a drag always ends through the hub; the header controls only reflect the model
-//   (changing one calls the model, the notification updates the control).
+//   measure callback; the header controls only reflect the model (changing one calls the model, the
+//   notification updates the control).
 // Callers: CustomizableToolbar, the gallery, tests.
-#include "r1ui/widgets/customize/ToolbarEditor.h"
-
 #include <algorithm>
 #include <cmath>
 
 #include "CustomizeBox.h"
 #include "CustomizeCommon.h"
-#include "r1ui/widgets/customize/CommandPicker.h"
+#include "ToolbarEditorMetrics.h"
+#include "r1ui/widgets/customize/ToolbarEditor.h"
 #include "r1ui/widgets/label/Label.h"
 #include "r1ui/widgets/segmented/Segmented.h"
 
@@ -24,22 +24,12 @@ namespace layout = core::layout;
 using core::events::Button;
 using core::events::Key;
 namespace Mod = core::events::Mod;
-
-namespace {
-
-constexpr double kPad = 5.0;        // surface padding (4 plus the border)
-constexpr double kBand = 16.0;      // the eye badges' band along the strip
-constexpr double kSeparator = 4.0;  // a separator cell's length
-constexpr double kSpacer = 28.0;
-constexpr double kTrigger = 12.0;   // the flyout chevron's width
-
-cz::EditResult runDrop(cz::Customization& m, const std::string& toolbar, const DragPayload& payload, const cz::Placement& at) {
-  (void)toolbar;
-  if (payload.kind == DragPayload::Kind::Command) return m.addCommand(at.parent, payload.commandId, at.anchor, at.side);
-  return m.move(payload.nodeId, at);
-}
-
-}  // namespace
+using cust::kStripBand;
+using cust::kStripPad;
+using cust::kStripSeparator;
+using cust::kStripSpacer;
+using cust::kStripTrigger;
+using cust::runStripDrop;
 
 // ---- strip: model mirror and geometry -----------------------------------------------------------
 
@@ -58,6 +48,7 @@ void ToolbarEditStrip::onAttached() {
 }
 
 void ToolbarEditStrip::onDetached() {
+  cancelDrag();
   controller_.unsubscribe(listener_);
   controller_.drag().removeTarget(id());
   if (contextMenu_) contextMenu_->close();
@@ -76,7 +67,7 @@ void ToolbarEditStrip::rebuild() {
   locked_ = t->locked;
   step_ = cz::sizeStepPixels(t->sizeStep);
   gap_ = t->gap;
-  double pos = kPad;
+  double pos = kStripPad;
   for (const cz::Node& n : t->items) {
     Cell c;
     c.id = n.id;
@@ -95,24 +86,24 @@ void ToolbarEditStrip::rebuild() {
         const cz::Node* first = n.children.empty() ? nullptr : &n.children.front();
         c.label = first != nullptr ? controller_.model().shownLabel(*first) + " (group)" : "Group";
         c.icon = first != nullptr ? cust::commandIconOf(controller_.services(), first->commandId) : "circle";
-        c.size = step_ + kTrigger;
+        c.size = step_ + kStripTrigger;
         break;
       }
       case cz::Kind::Separator:
         c.label = "Separator";
-        c.size = kSeparator;
+        c.size = kStripSeparator;
         break;
       default:
         c.label = "Spacer";
-        c.size = kSpacer;
+        c.size = kStripSpacer;
         break;
     }
     c.pos = pos;
     pos += c.size + gap_;
     cells_.push_back(std::move(c));
   }
-  const double main = cells_.empty() ? 140.0 : pos - gap_ + kPad;
-  const double cross = step_ + 2 * kPad + kBand;
+  const double main = cells_.empty() ? 140.0 : pos - gap_ + kStripPad;
+  const double cross = step_ + 2 * kStripPad + kStripBand;
   style().width = layout::Length::px(vertical_ ? cross : main);
   style().height = layout::Length::px(vertical_ ? main : cross);
   if (!cursor_.empty() && itemIndex(cursor_) < 0) cursor_.clear();
@@ -125,13 +116,13 @@ layout::RectD ToolbarEditStrip::cellRect(const Cell& c) const {
   const layout::Rect self = ui().absRect(id());
   const double crossLength = (c.kind == cz::Kind::Separator) ? 20.0 : step_;
   const double crossOffset = (step_ - crossLength) * 0.5;
-  if (vertical_) return {self.x + kPad + crossOffset, self.y + c.pos, crossLength, c.size};
-  return {self.x + c.pos, self.y + kBand + kPad + crossOffset, c.size, crossLength};
+  if (vertical_) return {self.x + kStripPad + crossOffset, self.y + c.pos, crossLength, c.size};
+  return {self.x + c.pos, self.y + kStripBand + kStripPad + crossOffset, c.size, crossLength};
 }
 
 layout::RectD ToolbarEditStrip::eyeRect(const Cell& c) const {
   const layout::Rect self = ui().absRect(id());
-  if (vertical_) return {self.x + kPad + step_ + 2.0, self.y + c.pos + c.size * 0.5 - 7.0, 14.0, 14.0};
+  if (vertical_) return {self.x + kStripPad + step_ + 2.0, self.y + c.pos + c.size * 0.5 - 7.0, 14.0, 14.0};
   return {self.x + c.pos + c.size * 0.5 - 7.0, self.y + 1.0, 14.0, 14.0};
 }
 
@@ -229,7 +220,7 @@ void ToolbarEditStrip::paint(PaintContext& ctx) {
         if (hovered) ctx.painter().fillRoundedRect(ctx.toPhysical(button.x, button.y, button.w, button.h), render::CornerRadii::uniform(ctx.px(8.0)), ctx.color("hover"));
         cust::drawIconSafe(ctx, c.icon, 16.0, ctx.toPhysical(button.x, button.y, button.w, button.h), c.missing ? ctx.color("danger") : (hovered ? ctx.color("surface") : muted));
         if (c.kind == cz::Kind::Group) {
-          const layout::RectD chevron = vertical_ ? layout::RectD{r.x, r.y + main, r.w, kTrigger} : layout::RectD{r.x + main, r.y, kTrigger, r.h};
+          const layout::RectD chevron = vertical_ ? layout::RectD{r.x, r.y + main, r.w, kStripTrigger} : layout::RectD{r.x + main, r.y, kStripTrigger, r.h};
           cust::drawIconSafe(ctx, vertical_ ? "chevron-right" : "chevron-down", 12.0, ctx.toPhysical(chevron.x, chevron.y, chevron.w, chevron.h), muted);
         }
         break;
@@ -247,293 +238,13 @@ void ToolbarEditStrip::paint(PaintContext& ctx) {
     TextOptions o;
     o.align = TextAlign::Center;
     o.color = ctx.color(s.color);
-    ctx.drawText("Drop a command here", s, ctx.toPhysical(self.x, self.y + kBand, self.w, step_ + 2 * kPad), o);
+    ctx.drawText("Drop a command here", s, ctx.toPhysical(self.x, self.y + kStripBand, self.w, step_ + 2 * kStripPad), o);
   }
   if (indicator_.active) {
     const layout::RectD& l = indicator_.line;
     ctx.painter().fillRoundedRect(ctx.toPhysical(l.x, l.y, l.w, l.h), render::CornerRadii::uniform(ctx.px(1.0)), accent);
   }
   if (focusVisible()) ctx.focusRing(radii.topLeft);
-}
-
-// ---- strip: pointer -----------------------------------------------------------------------------
-
-void ToolbarEditStrip::onPointerMove(Event& e) {
-  if (dragging_) {
-    controller_.drag().move(e.x, e.y);
-    e.markHandled();
-    return;
-  }
-  const Hit hit = hitAt(e.x, e.y);
-  std::string tip;
-  if (hit.index >= 0) {
-    const Cell& c = cells_[static_cast<size_t>(hit.index)];
-    tip = c.locked ? controller_.model().lockReason(c.id) : (hit.eye ? (c.visible ? "Hide" : "Show") : c.label);
-    if (c.locked && tip.empty()) tip = controller_.model().lockReason(toolbarId_);
-  }
-  if (hit.index != hover_.index || hit.eye != hover_.eye || tip != tip_) {
-    hover_ = hit;
-    tip_ = tip;
-    requestPaint();
-  }
-}
-
-void ToolbarEditStrip::onPointerLeave(Event&) {
-  if (dragging_) return;
-  hover_ = {};
-  tip_.clear();
-  requestPaint();
-}
-
-void ToolbarEditStrip::onPointerDown(Event& e) {
-  const Hit hit = hitAt(e.x, e.y);
-  if (e.button == Button::Right) {
-    if (hit.index >= 0) {
-      e.markHandled();
-      cursor_ = cells_[static_cast<size_t>(hit.index)].id;
-      openContextMenu(cursor_, e.x, e.y);
-    }
-    return;
-  }
-  if (e.button != Button::Left) return;
-  ui().router().focus(id(), core::events::FocusReason::Pointer);
-  e.markHandled();
-  pressed_ = hit;
-  armedId_.clear();
-  if (hit.index < 0) return;
-  cursor_ = cells_[static_cast<size_t>(hit.index)].id;
-  requestPaint();
-  if (!hit.eye) {
-    armedId_ = cursor_;
-    ui().router().capturePointer(id());
-  }
-}
-
-void ToolbarEditStrip::onDragStart(Event& e) {
-  if (armedId_.empty() || dragging_) return;
-  DragPayload payload;
-  payload.kind = DragPayload::Kind::Node;
-  payload.nodeId = armedId_;
-  const int index = itemIndex(armedId_);
-  payload.text = index >= 0 ? cells_[static_cast<size_t>(index)].label : armedId_;
-  dragging_ = controller_.drag().begin(std::move(payload), e.x, e.y);
-  e.markHandled();
-}
-
-void ToolbarEditStrip::onPointerUp(Event& e) {
-  if (e.button != Button::Left) return;
-  const bool wasDragging = dragging_;
-  dragging_ = false;
-  armedId_.clear();
-  if (wasDragging) controller_.drag().end(e.x, e.y);
-}
-
-void ToolbarEditStrip::onCaptureLost(Event&) { cancelDrag(); }
-
-void ToolbarEditStrip::cancelDrag() {
-  if (dragging_) controller_.drag().cancel();
-  dragging_ = false;
-  armedId_.clear();
-}
-
-void ToolbarEditStrip::onClick(Event& e) {
-  if (e.button != Button::Left) return;
-  const Hit hit = hitAt(e.x, e.y);
-  if (hit.index < 0 || !hit.eye || !pressed_.eye || hit.index != pressed_.index) return;
-  e.markHandled();
-  toggleHidden(cells_[static_cast<size_t>(hit.index)].id);
-}
-
-void ToolbarEditStrip::onFocusIn(Event&) { requestPaint(); }
-void ToolbarEditStrip::onFocusOut(Event&) { requestPaint(); }
-
-// ---- strip: actions -----------------------------------------------------------------------------
-
-void ToolbarEditStrip::toggleHidden(const std::string& nodeId) {
-  const cz::Node* node = controller_.model().find(nodeId);
-  if (node == nullptr) return;
-  controller_.noteResult(controller_.model().setHidden(nodeId, node->visible));
-}
-
-void ToolbarEditStrip::removeOrHide(const std::string& nodeId) {
-  const cz::Node* node = controller_.model().find(nodeId);
-  if (node == nullptr) return;
-  controller_.noteResult(node->user ? controller_.model().removeUserEntry(nodeId) : controller_.model().setHidden(nodeId, true));
-}
-
-void ToolbarEditStrip::moveByKey(const std::string& nodeId, int direction) {
-  const int index = itemIndex(nodeId);
-  if (index < 0) return;
-  const int other = index + direction;
-  if (other < 0 || other >= static_cast<int>(cells_.size())) return;
-  const cz::Placement to{toolbarId_, cells_[static_cast<size_t>(other)].id, direction < 0 ? cz::Side::Before : cz::Side::After};
-  const cz::EditResult r = controller_.model().move(nodeId, to);
-  controller_.noteResult(r);
-  if (r.ok) cursor_ = nodeId;
-}
-
-void ToolbarEditStrip::onKeyDown(Event& e) {
-  if (e.key == Key::Escape && dragging_) {
-    cancelDrag();
-    ui().router().cancelPointerInteraction();
-    e.markHandled();
-    return;
-  }
-  if (e.modifiers & (Mod::kCtrl | Mod::kMeta)) return;
-  const bool alt = (e.modifiers & Mod::kAlt) != 0;
-  const Key previous = vertical_ ? Key::Up : Key::Left;
-  const Key next = vertical_ ? Key::Down : Key::Right;
-  const int index = itemIndex(cursor_);
-  const auto moveCursor = [&](int to) {
-    if (cells_.empty()) return;
-    to = std::clamp(to, 0, static_cast<int>(cells_.size()) - 1);
-    cursor_ = cells_[static_cast<size_t>(to)].id;
-    requestPaint();
-  };
-  if (e.key == previous) {
-    if (alt) {
-      moveByKey(cursor_, -1);
-    } else {
-      moveCursor(index < 0 ? static_cast<int>(cells_.size()) - 1 : index - 1);
-    }
-  } else if (e.key == next) {
-    if (alt) {
-      moveByKey(cursor_, 1);
-    } else {
-      moveCursor(index < 0 ? 0 : index + 1);
-    }
-  } else if (e.key == Key::Home) {
-    moveCursor(0);
-  } else if (e.key == Key::End) {
-    moveCursor(static_cast<int>(cells_.size()) - 1);
-  } else if (e.key == Key::Space) {
-    if (!cursor_.empty()) toggleHidden(cursor_);
-  } else if (e.key == Key::Delete) {
-    if (!cursor_.empty()) removeOrHide(cursor_);
-  } else if (e.key == Key::Insert) {
-    addCommandAtCursor();
-  } else {
-    return;
-  }
-  e.markHandled();
-}
-
-void ToolbarEditStrip::addCommandAtCursor() {
-  CommandPickerOptions options;
-  options.title = "Add a command to the toolbar";
-  const core::tree::WidgetId self = id();
-  UiContext* context = &ui();
-  options.onChosen = [context, self](const std::string& commandId) {
-    ToolbarEditStrip* s = context->objectAs<ToolbarEditStrip>(self);
-    if (s == nullptr) return;
-    const bool atItem = s->itemIndex(s->cursor_) >= 0;
-    s->controller_.noteResult(s->controller_.model().addCommand(s->toolbarId_, commandId, atItem ? s->cursor_ : std::string(), atItem ? cz::Side::After : cz::Side::End));
-  };
-  openCommandPicker(controller_, std::move(options));
-}
-
-bool ToolbarEditStrip::openContextMenu(const std::string& nodeId, double x, double y) {
-  const cz::Node* node = controller_.model().find(nodeId);
-  if (node == nullptr) return false;
-  const bool locked = node->locked || locked_;
-  const core::tree::WidgetId self = id();
-  UiContext* context = &ui();
-  MenuSpec spec;
-  const auto add = [&](const char* tag, const std::string& label, bool enabled, std::function<void(ToolbarEditStrip&)> fn) {
-    MenuItemSpec item = menuAction(std::string("customize:") + tag, label);
-    item.enabled = enabled;
-    item.onActivate = [context, self, fn = std::move(fn)](const MenuItemSpec&) {
-      if (ToolbarEditStrip* s = context->objectAs<ToolbarEditStrip>(self)) fn(*s);
-    };
-    spec.items.push_back(std::move(item));
-  };
-  add("visibility", node->visible ? "Hide" : "Show", !locked, [nodeId](ToolbarEditStrip& s) { s.toggleHidden(nodeId); });
-  spec.items.push_back(menuSeparator());
-  add("addCommand", "Add command...", !locked_, [nodeId](ToolbarEditStrip& s) {
-    s.cursor_ = nodeId;
-    s.addCommandAtCursor();
-  });
-  add("addSeparator", "Add separator", !locked_, [nodeId](ToolbarEditStrip& s) {
-    s.controller_.noteResult(s.controller_.model().addSeparator(s.toolbarId_, nodeId, cz::Side::After));
-  });
-  add("addSpacer", "Add spacer", !locked_, [nodeId](ToolbarEditStrip& s) {
-    s.controller_.noteResult(s.controller_.model().addSpacer(s.toolbarId_, nodeId, cz::Side::After));
-  });
-  if (node->user) add("remove", "Remove", !locked, [nodeId](ToolbarEditStrip& s) { s.removeOrHide(nodeId); });
-  spec.items.push_back(menuSeparator());
-  add("reset", "Reset this toolbar", !locked_, [](ToolbarEditStrip& s) { s.controller_.noteResult(s.controller_.model().resetMenu(s.toolbarId_)); });
-  spec.onCommand = [](const MenuItemSpec&) {};
-  return contextMenu_->openContextMenu(std::move(spec), x, y);
-}
-
-// ---- strip: drag and drop -----------------------------------------------------------------------
-
-ToolbarEditStrip::Candidate ToolbarEditStrip::locate(const DragPayload& payload, double x, double y) const {
-  (void)payload;
-  Candidate c;
-  const layout::Rect self = ui().absRect(id());
-  if (x < self.x || y < self.y || x >= self.x + self.w || y >= self.y + self.h) return c;
-  c.valid = true;
-  const double m = vertical_ ? y - self.y : x - self.x;
-  const double half = std::max(1.0, gap_ * 0.5);
-  const auto lineAt = [&](double at) -> layout::RectD {
-    if (vertical_) return {self.x + kPad, self.y + at - 1.0, step_, 2.0};
-    return {self.x + at - 1.0, self.y + kBand + kPad, 2.0, step_};
-  };
-  if (cells_.empty()) {
-    c.placement = {toolbarId_, "", cz::Side::End};
-    c.line = lineAt(kPad);
-    return c;
-  }
-  for (size_t i = 0; i < cells_.size(); ++i) {
-    const Cell& cell = cells_[i];
-    const double end = i + 1 < cells_.size() ? cells_[i + 1].pos - half : cell.pos + cell.size + kPad;
-    const double start = i == 0 ? 0.0 : cell.pos - half;
-    if (m < start || m >= end) continue;
-    const bool before = m < cell.pos + cell.size * 0.5;
-    c.placement = {toolbarId_, cell.id, before ? cz::Side::Before : cz::Side::After};
-    c.line = lineAt(before ? cell.pos - half : cell.pos + cell.size + half);
-    return c;
-  }
-  const Cell& last = cells_.back();
-  c.placement = {toolbarId_, last.id, cz::Side::After};
-  c.line = lineAt(last.pos + last.size + half);
-  return c;
-}
-
-bool ToolbarEditStrip::dragOver(const DragPayload& payload, double x, double y) {
-  indicator_ = {};
-  const Candidate c = locate(payload, x, y);
-  if (!c.valid) {
-    requestPaint();
-    return false;
-  }
-  const cz::EditResult r = controller_.model().preview([&](cz::Customization& m) { return runDrop(m, toolbarId_, payload, c.placement); });
-  if (!r.ok) {
-    if (r.error == cz::EditError::Locked) controller_.noteResult(r);
-    requestPaint();
-    return false;
-  }
-  indicator_.active = true;
-  indicator_.line = c.line;
-  indicator_.placement = c.placement;
-  requestPaint();
-  return true;
-}
-
-void ToolbarEditStrip::dragLeave() {
-  if (!indicator_.active) return;
-  indicator_ = {};
-  requestPaint();
-}
-
-bool ToolbarEditStrip::dragDrop(const DragPayload& payload, double x, double y) {
-  indicator_ = {};
-  const Candidate c = locate(payload, x, y);
-  if (!c.valid) return false;
-  const cz::EditResult r = runDrop(controller_.model(), toolbarId_, payload, c.placement);
-  controller_.noteResult(r);
-  return r.ok;
 }
 
 // ---- editor: header and strip -------------------------------------------------------------------

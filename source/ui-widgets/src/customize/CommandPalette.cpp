@@ -269,6 +269,11 @@ void CommandPaletteList::onPointerUp(Event& e) {
   if (wasDragging) controller_.drag().end(e.x, e.y);
 }
 
+void CommandPaletteList::onDetached() {
+  if (dragging_) controller_.drag().cancel();
+  dragging_ = false;
+}
+
 void CommandPaletteList::onCaptureLost(Event&) {
   if (dragging_) controller_.drag().cancel();
   dragging_ = false;

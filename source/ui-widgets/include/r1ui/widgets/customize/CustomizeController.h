@@ -14,8 +14,8 @@
 //   customize.revert (revert the session), customize.resetAll (opens the confirmation), customize.newMenu.
 //   They are ordinary registry commands: they appear in the keybinding editor, menus and palette.
 // Command set tracking: the controller wires the Customization to the registry (command labels, which
-//   commands exist) and tells it when the SET of commands changed (not on every touch), so entries of
-//   removed commands show as missing without a rebuild on each command execution.
+//   commands exist) and tells it when the number of commands changed (an add or a remove; not on every
+//   touch), so entries of removed commands show as missing without a rebuild on each command execution.
 // Lifetime: the controller must outlive the widgets built with it and be destroyed before the
 //   Customization, the registry and the UiContext. It removes its commands and subscriptions.
 // Threading: UI thread only.
@@ -95,7 +95,7 @@ class CustomizeController {
  private:
   void registerCommands();
   void notify();
-  uint64_t commandSignature() const;
+  size_t commandCount() const;
 
   UiContext& ui_;
   CommandServices services_;
@@ -106,7 +106,7 @@ class CustomizeController {
   std::string refusal_;
   std::string pendingRename_;
   uint64_t revision_ = 0;
-  uint64_t seenSignature_ = 0;
+  size_t seenCount_ = 0;
   std::vector<std::pair<ListenerId, Listener>> listeners_;
   std::vector<std::pair<ListenerId, Listener>> messageListeners_;
   std::string currentMenu_;

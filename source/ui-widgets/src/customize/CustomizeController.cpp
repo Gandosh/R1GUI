@@ -24,12 +24,12 @@ CustomizeController::CustomizeController(UiContext& ui, CommandServices services
     return def != nullptr ? def->label : id;
   });
   model_.setCommandExists([registry](const std::string& id) { return registry->find(id) != nullptr; });
-  seenSignature_ = commandSignature();
+  seenCount_ = commandCount();
   modelListener_ = model_.subscribe([this] { notify(); });
   registryListener_ = services_.registry.subscribe([this] {
-    const uint64_t now = commandSignature();
-    if (now == seenSignature_) return;
-    seenSignature_ = now;
+    const size_t now = commandCount();
+    if (now == seenCount_) return;
+    seenCount_ = now;
     model_.commandsChanged();
   });
   registerCommands();
@@ -46,14 +46,9 @@ CustomizeController::~CustomizeController() {
   if (editMode_) model_.commitSession();
 }
 
-uint64_t CustomizeController::commandSignature() const {
-  uint64_t hash = 1469598103934665603ull;
-  for (const cmd::CommandDef* def : services_.registry.commands()) {
-    for (const char c : def->id) hash = (hash ^ static_cast<unsigned char>(c)) * 1099511628211ull;
-    hash = (hash ^ 0xFFu) * 1099511628211ull;
-  }
-  return hash;
-}
+// The registry adds and removes commands one at a time and notifies after each, so a change of the count
+// is exactly a change of the set (checking it must stay O(1): hosts register thousands of commands).
+size_t CustomizeController::commandCount() const { return services_.registry.size(); }
 
 // ---- commands -----------------------------------------------------------------------------------
 

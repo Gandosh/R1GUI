@@ -278,6 +278,30 @@ void testWorkspaceLayer() {
   R1_EXPECT(merged.edits.at("menu.view").label == "Workspace" && merged.edits.at("edit.copy").hidden == true);
 }
 
+void testPreview() {
+  cz::Customization c = makeCustomization();
+  int calls = 0;
+  c.subscribe([&] { ++calls; });
+  const uint64_t v = c.version();
+  // A preview validates exactly like the real call, stores nothing and notifies nobody.
+  const cz::EditResult ok = c.preview([](cz::Customization& m) { return m.move("edit.paste", {"file.main", "", cz::Side::End}); });
+  R1_EXPECT(ok.ok && c.version() == v && c.userDelta().empty() && calls == 0);
+  const cz::EditResult locked = c.preview([](cz::Customization& m) { return m.move("edit.paste", {"help.main", "", cz::Side::End}); });
+  R1_EXPECT(!locked.ok && locked.error == cz::EditError::Locked && c.userDelta().empty());
+  const cz::EditResult add = c.preview([](cz::Customization& m) { return m.addCommand("file.main", "tool.pen"); });
+  R1_EXPECT(add.ok && !add.id.empty() && c.find(add.id) == nullptr && c.userDelta().empty());
+  // Nested previews restore the mode; the real call afterwards applies.
+  c.preview([&](cz::Customization& m) {
+    m.preview([](cz::Customization& inner) { return inner.hideEntry("edit.copy"); });
+    return m.hideEntry("edit.cut");
+  });
+  R1_EXPECT(c.userDelta().empty() && calls == 0);
+  R1_EXPECT(c.move("edit.paste", {"file.main", "", cz::Side::End}).ok && calls == 1 && c.userDelta().moves.size() == 1);
+  const uint64_t serial = c.userDelta().serial;
+  c.preview([](cz::Customization& m) { return m.addUserMenu("Preview only"); });
+  R1_EXPECT(c.userDelta().serial == serial && c.effective().layout.menuBar.menus.size() == 4);  // ids of previews are not consumed
+}
+
 void testCommandChanges() {
   bool present = true;
   cz::Customization c(builtinV1(), [&](const std::string& id) { return id != "edit.copy" || present; });
@@ -302,6 +326,7 @@ int main() {
   testFreeForm();
   testSession();
   testWorkspaceLayer();
+  testPreview();
   testCommandChanges();
   return r1test::finish();
 }

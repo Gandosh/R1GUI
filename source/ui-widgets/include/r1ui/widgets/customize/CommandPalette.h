@@ -43,6 +43,7 @@ class CommandPaletteList final : public WidgetObject {
   explicit CommandPaletteList(CustomizeController& controller) : controller_(controller) {}
   const char* typeName() const override { return "CommandPaletteList"; }
   void onAttached() override;
+  void onDetached() override;
   void paint(PaintContext& ctx) override;
   void paintOver(PaintContext& ctx) override;
   Cursor cursor() const override { return Cursor::Pointer; }
