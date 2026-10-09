@@ -1,0 +1,1603 @@
+{
+  "source": "OpenPencil",
+  "commit": "dd3161e44",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "captured": "2026-10-08",
+  "images": [
+    {
+      "theme": "dark",
+      "name": "screen-empty",
+      "file": "dark/screen-empty.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "empty document"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-rectangle-selected",
+      "file": "dark/screen-rectangle-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "rectangle selected, design panel"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-file-menu-open",
+      "file": "dark/screen-file-menu-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "File menu open"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-select-open",
+      "file": "dark/screen-select-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "Blend mode select open"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-fill-popover-open",
+      "file": "dark/screen-fill-popover-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "selection toolbar fill popover open"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-color-picker-open",
+      "file": "dark/screen-color-picker-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "color picker open from the fill popover swatch"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-context-menu",
+      "file": "dark/screen-context-menu.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "canvas context menu"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-toolbar-tooltip",
+      "file": "dark/screen-toolbar-tooltip.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "toolbar tooltip"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-number-field-editing",
+      "file": "dark/screen-number-field-editing.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "width number field in edit mode"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-width-focus",
+      "file": "dark/widget-number-field-width-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 267,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-width",
+      "state": "focus"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menubar-item-idle",
+      "file": "dark/widget-menubar-item-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 30,
+        "width": 47.90625,
+        "height": 36
+      },
+      "widget": "menubar-item",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menubar-item-hover",
+      "file": "dark/widget-menubar-item-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 30,
+        "width": 47.90625,
+        "height": 36
+      },
+      "widget": "menubar-item",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-segmented-control-idle",
+      "file": "dark/widget-segmented-control-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 5,
+        "y": 67,
+        "width": 129.09375,
+        "height": 34
+      },
+      "widget": "segmented-control",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-segmented-control-hover",
+      "file": "dark/widget-segmented-control-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 5,
+        "y": 67,
+        "width": 129.09375,
+        "height": 34
+      },
+      "widget": "segmented-control",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-page-row-idle",
+      "file": "dark/widget-page-row-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 126.5,
+        "width": 262.203125,
+        "height": 36
+      },
+      "widget": "page-row",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-page-row-hover",
+      "file": "dark/widget-page-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 126.5,
+        "width": 262.203125,
+        "height": 36
+      },
+      "widget": "page-row",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-design-idle",
+      "file": "dark/widget-tab-design-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1183.796875,
+        "y": 42.5,
+        "width": 71.359375,
+        "height": 36
+      },
+      "widget": "tab-design",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-design-hover",
+      "file": "dark/widget-tab-design-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1183.796875,
+        "y": 42.5,
+        "width": 71.359375,
+        "height": 36
+      },
+      "widget": "tab-design",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-code-idle",
+      "file": "dark/widget-tab-code-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1247.15625,
+        "y": 42.5,
+        "width": 78.3125,
+        "height": 36
+      },
+      "widget": "tab-code",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-code-hover",
+      "file": "dark/widget-tab-code-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1247.15625,
+        "y": 42.5,
+        "width": 78.3125,
+        "height": 36
+      },
+      "widget": "tab-code",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-share-button-idle",
+      "file": "dark/widget-share-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1351.140625,
+        "y": 0,
+        "width": 88.859375,
+        "height": 40
+      },
+      "widget": "share-button",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-share-button-hover",
+      "file": "dark/widget-share-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1351.140625,
+        "y": 0,
+        "width": 88.859375,
+        "height": 40
+      },
+      "widget": "share-button",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-toolbar-button-idle",
+      "file": "dark/widget-toolbar-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 546.5,
+        "y": 841,
+        "width": 44,
+        "height": 44
+      },
+      "widget": "toolbar-button",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-toolbar-button-hover",
+      "file": "dark/widget-toolbar-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 546.5,
+        "y": 841,
+        "width": 44,
+        "height": 44
+      },
+      "widget": "toolbar-button",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-toolbar-button-active-theme-idle",
+      "file": "dark/widget-toolbar-button-active-theme-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1121.796875,
+        "y": 841,
+        "width": 44,
+        "height": 44
+      },
+      "widget": "toolbar-button-active-theme",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-toolbar-button-active-theme-hover",
+      "file": "dark/widget-toolbar-button-active-theme-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1121.796875,
+        "y": 841,
+        "width": 44,
+        "height": 44
+      },
+      "widget": "toolbar-button-active-theme",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-icon-button-panel-idle",
+      "file": "dark/widget-icon-button-panel-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1340,
+        "y": 207,
+        "width": 38,
+        "height": 38
+      },
+      "widget": "icon-button-panel",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-icon-button-panel-hover",
+      "file": "dark/widget-icon-button-panel-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1340,
+        "y": 207,
+        "width": 38,
+        "height": 38
+      },
+      "widget": "icon-button-panel",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-icon-button-small-idle",
+      "file": "dark/widget-icon-button-small-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1256.890625,
+        "y": 270,
+        "width": 32,
+        "height": 32
+      },
+      "widget": "icon-button-small",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-icon-button-small-hover",
+      "file": "dark/widget-icon-button-small-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1256.890625,
+        "y": 270,
+        "width": 32,
+        "height": 32
+      },
+      "widget": "icon-button-small",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-x-idle",
+      "file": "dark/widget-number-field-x-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 175,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-x",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-x-hover",
+      "file": "dark/widget-number-field-x-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 175,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-x",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-width-idle",
+      "file": "dark/widget-number-field-width-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 267,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-width",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-width-hover",
+      "file": "dark/widget-number-field-width-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 267,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-width",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-opacity-idle",
+      "file": "dark/widget-number-field-opacity-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1307.890625,
+        "y": 357,
+        "width": 126.109375,
+        "height": 38
+      },
+      "widget": "number-field-opacity",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-opacity-hover",
+      "file": "dark/widget-number-field-opacity-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1307.890625,
+        "y": 357,
+        "width": 126.109375,
+        "height": 38
+      },
+      "widget": "number-field-opacity",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-select-trigger-idle",
+      "file": "dark/widget-select-trigger-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 357,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "select-trigger",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-select-trigger-hover",
+      "file": "dark/widget-select-trigger-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 357,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "select-trigger",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-paint-field-idle",
+      "file": "dark/widget-paint-field-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 528,
+        "width": 186.203125,
+        "height": 38
+      },
+      "widget": "paint-field",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-paint-field-hover",
+      "file": "dark/widget-paint-field-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 528,
+        "width": 186.203125,
+        "height": 38
+      },
+      "widget": "paint-field",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-panel-header-rectangle-idle",
+      "file": "dark/widget-panel-header-rectangle-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1175.796875,
+        "y": 75,
+        "width": 270.203125,
+        "height": 55
+      },
+      "widget": "panel-header-rectangle",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-panel-header-rectangle-hover",
+      "file": "dark/widget-panel-header-rectangle-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1175.796875,
+        "y": 75,
+        "width": 270.203125,
+        "height": 55
+      },
+      "widget": "panel-header-rectangle",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-panel-section-title-idle",
+      "file": "dark/widget-panel-section-title-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 250,
+        "width": 246.203125,
+        "height": 23
+      },
+      "widget": "panel-section-title",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-panel-section-title-hover",
+      "file": "dark/widget-panel-section-title-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 250,
+        "width": 246.203125,
+        "height": 23
+      },
+      "widget": "panel-section-title",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-panel-field-label-idle",
+      "file": "dark/widget-panel-field-label-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 342,
+        "width": 126.09375,
+        "height": 23
+      },
+      "widget": "panel-field-label",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-panel-field-label-hover",
+      "file": "dark/widget-panel-field-label-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 342,
+        "width": 126.09375,
+        "height": 23
+      },
+      "widget": "panel-field-label",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-selected-idle",
+      "file": "dark/widget-layer-row-selected-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 262.203125,
+        "height": 36
+      },
+      "widget": "layer-row-selected",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-selected-hover",
+      "file": "dark/widget-layer-row-selected-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 262.203125,
+        "height": 36
+      },
+      "widget": "layer-row-selected",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-section-add-button-idle",
+      "file": "dark/widget-section-add-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1396,
+        "y": 494,
+        "width": 38,
+        "height": 38
+      },
+      "widget": "section-add-button",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-section-add-button-hover",
+      "file": "dark/widget-section-add-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1396,
+        "y": 494,
+        "width": 38,
+        "height": 38
+      },
+      "widget": "section-add-button",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "screen-empty-canvas-selected",
+      "file": "light/screen-empty-canvas-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "light theme, rectangle selected"
+    },
+    {
+      "theme": "light",
+      "name": "screen-rectangle-selected",
+      "file": "light/screen-rectangle-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "rectangle selected, design panel"
+    },
+    {
+      "theme": "light",
+      "name": "screen-file-menu-open",
+      "file": "light/screen-file-menu-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "File menu open"
+    },
+    {
+      "theme": "light",
+      "name": "screen-select-open",
+      "file": "light/screen-select-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "Blend mode select open"
+    },
+    {
+      "theme": "light",
+      "name": "screen-fill-popover-open",
+      "file": "light/screen-fill-popover-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "selection toolbar fill popover open"
+    },
+    {
+      "theme": "light",
+      "name": "screen-color-picker-open",
+      "file": "light/screen-color-picker-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "color picker open from the fill popover swatch"
+    },
+    {
+      "theme": "light",
+      "name": "screen-context-menu",
+      "file": "light/screen-context-menu.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "canvas context menu"
+    },
+    {
+      "theme": "light",
+      "name": "screen-toolbar-tooltip",
+      "file": "light/screen-toolbar-tooltip.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "toolbar tooltip"
+    },
+    {
+      "theme": "light",
+      "name": "screen-number-field-editing",
+      "file": "light/screen-number-field-editing.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "scene": "width number field in edit mode"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-width-focus",
+      "file": "light/widget-number-field-width-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 267,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-width",
+      "state": "focus"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menubar-item-idle",
+      "file": "light/widget-menubar-item-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 30,
+        "width": 47.90625,
+        "height": 36
+      },
+      "widget": "menubar-item",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menubar-item-hover",
+      "file": "light/widget-menubar-item-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 30,
+        "width": 47.90625,
+        "height": 36
+      },
+      "widget": "menubar-item",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-segmented-control-idle",
+      "file": "light/widget-segmented-control-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 5,
+        "y": 67,
+        "width": 129.09375,
+        "height": 34
+      },
+      "widget": "segmented-control",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-segmented-control-hover",
+      "file": "light/widget-segmented-control-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 5,
+        "y": 67,
+        "width": 129.09375,
+        "height": 34
+      },
+      "widget": "segmented-control",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-page-row-idle",
+      "file": "light/widget-page-row-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 126.5,
+        "width": 262.203125,
+        "height": 36
+      },
+      "widget": "page-row",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-page-row-hover",
+      "file": "light/widget-page-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 126.5,
+        "width": 262.203125,
+        "height": 36
+      },
+      "widget": "page-row",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-design-idle",
+      "file": "light/widget-tab-design-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1183.796875,
+        "y": 42.5,
+        "width": 71.359375,
+        "height": 36
+      },
+      "widget": "tab-design",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-design-hover",
+      "file": "light/widget-tab-design-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1183.796875,
+        "y": 42.5,
+        "width": 71.359375,
+        "height": 36
+      },
+      "widget": "tab-design",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-code-idle",
+      "file": "light/widget-tab-code-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1247.15625,
+        "y": 42.5,
+        "width": 78.3125,
+        "height": 36
+      },
+      "widget": "tab-code",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-code-hover",
+      "file": "light/widget-tab-code-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1247.15625,
+        "y": 42.5,
+        "width": 78.3125,
+        "height": 36
+      },
+      "widget": "tab-code",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-share-button-idle",
+      "file": "light/widget-share-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1351.140625,
+        "y": 0,
+        "width": 88.859375,
+        "height": 40
+      },
+      "widget": "share-button",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-share-button-hover",
+      "file": "light/widget-share-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1351.140625,
+        "y": 0,
+        "width": 88.859375,
+        "height": 40
+      },
+      "widget": "share-button",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-toolbar-button-idle",
+      "file": "light/widget-toolbar-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 546.5,
+        "y": 841,
+        "width": 44,
+        "height": 44
+      },
+      "widget": "toolbar-button",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-toolbar-button-hover",
+      "file": "light/widget-toolbar-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 546.5,
+        "y": 841,
+        "width": 44,
+        "height": 44
+      },
+      "widget": "toolbar-button",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-toolbar-button-active-theme-idle",
+      "file": "light/widget-toolbar-button-active-theme-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1121.796875,
+        "y": 841,
+        "width": 44,
+        "height": 44
+      },
+      "widget": "toolbar-button-active-theme",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-toolbar-button-active-theme-hover",
+      "file": "light/widget-toolbar-button-active-theme-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1121.796875,
+        "y": 841,
+        "width": 44,
+        "height": 44
+      },
+      "widget": "toolbar-button-active-theme",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-icon-button-panel-idle",
+      "file": "light/widget-icon-button-panel-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1340,
+        "y": 207,
+        "width": 38,
+        "height": 38
+      },
+      "widget": "icon-button-panel",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-icon-button-panel-hover",
+      "file": "light/widget-icon-button-panel-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1340,
+        "y": 207,
+        "width": 38,
+        "height": 38
+      },
+      "widget": "icon-button-panel",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-icon-button-small-idle",
+      "file": "light/widget-icon-button-small-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1256.890625,
+        "y": 270,
+        "width": 32,
+        "height": 32
+      },
+      "widget": "icon-button-small",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-icon-button-small-hover",
+      "file": "light/widget-icon-button-small-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1256.890625,
+        "y": 270,
+        "width": 32,
+        "height": 32
+      },
+      "widget": "icon-button-small",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-x-idle",
+      "file": "light/widget-number-field-x-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 175,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-x",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-x-hover",
+      "file": "light/widget-number-field-x-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 175,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-x",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-width-idle",
+      "file": "light/widget-number-field-width-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 267,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-width",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-width-hover",
+      "file": "light/widget-number-field-width-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 267,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "number-field-width",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-opacity-idle",
+      "file": "light/widget-number-field-opacity-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1307.890625,
+        "y": 357,
+        "width": 126.109375,
+        "height": 38
+      },
+      "widget": "number-field-opacity",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-opacity-hover",
+      "file": "light/widget-number-field-opacity-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1307.890625,
+        "y": 357,
+        "width": 126.109375,
+        "height": 38
+      },
+      "widget": "number-field-opacity",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-select-trigger-idle",
+      "file": "light/widget-select-trigger-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 357,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "select-trigger",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-select-trigger-hover",
+      "file": "light/widget-select-trigger-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 357,
+        "width": 126.09375,
+        "height": 38
+      },
+      "widget": "select-trigger",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-paint-field-idle",
+      "file": "light/widget-paint-field-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 528,
+        "width": 186.203125,
+        "height": 38
+      },
+      "widget": "paint-field",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-paint-field-hover",
+      "file": "light/widget-paint-field-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 528,
+        "width": 186.203125,
+        "height": 38
+      },
+      "widget": "paint-field",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-panel-header-rectangle-idle",
+      "file": "light/widget-panel-header-rectangle-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1175.796875,
+        "y": 75,
+        "width": 270.203125,
+        "height": 55
+      },
+      "widget": "panel-header-rectangle",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-panel-header-rectangle-hover",
+      "file": "light/widget-panel-header-rectangle-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1175.796875,
+        "y": 75,
+        "width": 270.203125,
+        "height": 55
+      },
+      "widget": "panel-header-rectangle",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-panel-section-title-idle",
+      "file": "light/widget-panel-section-title-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 250,
+        "width": 246.203125,
+        "height": 23
+      },
+      "widget": "panel-section-title",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-panel-section-title-hover",
+      "file": "light/widget-panel-section-title-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 250,
+        "width": 246.203125,
+        "height": 23
+      },
+      "widget": "panel-section-title",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-panel-field-label-idle",
+      "file": "light/widget-panel-field-label-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 342,
+        "width": 126.09375,
+        "height": 23
+      },
+      "widget": "panel-field-label",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-panel-field-label-hover",
+      "file": "light/widget-panel-field-label-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 342,
+        "width": 126.09375,
+        "height": 23
+      },
+      "widget": "panel-field-label",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-selected-idle",
+      "file": "light/widget-layer-row-selected-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 262.203125,
+        "height": 36
+      },
+      "widget": "layer-row-selected",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-selected-hover",
+      "file": "light/widget-layer-row-selected-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 262.203125,
+        "height": 36
+      },
+      "widget": "layer-row-selected",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-section-add-button-idle",
+      "file": "light/widget-section-add-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1396,
+        "y": 494,
+        "width": 38,
+        "height": 38
+      },
+      "widget": "section-add-button",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-section-add-button-hover",
+      "file": "light/widget-section-add-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1396,
+        "y": 494,
+        "width": 38,
+        "height": 38
+      },
+      "widget": "section-add-button",
+      "state": "hover"
+    }
+  ]
+}

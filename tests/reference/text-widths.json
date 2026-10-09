@@ -1,0 +1,3462 @@
+{
+ "source": "OpenPencil build, Chrome canvas measureText, Inter 4.001, kerning and ligatures as the browser applies by default. FINDING: the DOM UI loads only the Inter Regular face (document.fonts lists three Inter 400 faces), so weights 500-700 are synthesized by the browser and share the Regular advance widths; real heavier-weight metrics exist only for canvas text",
+ "count": 576,
+ "rows": [
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Rectangle",
+   "width": 47.060546875
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Pass through",
+   "width": 62.109375
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Blend mode",
+   "width": 56.34765625
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Corner smoothing",
+   "width": 85.21484375
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Position",
+   "width": 37.626953125
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Layout",
+   "width": 31.728515625
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Appearance",
+   "width": 57.51953125
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Untitled",
+   "width": 36.689453125
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Page 1",
+   "width": 30.8447265625
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "D4D4D4",
+   "width": 41.0302734375
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "100",
+   "width": 16.6845703125
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "File",
+   "width": 16.5771484375
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Edit",
+   "width": 17.8271484375
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Arrange",
+   "width": 38.0712890625
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Share",
+   "width": 27.373046875
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Design",
+   "width": 32.7880859375
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "Variables",
+   "width": 43.5595703125
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "No local variables",
+   "width": 84.16015625
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 212.3876953125
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "AVATAR To Wave",
+   "width": 80.7861328125
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "0123456789",
+   "width": 59.150390625
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "WWWWWWWWWW",
+   "width": 100.732421875
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "iiiiiiiiii",
+   "width": 24.21875
+  },
+  {
+   "weight": 400,
+   "size": 10,
+   "text": "fi fl ffi",
+   "width": 27.3046875
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Rectangle",
+   "width": 51.7666015625
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Pass through",
+   "width": 68.3203125
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Blend mode",
+   "width": 61.982421875
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Corner smoothing",
+   "width": 93.736328125
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Position",
+   "width": 41.3896484375
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Layout",
+   "width": 34.9013671875
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Appearance",
+   "width": 63.271484375
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Untitled",
+   "width": 40.3583984375
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Page 1",
+   "width": 33.92919921875
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "D4D4D4",
+   "width": 45.13330078125
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "100",
+   "width": 18.35302734375
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "File",
+   "width": 18.23486328125
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Edit",
+   "width": 19.60986328125
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Arrange",
+   "width": 41.87841796875
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Share",
+   "width": 30.1103515625
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Design",
+   "width": 36.06689453125
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "Variables",
+   "width": 47.91552734375
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "No local variables",
+   "width": 92.576171875
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 233.62646484375
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "AVATAR To Wave",
+   "width": 88.86474609375
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "0123456789",
+   "width": 65.0654296875
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "WWWWWWWWWW",
+   "width": 110.8056640625
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "iiiiiiiiii",
+   "width": 26.640625
+  },
+  {
+   "weight": 400,
+   "size": 11,
+   "text": "fi fl ffi",
+   "width": 30.03515625
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Rectangle",
+   "width": 56.47265625
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Pass through",
+   "width": 74.53125
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Blend mode",
+   "width": 67.6171875
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Corner smoothing",
+   "width": 102.2578125
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Position",
+   "width": 45.15234375
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Layout",
+   "width": 38.07421875
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Appearance",
+   "width": 69.0234375
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Untitled",
+   "width": 44.02734375
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Page 1",
+   "width": 37.013671875
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "D4D4D4",
+   "width": 49.236328125
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "100",
+   "width": 20.021484375
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "File",
+   "width": 19.892578125
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Edit",
+   "width": 21.392578125
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Arrange",
+   "width": 45.685546875
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Share",
+   "width": 32.84765625
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Design",
+   "width": 39.345703125
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "Variables",
+   "width": 52.271484375
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "No local variables",
+   "width": 100.9921875
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 254.865234375
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "AVATAR To Wave",
+   "width": 96.943359375
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "0123456789",
+   "width": 70.98046875
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "WWWWWWWWWW",
+   "width": 120.87890625
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "iiiiiiiiii",
+   "width": 29.0625
+  },
+  {
+   "weight": 400,
+   "size": 12,
+   "text": "fi fl ffi",
+   "width": 32.765625
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Rectangle",
+   "width": 61.1787109375
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Pass through",
+   "width": 80.7421875
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Blend mode",
+   "width": 73.251953125
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Corner smoothing",
+   "width": 110.779296875
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Position",
+   "width": 48.9150390625
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Layout",
+   "width": 41.2470703125
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Appearance",
+   "width": 74.775390625
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Untitled",
+   "width": 47.6962890625
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Page 1",
+   "width": 40.09814453125
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "D4D4D4",
+   "width": 53.33935546875
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "100",
+   "width": 21.68994140625
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "File",
+   "width": 21.55029296875
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Edit",
+   "width": 23.17529296875
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Arrange",
+   "width": 49.49267578125
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Share",
+   "width": 35.5849609375
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Design",
+   "width": 42.62451171875
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "Variables",
+   "width": 56.62744140625
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "No local variables",
+   "width": 109.408203125
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 276.10400390625
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "AVATAR To Wave",
+   "width": 105.02197265625
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "0123456789",
+   "width": 76.8955078125
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "WWWWWWWWWW",
+   "width": 130.9521484375
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "iiiiiiiiii",
+   "width": 31.484375
+  },
+  {
+   "weight": 400,
+   "size": 13,
+   "text": "fi fl ffi",
+   "width": 35.49609375
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Rectangle",
+   "width": 65.884765625
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Pass through",
+   "width": 86.953125
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Blend mode",
+   "width": 78.88671875
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Corner smoothing",
+   "width": 119.30078125
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Position",
+   "width": 52.677734375
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Layout",
+   "width": 44.419921875
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Appearance",
+   "width": 80.52734375
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Untitled",
+   "width": 51.365234375
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Page 1",
+   "width": 43.1826171875
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "D4D4D4",
+   "width": 57.4423828125
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "100",
+   "width": 23.3583984375
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "File",
+   "width": 23.2080078125
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Edit",
+   "width": 24.9580078125
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Arrange",
+   "width": 53.2998046875
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Share",
+   "width": 38.322265625
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Design",
+   "width": 45.9033203125
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "Variables",
+   "width": 60.9833984375
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "No local variables",
+   "width": 117.82421875
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 297.3427734375
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "AVATAR To Wave",
+   "width": 113.1005859375
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "0123456789",
+   "width": 82.810546875
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "WWWWWWWWWW",
+   "width": 141.025390625
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "iiiiiiiiii",
+   "width": 33.90625
+  },
+  {
+   "weight": 400,
+   "size": 14,
+   "text": "fi fl ffi",
+   "width": 38.2265625
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Rectangle",
+   "width": 75.296875
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Pass through",
+   "width": 99.375
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Blend mode",
+   "width": 90.15625
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Corner smoothing",
+   "width": 136.34375
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Position",
+   "width": 60.203125
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Layout",
+   "width": 50.765625
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Appearance",
+   "width": 92.03125
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Untitled",
+   "width": 58.703125
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Page 1",
+   "width": 49.3515625
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "D4D4D4",
+   "width": 65.6484375
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "100",
+   "width": 26.6953125
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "File",
+   "width": 26.5234375
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Edit",
+   "width": 28.5234375
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Arrange",
+   "width": 60.9140625
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Share",
+   "width": 43.796875
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Design",
+   "width": 52.4609375
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "Variables",
+   "width": 69.6953125
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "No local variables",
+   "width": 134.65625
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 339.8203125
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "AVATAR To Wave",
+   "width": 129.2578125
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "0123456789",
+   "width": 94.640625
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "WWWWWWWWWW",
+   "width": 161.171875
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "iiiiiiiiii",
+   "width": 38.75
+  },
+  {
+   "weight": 400,
+   "size": 16,
+   "text": "fi fl ffi",
+   "width": 43.6875
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Rectangle",
+   "width": 47.060546875
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Pass through",
+   "width": 62.109375
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Blend mode",
+   "width": 56.34765625
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Corner smoothing",
+   "width": 85.21484375
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Position",
+   "width": 37.626953125
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Layout",
+   "width": 31.728515625
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Appearance",
+   "width": 57.51953125
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Untitled",
+   "width": 36.689453125
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Page 1",
+   "width": 30.8447265625
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "D4D4D4",
+   "width": 41.0302734375
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "100",
+   "width": 16.6845703125
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "File",
+   "width": 16.5771484375
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Edit",
+   "width": 17.8271484375
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Arrange",
+   "width": 38.0712890625
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Share",
+   "width": 27.373046875
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Design",
+   "width": 32.7880859375
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "Variables",
+   "width": 43.5595703125
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "No local variables",
+   "width": 84.16015625
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 212.3876953125
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "AVATAR To Wave",
+   "width": 80.7861328125
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "0123456789",
+   "width": 59.150390625
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "WWWWWWWWWW",
+   "width": 100.732421875
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "iiiiiiiiii",
+   "width": 24.21875
+  },
+  {
+   "weight": 500,
+   "size": 10,
+   "text": "fi fl ffi",
+   "width": 27.3046875
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Rectangle",
+   "width": 51.7666015625
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Pass through",
+   "width": 68.3203125
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Blend mode",
+   "width": 61.982421875
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Corner smoothing",
+   "width": 93.736328125
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Position",
+   "width": 41.3896484375
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Layout",
+   "width": 34.9013671875
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Appearance",
+   "width": 63.271484375
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Untitled",
+   "width": 40.3583984375
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Page 1",
+   "width": 33.92919921875
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "D4D4D4",
+   "width": 45.13330078125
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "100",
+   "width": 18.35302734375
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "File",
+   "width": 18.23486328125
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Edit",
+   "width": 19.60986328125
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Arrange",
+   "width": 41.87841796875
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Share",
+   "width": 30.1103515625
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Design",
+   "width": 36.06689453125
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "Variables",
+   "width": 47.91552734375
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "No local variables",
+   "width": 92.576171875
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 233.62646484375
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "AVATAR To Wave",
+   "width": 88.86474609375
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "0123456789",
+   "width": 65.0654296875
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "WWWWWWWWWW",
+   "width": 110.8056640625
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "iiiiiiiiii",
+   "width": 26.640625
+  },
+  {
+   "weight": 500,
+   "size": 11,
+   "text": "fi fl ffi",
+   "width": 30.03515625
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Rectangle",
+   "width": 56.47265625
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Pass through",
+   "width": 74.53125
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Blend mode",
+   "width": 67.6171875
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Corner smoothing",
+   "width": 102.2578125
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Position",
+   "width": 45.15234375
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Layout",
+   "width": 38.07421875
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Appearance",
+   "width": 69.0234375
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Untitled",
+   "width": 44.02734375
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Page 1",
+   "width": 37.013671875
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "D4D4D4",
+   "width": 49.236328125
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "100",
+   "width": 20.021484375
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "File",
+   "width": 19.892578125
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Edit",
+   "width": 21.392578125
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Arrange",
+   "width": 45.685546875
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Share",
+   "width": 32.84765625
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Design",
+   "width": 39.345703125
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "Variables",
+   "width": 52.271484375
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "No local variables",
+   "width": 100.9921875
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 254.865234375
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "AVATAR To Wave",
+   "width": 96.943359375
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "0123456789",
+   "width": 70.98046875
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "WWWWWWWWWW",
+   "width": 120.87890625
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "iiiiiiiiii",
+   "width": 29.0625
+  },
+  {
+   "weight": 500,
+   "size": 12,
+   "text": "fi fl ffi",
+   "width": 32.765625
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Rectangle",
+   "width": 61.1787109375
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Pass through",
+   "width": 80.7421875
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Blend mode",
+   "width": 73.251953125
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Corner smoothing",
+   "width": 110.779296875
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Position",
+   "width": 48.9150390625
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Layout",
+   "width": 41.2470703125
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Appearance",
+   "width": 74.775390625
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Untitled",
+   "width": 47.6962890625
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Page 1",
+   "width": 40.09814453125
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "D4D4D4",
+   "width": 53.33935546875
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "100",
+   "width": 21.68994140625
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "File",
+   "width": 21.55029296875
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Edit",
+   "width": 23.17529296875
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Arrange",
+   "width": 49.49267578125
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Share",
+   "width": 35.5849609375
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Design",
+   "width": 42.62451171875
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "Variables",
+   "width": 56.62744140625
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "No local variables",
+   "width": 109.408203125
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 276.10400390625
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "AVATAR To Wave",
+   "width": 105.02197265625
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "0123456789",
+   "width": 76.8955078125
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "WWWWWWWWWW",
+   "width": 130.9521484375
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "iiiiiiiiii",
+   "width": 31.484375
+  },
+  {
+   "weight": 500,
+   "size": 13,
+   "text": "fi fl ffi",
+   "width": 35.49609375
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Rectangle",
+   "width": 65.884765625
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Pass through",
+   "width": 86.953125
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Blend mode",
+   "width": 78.88671875
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Corner smoothing",
+   "width": 119.30078125
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Position",
+   "width": 52.677734375
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Layout",
+   "width": 44.419921875
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Appearance",
+   "width": 80.52734375
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Untitled",
+   "width": 51.365234375
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Page 1",
+   "width": 43.1826171875
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "D4D4D4",
+   "width": 57.4423828125
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "100",
+   "width": 23.3583984375
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "File",
+   "width": 23.2080078125
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Edit",
+   "width": 24.9580078125
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Arrange",
+   "width": 53.2998046875
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Share",
+   "width": 38.322265625
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Design",
+   "width": 45.9033203125
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "Variables",
+   "width": 60.9833984375
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "No local variables",
+   "width": 117.82421875
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 297.3427734375
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "AVATAR To Wave",
+   "width": 113.1005859375
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "0123456789",
+   "width": 82.810546875
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "WWWWWWWWWW",
+   "width": 141.025390625
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "iiiiiiiiii",
+   "width": 33.90625
+  },
+  {
+   "weight": 500,
+   "size": 14,
+   "text": "fi fl ffi",
+   "width": 38.2265625
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Rectangle",
+   "width": 75.296875
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Pass through",
+   "width": 99.375
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Blend mode",
+   "width": 90.15625
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Corner smoothing",
+   "width": 136.34375
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Position",
+   "width": 60.203125
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Layout",
+   "width": 50.765625
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Appearance",
+   "width": 92.03125
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Untitled",
+   "width": 58.703125
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Page 1",
+   "width": 49.3515625
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "D4D4D4",
+   "width": 65.6484375
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "100",
+   "width": 26.6953125
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "File",
+   "width": 26.5234375
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Edit",
+   "width": 28.5234375
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Arrange",
+   "width": 60.9140625
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Share",
+   "width": 43.796875
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Design",
+   "width": 52.4609375
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "Variables",
+   "width": 69.6953125
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "No local variables",
+   "width": 134.65625
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 339.8203125
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "AVATAR To Wave",
+   "width": 129.2578125
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "0123456789",
+   "width": 94.640625
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "WWWWWWWWWW",
+   "width": 161.171875
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "iiiiiiiiii",
+   "width": 38.75
+  },
+  {
+   "weight": 500,
+   "size": 16,
+   "text": "fi fl ffi",
+   "width": 43.6875
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Rectangle",
+   "width": 47.060546875
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Pass through",
+   "width": 62.109375
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Blend mode",
+   "width": 56.34765625
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Corner smoothing",
+   "width": 85.21484375
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Position",
+   "width": 37.626953125
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Layout",
+   "width": 31.728515625
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Appearance",
+   "width": 57.51953125
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Untitled",
+   "width": 36.689453125
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Page 1",
+   "width": 30.8447265625
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "D4D4D4",
+   "width": 41.0302734375
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "100",
+   "width": 16.6845703125
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "File",
+   "width": 16.5771484375
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Edit",
+   "width": 17.8271484375
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Arrange",
+   "width": 38.0712890625
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Share",
+   "width": 27.373046875
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Design",
+   "width": 32.7880859375
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "Variables",
+   "width": 43.5595703125
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "No local variables",
+   "width": 84.16015625
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 212.3876953125
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "AVATAR To Wave",
+   "width": 80.7861328125
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "0123456789",
+   "width": 59.150390625
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "WWWWWWWWWW",
+   "width": 100.732421875
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "iiiiiiiiii",
+   "width": 24.21875
+  },
+  {
+   "weight": 600,
+   "size": 10,
+   "text": "fi fl ffi",
+   "width": 27.3046875
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Rectangle",
+   "width": 51.7666015625
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Pass through",
+   "width": 68.3203125
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Blend mode",
+   "width": 61.982421875
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Corner smoothing",
+   "width": 93.736328125
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Position",
+   "width": 41.3896484375
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Layout",
+   "width": 34.9013671875
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Appearance",
+   "width": 63.271484375
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Untitled",
+   "width": 40.3583984375
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Page 1",
+   "width": 33.92919921875
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "D4D4D4",
+   "width": 45.13330078125
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "100",
+   "width": 18.35302734375
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "File",
+   "width": 18.23486328125
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Edit",
+   "width": 19.60986328125
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Arrange",
+   "width": 41.87841796875
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Share",
+   "width": 30.1103515625
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Design",
+   "width": 36.06689453125
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "Variables",
+   "width": 47.91552734375
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "No local variables",
+   "width": 92.576171875
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 233.62646484375
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "AVATAR To Wave",
+   "width": 88.86474609375
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "0123456789",
+   "width": 65.0654296875
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "WWWWWWWWWW",
+   "width": 110.8056640625
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "iiiiiiiiii",
+   "width": 26.640625
+  },
+  {
+   "weight": 600,
+   "size": 11,
+   "text": "fi fl ffi",
+   "width": 30.03515625
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Rectangle",
+   "width": 56.47265625
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Pass through",
+   "width": 74.53125
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Blend mode",
+   "width": 67.6171875
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Corner smoothing",
+   "width": 102.2578125
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Position",
+   "width": 45.15234375
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Layout",
+   "width": 38.07421875
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Appearance",
+   "width": 69.0234375
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Untitled",
+   "width": 44.02734375
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Page 1",
+   "width": 37.013671875
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "D4D4D4",
+   "width": 49.236328125
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "100",
+   "width": 20.021484375
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "File",
+   "width": 19.892578125
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Edit",
+   "width": 21.392578125
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Arrange",
+   "width": 45.685546875
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Share",
+   "width": 32.84765625
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Design",
+   "width": 39.345703125
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "Variables",
+   "width": 52.271484375
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "No local variables",
+   "width": 100.9921875
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 254.865234375
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "AVATAR To Wave",
+   "width": 96.943359375
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "0123456789",
+   "width": 70.98046875
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "WWWWWWWWWW",
+   "width": 120.87890625
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "iiiiiiiiii",
+   "width": 29.0625
+  },
+  {
+   "weight": 600,
+   "size": 12,
+   "text": "fi fl ffi",
+   "width": 32.765625
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Rectangle",
+   "width": 61.1787109375
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Pass through",
+   "width": 80.7421875
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Blend mode",
+   "width": 73.251953125
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Corner smoothing",
+   "width": 110.779296875
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Position",
+   "width": 48.9150390625
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Layout",
+   "width": 41.2470703125
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Appearance",
+   "width": 74.775390625
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Untitled",
+   "width": 47.6962890625
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Page 1",
+   "width": 40.09814453125
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "D4D4D4",
+   "width": 53.33935546875
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "100",
+   "width": 21.68994140625
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "File",
+   "width": 21.55029296875
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Edit",
+   "width": 23.17529296875
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Arrange",
+   "width": 49.49267578125
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Share",
+   "width": 35.5849609375
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Design",
+   "width": 42.62451171875
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "Variables",
+   "width": 56.62744140625
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "No local variables",
+   "width": 109.408203125
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 276.10400390625
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "AVATAR To Wave",
+   "width": 105.02197265625
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "0123456789",
+   "width": 76.8955078125
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "WWWWWWWWWW",
+   "width": 130.9521484375
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "iiiiiiiiii",
+   "width": 31.484375
+  },
+  {
+   "weight": 600,
+   "size": 13,
+   "text": "fi fl ffi",
+   "width": 35.49609375
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Rectangle",
+   "width": 65.884765625
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Pass through",
+   "width": 86.953125
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Blend mode",
+   "width": 78.88671875
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Corner smoothing",
+   "width": 119.30078125
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Position",
+   "width": 52.677734375
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Layout",
+   "width": 44.419921875
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Appearance",
+   "width": 80.52734375
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Untitled",
+   "width": 51.365234375
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Page 1",
+   "width": 43.1826171875
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "D4D4D4",
+   "width": 57.4423828125
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "100",
+   "width": 23.3583984375
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "File",
+   "width": 23.2080078125
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Edit",
+   "width": 24.9580078125
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Arrange",
+   "width": 53.2998046875
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Share",
+   "width": 38.322265625
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Design",
+   "width": 45.9033203125
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "Variables",
+   "width": 60.9833984375
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "No local variables",
+   "width": 117.82421875
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 297.3427734375
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "AVATAR To Wave",
+   "width": 113.1005859375
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "0123456789",
+   "width": 82.810546875
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "WWWWWWWWWW",
+   "width": 141.025390625
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "iiiiiiiiii",
+   "width": 33.90625
+  },
+  {
+   "weight": 600,
+   "size": 14,
+   "text": "fi fl ffi",
+   "width": 38.2265625
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Rectangle",
+   "width": 75.296875
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Pass through",
+   "width": 99.375
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Blend mode",
+   "width": 90.15625
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Corner smoothing",
+   "width": 136.34375
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Position",
+   "width": 60.203125
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Layout",
+   "width": 50.765625
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Appearance",
+   "width": 92.03125
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Untitled",
+   "width": 58.703125
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Page 1",
+   "width": 49.3515625
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "D4D4D4",
+   "width": 65.6484375
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "100",
+   "width": 26.6953125
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "File",
+   "width": 26.5234375
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Edit",
+   "width": 28.5234375
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Arrange",
+   "width": 60.9140625
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Share",
+   "width": 43.796875
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Design",
+   "width": 52.4609375
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "Variables",
+   "width": 69.6953125
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "No local variables",
+   "width": 134.65625
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 339.8203125
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "AVATAR To Wave",
+   "width": 129.2578125
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "0123456789",
+   "width": 94.640625
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "WWWWWWWWWW",
+   "width": 161.171875
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "iiiiiiiiii",
+   "width": 38.75
+  },
+  {
+   "weight": 600,
+   "size": 16,
+   "text": "fi fl ffi",
+   "width": 43.6875
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Rectangle",
+   "width": 47.060546875
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Pass through",
+   "width": 62.109375
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Blend mode",
+   "width": 56.34765625
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Corner smoothing",
+   "width": 85.21484375
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Position",
+   "width": 37.626953125
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Layout",
+   "width": 31.728515625
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Appearance",
+   "width": 57.51953125
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Untitled",
+   "width": 36.689453125
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Page 1",
+   "width": 30.8447265625
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "D4D4D4",
+   "width": 41.0302734375
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "100",
+   "width": 16.6845703125
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "File",
+   "width": 16.5771484375
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Edit",
+   "width": 17.8271484375
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Arrange",
+   "width": 38.0712890625
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Share",
+   "width": 27.373046875
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Design",
+   "width": 32.7880859375
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "Variables",
+   "width": 43.5595703125
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "No local variables",
+   "width": 84.16015625
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 212.3876953125
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "AVATAR To Wave",
+   "width": 80.7861328125
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "0123456789",
+   "width": 59.150390625
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "WWWWWWWWWW",
+   "width": 100.732421875
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "iiiiiiiiii",
+   "width": 24.21875
+  },
+  {
+   "weight": 700,
+   "size": 10,
+   "text": "fi fl ffi",
+   "width": 27.3046875
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Rectangle",
+   "width": 51.7666015625
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Pass through",
+   "width": 68.3203125
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Blend mode",
+   "width": 61.982421875
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Corner smoothing",
+   "width": 93.736328125
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Position",
+   "width": 41.3896484375
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Layout",
+   "width": 34.9013671875
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Appearance",
+   "width": 63.271484375
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Untitled",
+   "width": 40.3583984375
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Page 1",
+   "width": 33.92919921875
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "D4D4D4",
+   "width": 45.13330078125
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "100",
+   "width": 18.35302734375
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "File",
+   "width": 18.23486328125
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Edit",
+   "width": 19.60986328125
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Arrange",
+   "width": 41.87841796875
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Share",
+   "width": 30.1103515625
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Design",
+   "width": 36.06689453125
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "Variables",
+   "width": 47.91552734375
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "No local variables",
+   "width": 92.576171875
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 233.62646484375
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "AVATAR To Wave",
+   "width": 88.86474609375
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "0123456789",
+   "width": 65.0654296875
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "WWWWWWWWWW",
+   "width": 110.8056640625
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "iiiiiiiiii",
+   "width": 26.640625
+  },
+  {
+   "weight": 700,
+   "size": 11,
+   "text": "fi fl ffi",
+   "width": 30.03515625
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Rectangle",
+   "width": 56.47265625
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Pass through",
+   "width": 74.53125
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Blend mode",
+   "width": 67.6171875
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Corner smoothing",
+   "width": 102.2578125
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Position",
+   "width": 45.15234375
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Layout",
+   "width": 38.07421875
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Appearance",
+   "width": 69.0234375
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Untitled",
+   "width": 44.02734375
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Page 1",
+   "width": 37.013671875
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "D4D4D4",
+   "width": 49.236328125
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "100",
+   "width": 20.021484375
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "File",
+   "width": 19.892578125
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Edit",
+   "width": 21.392578125
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Arrange",
+   "width": 45.685546875
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Share",
+   "width": 32.84765625
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Design",
+   "width": 39.345703125
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "Variables",
+   "width": 52.271484375
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "No local variables",
+   "width": 100.9921875
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 254.865234375
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "AVATAR To Wave",
+   "width": 96.943359375
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "0123456789",
+   "width": 70.98046875
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "WWWWWWWWWW",
+   "width": 120.87890625
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "iiiiiiiiii",
+   "width": 29.0625
+  },
+  {
+   "weight": 700,
+   "size": 12,
+   "text": "fi fl ffi",
+   "width": 32.765625
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Rectangle",
+   "width": 61.1787109375
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Pass through",
+   "width": 80.7421875
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Blend mode",
+   "width": 73.251953125
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Corner smoothing",
+   "width": 110.779296875
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Position",
+   "width": 48.9150390625
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Layout",
+   "width": 41.2470703125
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Appearance",
+   "width": 74.775390625
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Untitled",
+   "width": 47.6962890625
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Page 1",
+   "width": 40.09814453125
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "D4D4D4",
+   "width": 53.33935546875
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "100",
+   "width": 21.68994140625
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "File",
+   "width": 21.55029296875
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Edit",
+   "width": 23.17529296875
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Arrange",
+   "width": 49.49267578125
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Share",
+   "width": 35.5849609375
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Design",
+   "width": 42.62451171875
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "Variables",
+   "width": 56.62744140625
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "No local variables",
+   "width": 109.408203125
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 276.10400390625
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "AVATAR To Wave",
+   "width": 105.02197265625
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "0123456789",
+   "width": 76.8955078125
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "WWWWWWWWWW",
+   "width": 130.9521484375
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "iiiiiiiiii",
+   "width": 31.484375
+  },
+  {
+   "weight": 700,
+   "size": 13,
+   "text": "fi fl ffi",
+   "width": 35.49609375
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Rectangle",
+   "width": 65.884765625
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Pass through",
+   "width": 86.953125
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Blend mode",
+   "width": 78.88671875
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Corner smoothing",
+   "width": 119.30078125
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Position",
+   "width": 52.677734375
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Layout",
+   "width": 44.419921875
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Appearance",
+   "width": 80.52734375
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Untitled",
+   "width": 51.365234375
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Page 1",
+   "width": 43.1826171875
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "D4D4D4",
+   "width": 57.4423828125
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "100",
+   "width": 23.3583984375
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "File",
+   "width": 23.2080078125
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Edit",
+   "width": 24.9580078125
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Arrange",
+   "width": 53.2998046875
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Share",
+   "width": 38.322265625
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Design",
+   "width": 45.9033203125
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "Variables",
+   "width": 60.9833984375
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "No local variables",
+   "width": 117.82421875
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 297.3427734375
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "AVATAR To Wave",
+   "width": 113.1005859375
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "0123456789",
+   "width": 82.810546875
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "WWWWWWWWWW",
+   "width": 141.025390625
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "iiiiiiiiii",
+   "width": 33.90625
+  },
+  {
+   "weight": 700,
+   "size": 14,
+   "text": "fi fl ffi",
+   "width": 38.2265625
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Rectangle",
+   "width": 75.296875
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Pass through",
+   "width": 99.375
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Blend mode",
+   "width": 90.15625
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Corner smoothing",
+   "width": 136.34375
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Position",
+   "width": 60.203125
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Layout",
+   "width": 50.765625
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Appearance",
+   "width": 92.03125
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Untitled",
+   "width": 58.703125
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Page 1",
+   "width": 49.3515625
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "D4D4D4",
+   "width": 65.6484375
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "100",
+   "width": 26.6953125
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "File",
+   "width": 26.5234375
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Edit",
+   "width": 28.5234375
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Arrange",
+   "width": 60.9140625
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Share",
+   "width": 43.796875
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Design",
+   "width": 52.4609375
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "Variables",
+   "width": 69.6953125
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "No local variables",
+   "width": 134.65625
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "The quick brown fox jumps over the lazy dog",
+   "width": 339.8203125
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "AVATAR To Wave",
+   "width": 129.2578125
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "0123456789",
+   "width": 94.640625
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "WWWWWWWWWW",
+   "width": 161.171875
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "iiiiiiiiii",
+   "width": 38.75
+  },
+  {
+   "weight": 700,
+   "size": 16,
+   "text": "fi fl ffi",
+   "width": 43.6875
+  }
+ ]
+}
