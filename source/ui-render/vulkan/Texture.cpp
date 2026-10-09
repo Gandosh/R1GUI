@@ -1,6 +1,7 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: implementation of Texture.h: validation, GPU image and descriptor creation, registration
-//   with the device, staging of pixel data and deferred destruction.
+//   with the device, queueing of pixel writes (staged by the device's upload queue) and deferred
+//   destruction.
 // Callers: ui-text, Renderer facade, tests. Calls: RenderDevice::Impl (DeviceImpl.h).
 // Invariants: a texture's first queued upload is a whole-image clear or whole-image copy; the
 //   device registry entry exists exactly as long as the Texture object; the GPU objects are
@@ -12,7 +13,6 @@
 #include <string>
 
 #include "DeviceImpl.h"
-#include "r1ui/core/CheckedCast.h"
 
 namespace r1ui::render {
 

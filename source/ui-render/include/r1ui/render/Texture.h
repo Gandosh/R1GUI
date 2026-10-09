@@ -10,8 +10,10 @@
 //   endFrame() throw std::invalid_argument (frame abandoned, target stays usable).
 // Upload timing: create/update only record the pixels; they reach the GPU in the command buffer
 //   of the next endFrame() (or flushUploads()), ordered before the draw that samples them, so an
-//   update followed by a draw in the same frame is always visible. More than 64 MiB of pending
-//   uploads forces a synchronous flush. Updates never tear a frame already submitted.
+//   update followed by a draw in the same frame is always visible. More than 64 MiB (or 4096
+//   writes) of pending uploads forces a synchronous flush. Updates never tear a frame already
+//   submitted, and a frame that fails before its submission keeps its pending writes for the next.
+//   Pixels are staged in shared blocks, so a burst of small updates costs no allocation each.
 // Limits: at most kMaxTextures live textures per device, each at most 256 MiB.
 #pragma once
 

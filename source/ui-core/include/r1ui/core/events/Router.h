@@ -13,7 +13,9 @@
 //   dropped (no event can be delivered to it), a hidden / disabled one is released with
 //   CaptureLost / FocusOut. After each handler call ids are re-checked, so a handler may
 //   destroy anything, including the widget it runs on. Nested dispatch deeper than
-//   kMaxDispatchDepth is dropped.
+//   kMaxDispatchDepth is dropped; that includes boundary events (Leave, FocusOut, CaptureLost),
+//   whose router state (hover chain, focus) has already moved on, so a handler that re-enters
+//   the router that many levels deep never sees its own boundary events.
 // Pointer rules:
 //  * Target = the capturing widget if there is one, else the topmost hit (hitTest).
 //  * Hover is the chain root..leaf of the widget under the pointer (the capturer while
