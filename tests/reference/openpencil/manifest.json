@@ -1598,6 +1598,5846 @@
       },
       "widget": "section-add-button",
       "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-nested-frames-document",
+      "file": "dark/screen-nested-frames-document.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "document with an outer frame, two rectangles and an inner frame holding one rectangle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-tree-idle",
+      "file": "dark/widget-layer-tree-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 260.203125,
+        "height": 132
+      },
+      "set": "gaps",
+      "widget": "layer-tree",
+      "state": "idle",
+      "scene": "layer tree with nested frames, inner rectangle selected from the canvas"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-selected-unfocused-idle",
+      "file": "dark/widget-layer-row-selected-unfocused-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 465.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-selected-unfocused",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-selected-unfocused-hover",
+      "file": "dark/widget-layer-row-selected-unfocused-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 465.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-selected-unfocused",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-idle",
+      "file": "dark/widget-layer-row-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row",
+      "state": "idle",
+      "scene": "unselected row; hover shows the row actions"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-hover",
+      "file": "dark/widget-layer-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row",
+      "state": "hover",
+      "scene": "unselected row; hover shows the row actions"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-action-row-hover",
+      "file": "dark/widget-layer-row-action-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 228.203125,
+        "y": 397.296875,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "layer-row-action",
+      "state": "row-hover",
+      "scene": "eye action of a hovered row"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-action-hover",
+      "file": "dark/widget-layer-row-action-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 228.203125,
+        "y": 397.296875,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "layer-row-action",
+      "state": "hover",
+      "scene": "eye action of a hovered row"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-disclosure-idle",
+      "file": "dark/widget-layer-disclosure-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 16,
+        "y": 445.296875,
+        "width": 24,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "layer-disclosure",
+      "state": "idle",
+      "scene": "inner frame disclosure, expanded"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-disclosure-hover",
+      "file": "dark/widget-layer-disclosure-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 16,
+        "y": 445.296875,
+        "width": 24,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "layer-disclosure",
+      "state": "hover",
+      "scene": "inner frame disclosure, expanded"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-disclosure-collapsed",
+      "file": "dark/widget-layer-disclosure-collapsed.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 14,
+        "y": 447.296875,
+        "width": 28,
+        "height": 24
+      },
+      "set": "gaps",
+      "widget": "layer-disclosure",
+      "state": "collapsed"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-tree-collapsed-frame",
+      "file": "dark/widget-layer-tree-collapsed-frame.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 260.203125,
+        "height": 108
+      },
+      "set": "gaps",
+      "widget": "layer-tree",
+      "state": "collapsed-frame"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-hidden-idle",
+      "file": "dark/widget-layer-row-hidden-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-hidden",
+      "state": "idle",
+      "scene": "row of a hidden layer"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-rename-focus",
+      "file": "dark/widget-layer-row-rename-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "layer-row-rename",
+      "state": "focus",
+      "scene": "inline rename input in a layer row"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-selected-focused-idle",
+      "file": "dark/widget-layer-row-selected-focused-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-selected-focused",
+      "state": "idle",
+      "scene": "selected row while the tree reports focus (after the rename input closed)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-row-selected-focused-hover",
+      "file": "dark/widget-layer-row-selected-focused-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-selected-focused",
+      "state": "hover",
+      "scene": "selected row while the tree reports focus (after the rename input closed)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layer-tree-selected-focused",
+      "file": "dark/widget-layer-tree-selected-focused.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 260.203125,
+        "height": 132
+      },
+      "set": "gaps",
+      "widget": "layer-tree",
+      "state": "selected-focused"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-constraints-diagram-idle",
+      "file": "dark/widget-constraints-diagram-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 279,
+        "width": 84,
+        "height": 76
+      },
+      "set": "gaps",
+      "widget": "constraints-diagram",
+      "state": "idle",
+      "scene": "constraints diagram with left and top pins active"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-constraints-pin-active-idle",
+      "file": "dark/widget-constraints-pin-active-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1192.796875,
+        "y": 297,
+        "width": 28,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "constraints-pin-active",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-constraints-pin-active-hover",
+      "file": "dark/widget-constraints-pin-active-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1192.796875,
+        "y": 297,
+        "width": 28,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "constraints-pin-active",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-constraints-pin-idle",
+      "file": "dark/widget-constraints-pin-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1238.796875,
+        "y": 297,
+        "width": 28,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "constraints-pin",
+      "state": "idle",
+      "scene": "an inactive constraint pin"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-constraints-pin-hover",
+      "file": "dark/widget-constraints-pin-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1238.796875,
+        "y": 297,
+        "width": 28,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "constraints-pin",
+      "state": "hover",
+      "scene": "an inactive constraint pin"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-constraints-selected",
+      "file": "dark/screen-constraints-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "rectangle inside a frame selected: constraints section visible"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-auto-layout-section",
+      "file": "dark/screen-auto-layout-section.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "inner frame with auto layout: direction, spacing, clip content, alignment grid"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layout-alignment-grid-idle",
+      "file": "dark/widget-layout-alignment-grid-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 676,
+        "width": 88,
+        "height": 88
+      },
+      "set": "gaps",
+      "widget": "layout-alignment-grid",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layout-alignment-cell-active-idle",
+      "file": "dark/widget-layout-alignment-cell-active-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 676,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layout-alignment-cell-active",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layout-alignment-cell-idle",
+      "file": "dark/widget-layout-alignment-cell-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1213.796875,
+        "y": 676,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layout-alignment-cell",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-layout-alignment-cell-hover",
+      "file": "dark/widget-layout-alignment-cell-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1213.796875,
+        "y": 676,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layout-alignment-cell",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-checkbox-clip-content-idle",
+      "file": "dark/widget-checkbox-clip-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 633,
+        "width": 25,
+        "height": 25
+      },
+      "set": "gaps",
+      "widget": "checkbox-clip-content",
+      "state": "idle",
+      "scene": "clip content checkbox, unchecked"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-checkbox-clip-content-hover",
+      "file": "dark/widget-checkbox-clip-content-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 633,
+        "width": 25,
+        "height": 25
+      },
+      "set": "gaps",
+      "widget": "checkbox-clip-content",
+      "state": "hover",
+      "scene": "clip content checkbox, unchecked"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-checkbox-clip-content-checked-hover",
+      "file": "dark/widget-checkbox-clip-content-checked-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 633,
+        "width": 25,
+        "height": 25
+      },
+      "set": "gaps",
+      "widget": "checkbox-clip-content",
+      "state": "checked-hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-checkbox-clip-content-checked",
+      "file": "dark/widget-checkbox-clip-content-checked.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 633,
+        "width": 25,
+        "height": 25
+      },
+      "set": "gaps",
+      "widget": "checkbox-clip-content",
+      "state": "checked"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-context-menu-selection",
+      "file": "dark/screen-context-menu-selection.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "canvas context menu for a selected rectangle (disabled, component-tone and submenu items)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-content-idle",
+      "file": "dark/widget-menu-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 406,
+        "y": 182,
+        "width": 236,
+        "height": 718
+      },
+      "set": "gaps",
+      "widget": "menu-content",
+      "state": "idle",
+      "scene": "context menu content"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-idle",
+      "file": "dark/widget-menu-item-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 364,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item",
+      "state": "idle",
+      "scene": "menu item with shortcut"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-hover",
+      "file": "dark/widget-menu-item-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 364,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item",
+      "state": "hover",
+      "scene": "menu item with shortcut"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-disabled-idle",
+      "file": "dark/widget-menu-item-disabled-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 485,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled",
+      "state": "idle",
+      "scene": "disabled menu item (no hover change)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-disabled-hover",
+      "file": "dark/widget-menu-item-disabled-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 485,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled",
+      "state": "hover",
+      "scene": "disabled menu item (no hover change)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-component-idle",
+      "file": "dark/widget-menu-item-component-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 690,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-component",
+      "state": "idle",
+      "scene": "component-tone menu item"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-component-hover",
+      "file": "dark/widget-menu-item-component-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 690,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-component",
+      "state": "hover",
+      "scene": "component-tone menu item"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-submenu-idle",
+      "file": "dark/widget-menu-item-submenu-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 857,
+        "width": 226,
+        "height": 43
+      },
+      "set": "gaps",
+      "widget": "menu-item-submenu",
+      "state": "idle",
+      "scene": "submenu trigger, closed then open"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-submenu-open",
+      "file": "dark/widget-menu-item-submenu-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 857,
+        "width": 226,
+        "height": 43
+      },
+      "set": "gaps",
+      "widget": "menu-item-submenu",
+      "state": "open",
+      "scene": "submenu trigger, closed then open"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-context-submenu-open",
+      "file": "dark/screen-context-submenu-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "context menu with the Copy/Paste as submenu open"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-submenu-content-idle",
+      "file": "dark/widget-menu-submenu-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 625,
+        "y": 711,
+        "width": 201.828125,
+        "height": 189
+      },
+      "set": "gaps",
+      "widget": "menu-submenu-content",
+      "state": "idle",
+      "scene": "submenu content"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-in-submenu-hover",
+      "file": "dark/widget-menu-item-in-submenu-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 630,
+        "y": 744,
+        "width": 191.828125,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-in-submenu",
+      "state": "hover",
+      "scene": "submenu item hover"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-toast-default",
+      "file": "dark/screen-toast-default.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "default tone toast at the top centre after Copy node ID"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-toast-default",
+      "file": "dark/widget-toast-default.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 642.859375,
+        "y": 2,
+        "width": 154.28125,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "toast",
+      "state": "default",
+      "scene": "default tone toast"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-toast-error",
+      "file": "dark/screen-toast-error.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "error tone toast raised by an unhandled rejection"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-toast-error",
+      "file": "dark/widget-toast-error.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 568.4375,
+        "y": 2,
+        "width": 303.125,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "toast",
+      "state": "error",
+      "scene": "error tone toast"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tooltip-toolbar-shortcut",
+      "file": "dark/widget-tooltip-toolbar-shortcut.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 660.234375,
+        "y": 812.296875,
+        "width": 71.484375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "tooltip",
+      "state": "toolbar-shortcut",
+      "scene": "tooltip of a toolbar button with shortcut text (Pen (P))"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-tooltip-toolbar-shortcut",
+      "file": "dark/screen-tooltip-toolbar-shortcut.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "tooltip over the toolbar pen button"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tooltip-panel-icon-button",
+      "file": "dark/widget-tooltip-panel-icon-button.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1306.53125,
+        "y": 178.296875,
+        "width": 109.828125,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "tooltip",
+      "state": "panel-icon-button",
+      "scene": "tooltip of a panel icon button"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-toolbar-flyout-open",
+      "file": "dark/screen-toolbar-flyout-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "frame tool flyout open above the toolbar"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-flyout-content-idle",
+      "file": "dark/widget-flyout-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 613,
+        "y": 767,
+        "width": 149.734375,
+        "height": 78
+      },
+      "set": "gaps",
+      "widget": "flyout-content",
+      "state": "idle",
+      "scene": "toolbar flyout content"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-flyout-item-idle",
+      "file": "dark/widget-flyout-item-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 618,
+        "y": 800,
+        "width": 139.734375,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "flyout-item",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-flyout-item-hover",
+      "file": "dark/widget-flyout-item-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 618,
+        "y": 800,
+        "width": 139.734375,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "flyout-item",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-menubar-edit-open",
+      "file": "dark/screen-menubar-edit-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "Edit menu open"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-disabled-menubar-idle",
+      "file": "dark/widget-menu-item-disabled-menubar-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 41,
+        "y": 91,
+        "width": 210,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled-menubar",
+      "state": "idle",
+      "scene": "disabled item in a menubar menu"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-disabled-menubar-hover",
+      "file": "dark/widget-menu-item-disabled-menubar-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 41,
+        "y": 91,
+        "width": 210,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled-menubar",
+      "state": "hover",
+      "scene": "disabled item in a menubar menu"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-menubar-view-open",
+      "file": "dark/screen-menubar-view-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "View menu open"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-checkbox-idle",
+      "file": "dark/widget-menu-item-checkbox-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 80,
+        "y": 305,
+        "width": 210,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-checkbox",
+      "state": "idle",
+      "scene": "checkbox menu item"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-checkbox-hover",
+      "file": "dark/widget-menu-item-checkbox-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 80,
+        "y": 305,
+        "width": 210,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-checkbox",
+      "state": "hover",
+      "scene": "checkbox menu item"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-file-menu-submenu-open",
+      "file": "dark/screen-file-menu-submenu-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "File menu with the Export selection submenu open"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-disabled-page-delete-idle",
+      "file": "dark/widget-menu-item-disabled-page-delete-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 130,
+        "y": 171,
+        "width": 146,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled-page-delete",
+      "state": "idle",
+      "scene": "Delete page while only one page exists"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-disabled-page-delete-hover",
+      "file": "dark/widget-menu-item-disabled-page-delete-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 130,
+        "y": 171,
+        "width": 146,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled-page-delete",
+      "state": "hover",
+      "scene": "Delete page while only one page exists"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-grid-settings-popover",
+      "file": "dark/screen-grid-settings-popover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "canvas grid popover with two switches"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-popover-grid-settings",
+      "file": "dark/widget-popover-grid-settings.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 704,
+        "y": 650,
+        "width": 268,
+        "height": 195
+      },
+      "set": "gaps",
+      "widget": "popover",
+      "state": "grid-settings",
+      "scene": "popover content"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-grid-size-input-focus",
+      "file": "dark/widget-grid-size-input-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 717,
+        "y": 715,
+        "width": 123,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "grid-size-input",
+      "state": "focus",
+      "scene": "native number input in the popover, autofocused"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-grid-size-input-idle",
+      "file": "dark/widget-grid-size-input-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 836,
+        "y": 715,
+        "width": 123,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "grid-size-input",
+      "state": "idle",
+      "scene": "second input, not focused"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-grid-size-input-hover",
+      "file": "dark/widget-grid-size-input-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 836,
+        "y": 715,
+        "width": 123,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "grid-size-input",
+      "state": "hover",
+      "scene": "second input, not focused"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-switch-idle",
+      "file": "dark/widget-switch-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "idle",
+      "scene": "switch off (sm 28x16)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-switch-hover",
+      "file": "dark/widget-switch-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "hover",
+      "scene": "switch off (sm 28x16)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-switch-focus",
+      "file": "dark/widget-switch-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "focus"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-switch-on",
+      "file": "dark/widget-switch-on.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "on"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-switch-on-hover",
+      "file": "dark/widget-switch-on-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "on-hover"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-share-popover",
+      "file": "dark/screen-share-popover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "share popover: name input focused, share and join buttons disabled"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-input-focus",
+      "file": "dark/widget-text-input-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 69,
+        "width": 274,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "text-input",
+      "state": "focus",
+      "scene": "default tone md input, autofocused, placeholder shown"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-input-idle",
+      "file": "dark/widget-text-input-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 176.5,
+        "width": 219.953125,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "text-input",
+      "state": "idle",
+      "scene": "default tone md input with placeholder"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-input-hover",
+      "file": "dark/widget-text-input-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 176.5,
+        "width": 219.953125,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "text-input",
+      "state": "hover",
+      "scene": "default tone md input with placeholder"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-button-accent-disabled-idle",
+      "file": "dark/widget-button-accent-disabled-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 107,
+        "width": 274,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "button-accent-disabled",
+      "state": "idle",
+      "scene": "accent button disabled"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-button-accent-disabled-hover",
+      "file": "dark/widget-button-accent-disabled-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 107,
+        "width": 274,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "button-accent-disabled",
+      "state": "hover",
+      "scene": "accent button disabled"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-button-accent-disabled-small-idle",
+      "file": "dark/widget-button-accent-disabled-small-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1366.953125,
+        "y": 175.5,
+        "width": 60.046875,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "button-accent-disabled-small",
+      "state": "idle",
+      "scene": "small accent button disabled"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-input-filled-focus",
+      "file": "dark/widget-text-input-filled-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 69,
+        "width": 274,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "text-input",
+      "state": "filled-focus",
+      "scene": "typed value"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-button-accent-idle",
+      "file": "dark/widget-button-accent-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 107,
+        "width": 274,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "button-accent",
+      "state": "idle",
+      "scene": "accent button enabled after a name was typed"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-button-accent-hover",
+      "file": "dark/widget-button-accent-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 107,
+        "width": 274,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "button-accent",
+      "state": "hover",
+      "scene": "accent button enabled after a name was typed"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-assets-panel",
+      "file": "dark/screen-assets-panel.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "assets tab with the search input and no local components"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-input-sm-idle",
+      "file": "dark/widget-text-input-sm-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 2,
+        "y": 130.5,
+        "width": 254.203125,
+        "height": 38.5
+      },
+      "set": "gaps",
+      "widget": "text-input-sm",
+      "state": "idle",
+      "scene": "default tone sm search input"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-input-sm-hover",
+      "file": "dark/widget-text-input-sm-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 2,
+        "y": 130.5,
+        "width": 254.203125,
+        "height": 38.5
+      },
+      "set": "gaps",
+      "widget": "text-input-sm",
+      "state": "hover",
+      "scene": "default tone sm search input"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-input-sm-focus",
+      "file": "dark/widget-text-input-sm-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 2,
+        "y": 130.5,
+        "width": 254.203125,
+        "height": 38.5
+      },
+      "set": "gaps",
+      "widget": "text-input-sm",
+      "state": "focus"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-input-sm-filled-focus",
+      "file": "dark/widget-text-input-sm-filled-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 2,
+        "y": 130.5,
+        "width": 254.203125,
+        "height": 38.5
+      },
+      "set": "gaps",
+      "widget": "text-input-sm",
+      "state": "filled-focus"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-dialog-variables-empty",
+      "file": "dark/screen-dialog-variables-empty.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "variables dialog without collections: dim overlay, centred content"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-dialog-overlay-idle",
+      "file": "dark/widget-dialog-overlay-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "set": "gaps",
+      "widget": "dialog-overlay",
+      "state": "idle",
+      "scene": "dialog overlay (black at 50%)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-dialog-content-idle",
+      "file": "dark/widget-dialog-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 314,
+        "y": 106.5,
+        "width": 812,
+        "height": 687
+      },
+      "set": "gaps",
+      "widget": "dialog-content",
+      "state": "idle",
+      "scene": "dialog content, empty state"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-dialog-close-button-idle",
+      "file": "dark/widget-dialog-close-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1073,
+        "y": 119.5,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "dialog-close-button",
+      "state": "idle",
+      "scene": "dialog close icon button"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-dialog-close-button-hover",
+      "file": "dark/widget-dialog-close-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1073,
+        "y": 119.5,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "dialog-close-button",
+      "state": "hover",
+      "scene": "dialog close icon button"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-button-idle",
+      "file": "dark/widget-text-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 654.015625,
+        "y": 468.5,
+        "width": 131.953125,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "text-button",
+      "state": "idle",
+      "scene": "neutral text button (Create collection)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-button-hover",
+      "file": "dark/widget-text-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 654.015625,
+        "y": 468.5,
+        "width": 131.953125,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "text-button",
+      "state": "hover",
+      "scene": "neutral text button (Create collection)"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-dialog-variables-table-empty",
+      "file": "dark/screen-dialog-variables-table-empty.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "variables dialog with an empty collection table"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-dialog-search-input-idle",
+      "file": "dark/widget-dialog-search-input-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 936,
+        "y": 115.5,
+        "width": 108,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "dialog-search-input",
+      "state": "idle",
+      "scene": "search field in the dialog header"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-dialog-search-input-hover",
+      "file": "dark/widget-dialog-search-input-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 936,
+        "y": 115.5,
+        "width": 108,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "dialog-search-input",
+      "state": "hover",
+      "scene": "search field in the dialog header"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-dialog-collection-tab-idle",
+      "file": "dark/widget-dialog-collection-tab-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 327,
+        "y": 111.5,
+        "width": 115.859375,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "dialog-collection-tab",
+      "state": "idle",
+      "scene": "collection tab"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-dialog-collection-tab-hover",
+      "file": "dark/widget-dialog-collection-tab-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 327,
+        "y": 111.5,
+        "width": 115.859375,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "dialog-collection-tab",
+      "state": "hover",
+      "scene": "collection tab"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-button-add-idle",
+      "file": "dark/widget-text-button-add-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1016.015625,
+        "y": 744.5,
+        "width": 92.984375,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "text-button-add",
+      "state": "idle",
+      "scene": "Add button with chevron in the dialog footer"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-text-button-add-hover",
+      "file": "dark/widget-text-button-add-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1016.015625,
+        "y": 744.5,
+        "width": 92.984375,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "text-button-add",
+      "state": "hover",
+      "scene": "Add button with chevron in the dialog footer"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-dialog-variables-add-menu",
+      "file": "dark/screen-dialog-variables-add-menu.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "add variable menu: items with a title and a description line"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-content-described-idle",
+      "file": "dark/widget-menu-content-described-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 905,
+        "y": 561,
+        "width": 204,
+        "height": 187.3125
+      },
+      "set": "gaps",
+      "widget": "menu-content-described",
+      "state": "idle",
+      "scene": "menu with two-line items"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-described-idle",
+      "file": "dark/widget-menu-item-described-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 910,
+        "y": 607.328125,
+        "width": 194,
+        "height": 53.328125
+      },
+      "set": "gaps",
+      "widget": "menu-item-described",
+      "state": "idle",
+      "scene": "menu item with title and description"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-menu-item-described-hover",
+      "file": "dark/widget-menu-item-described-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 910,
+        "y": 607.328125,
+        "width": 194,
+        "height": 53.328125
+      },
+      "set": "gaps",
+      "widget": "menu-item-described",
+      "state": "hover",
+      "scene": "menu item with title and description"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-dialog-variables-table",
+      "file": "dark/screen-dialog-variables-table.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "variables dialog with a number and a colour variable"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-variable-row-idle",
+      "file": "dark/widget-variable-row-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 315,
+        "y": 177,
+        "width": 810,
+        "height": 45
+      },
+      "set": "gaps",
+      "widget": "variable-row",
+      "state": "idle",
+      "scene": "variable table row"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-variable-row-hover",
+      "file": "dark/widget-variable-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 315,
+        "y": 177,
+        "width": 810,
+        "height": 45
+      },
+      "set": "gaps",
+      "widget": "variable-row",
+      "state": "hover",
+      "scene": "variable table row"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-x-mixed-idle",
+      "file": "dark/widget-number-field-x-mixed-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 177,
+        "width": 126.09375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "number-field-x-mixed",
+      "state": "idle",
+      "scene": "two rectangles selected with different X: value shows Mixed"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-x-mixed-hover",
+      "file": "dark/widget-number-field-x-mixed-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 177,
+        "width": 126.09375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "number-field-x-mixed",
+      "state": "hover",
+      "scene": "two rectangles selected with different X: value shows Mixed"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-icon-button-variable-trigger-idle",
+      "file": "dark/widget-icon-button-variable-trigger-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1256.890625,
+        "y": 270,
+        "width": 32,
+        "height": 32
+      },
+      "set": "gaps",
+      "widget": "icon-button-variable-trigger",
+      "state": "idle",
+      "scene": "apply variable trigger (20x20) in a number field"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-icon-button-variable-trigger-hover",
+      "file": "dark/widget-icon-button-variable-trigger-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1256.890625,
+        "y": 270,
+        "width": 32,
+        "height": 32
+      },
+      "set": "gaps",
+      "widget": "icon-button-variable-trigger",
+      "state": "hover",
+      "scene": "apply variable trigger (20x20) in a number field"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-binding-picker-open",
+      "file": "dark/screen-binding-picker-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "binding picker: search row, variable item, create footer"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-binding-picker-idle",
+      "file": "dark/widget-binding-picker-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1025,
+        "y": 232,
+        "width": 236,
+        "height": 109
+      },
+      "set": "gaps",
+      "widget": "binding-picker",
+      "state": "idle",
+      "scene": "binding picker popover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-binding-picker-search-focus",
+      "file": "dark/widget-binding-picker-search-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1026,
+        "y": 233,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-search",
+      "state": "focus",
+      "scene": "search row, autofocused"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-binding-picker-item-idle",
+      "file": "dark/widget-binding-picker-item-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1030,
+        "y": 263,
+        "width": 226,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-item",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-binding-picker-item-hover",
+      "file": "dark/widget-binding-picker-item-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1030,
+        "y": 263,
+        "width": 226,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-item",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-binding-picker-action-idle",
+      "file": "dark/widget-binding-picker-action-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1030,
+        "y": 298,
+        "width": 226,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-action",
+      "state": "idle",
+      "scene": "footer action row"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-binding-picker-action-hover",
+      "file": "dark/widget-binding-picker-action-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1030,
+        "y": 298,
+        "width": 226,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-action",
+      "state": "hover",
+      "scene": "footer action row"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-binding-pill-idle",
+      "file": "dark/widget-binding-pill-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1209.640625,
+        "y": 272.671875,
+        "width": 59.25,
+        "height": 26.65625
+      },
+      "set": "gaps",
+      "widget": "binding-pill",
+      "state": "idle",
+      "scene": "bound variable pill replacing the value (component colour)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-binding-pill-hover",
+      "file": "dark/widget-binding-pill-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1209.640625,
+        "y": 272.671875,
+        "width": 59.25,
+        "height": 26.65625
+      },
+      "set": "gaps",
+      "widget": "binding-pill",
+      "state": "hover",
+      "scene": "bound variable pill replacing the value (component colour)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-number-field-width-bound-idle",
+      "file": "dark/widget-number-field-width-bound-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 267,
+        "width": 126.09375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "number-field-width-bound",
+      "state": "idle",
+      "scene": "width field bound to a variable"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-number-field-bound",
+      "file": "dark/screen-number-field-bound.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "width bound to a variable"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-fill-picker-solid",
+      "file": "dark/screen-fill-picker-solid.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "fill picker, solid tab"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-fill-picker-tab-active",
+      "file": "dark/widget-fill-picker-tab-active.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 369,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "fill-picker-tab",
+      "state": "active",
+      "scene": "solid tab active"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-fill-picker-tab-idle",
+      "file": "dark/widget-fill-picker-tab-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 966,
+        "y": 369,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "fill-picker-tab",
+      "state": "idle",
+      "scene": "inactive tab (idle, hover)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-fill-picker-tab-hover",
+      "file": "dark/widget-fill-picker-tab-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 966,
+        "y": 369,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "fill-picker-tab",
+      "state": "hover",
+      "scene": "inactive tab (idle, hover)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-color-slider-hue-idle",
+      "file": "dark/widget-color-slider-hue-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 549,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "color-slider-hue",
+      "state": "idle",
+      "scene": "hue slider (12 px track, 14 px thumb)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-color-slider-hue-hover",
+      "file": "dark/widget-color-slider-hue-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 549,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "color-slider-hue",
+      "state": "hover",
+      "scene": "hue slider (12 px track, 14 px thumb)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-color-slider-alpha-idle",
+      "file": "dark/widget-color-slider-alpha-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 583,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "color-slider-alpha",
+      "state": "idle",
+      "scene": "alpha slider over a checkerboard"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-color-slider-alpha-hover",
+      "file": "dark/widget-color-slider-alpha-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 583,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "color-slider-alpha",
+      "state": "hover",
+      "scene": "alpha slider over a checkerboard"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-gradient-editor",
+      "file": "dark/screen-gradient-editor.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "fill picker, gradient tab: type select, bar with two stops, stop list"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-fill-picker-tab-active",
+      "file": "dark/widget-fill-picker-tab-active.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 966,
+        "y": 291,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "fill-picker-tab",
+      "state": "active"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-bar-idle",
+      "file": "dark/widget-gradient-bar-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 357,
+        "width": 234,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "gradient-bar",
+      "state": "idle",
+      "scene": "gradient bar with stop handles"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-idle",
+      "file": "dark/widget-gradient-stop-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 933,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop",
+      "state": "idle",
+      "scene": "stop handle (14 px, active)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-hover",
+      "file": "dark/widget-gradient-stop-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 933,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop",
+      "state": "hover",
+      "scene": "stop handle (14 px, active)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-inactive-idle",
+      "file": "dark/widget-gradient-stop-inactive-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1155,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-inactive",
+      "state": "idle",
+      "scene": "second stop handle, inactive"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-inactive-hover",
+      "file": "dark/widget-gradient-stop-inactive-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1155,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-inactive",
+      "state": "hover",
+      "scene": "second stop handle, inactive"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-row-idle",
+      "file": "dark/widget-gradient-stop-row-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 409.5,
+        "width": 234,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-row",
+      "state": "idle",
+      "scene": "stop list row, active (hover tint)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-row-hover",
+      "file": "dark/widget-gradient-stop-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 409.5,
+        "width": 234,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-row",
+      "state": "hover",
+      "scene": "stop list row, active (hover tint)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-row-inactive-idle",
+      "file": "dark/widget-gradient-stop-row-inactive-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 439.5,
+        "width": 234,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-row-inactive",
+      "state": "idle"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-row-inactive-hover",
+      "file": "dark/widget-gradient-stop-row-inactive-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 439.5,
+        "width": 234,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-row-inactive",
+      "state": "hover"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-icon-button-add-stop-idle",
+      "file": "dark/widget-icon-button-add-stop-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1146,
+        "y": 389.25,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "icon-button-add-stop",
+      "state": "idle",
+      "scene": "add stop (16 px icon button)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-icon-button-add-stop-hover",
+      "file": "dark/widget-icon-button-add-stop-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1146,
+        "y": 389.25,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "icon-button-add-stop",
+      "state": "hover",
+      "scene": "add stop (16 px icon button)"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-gradient-editor-stop-selected",
+      "file": "dark/screen-gradient-editor-stop-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "second stop selected: handle white, list row tinted"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-stop-inactive-selected",
+      "file": "dark/widget-gradient-stop-inactive-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1155,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-inactive",
+      "state": "selected"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-gradient-bar-dragging",
+      "file": "dark/widget-gradient-bar-dragging.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 357,
+        "width": 234,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "gradient-bar",
+      "state": "dragging",
+      "scene": "second stop dragged left, button still down (grabbing)"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-fill-picker-image",
+      "file": "dark/screen-fill-picker-image.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "fill picker, image tab"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-tab-bar-two-documents",
+      "file": "dark/screen-tab-bar-two-documents.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "tab bar with an inactive and an active document tab and the new-tab button"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-idle",
+      "file": "dark/widget-tab-bar-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "tab-bar",
+      "state": "idle",
+      "scene": "tab bar root (36 px, bottom border)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-tab-inactive-idle",
+      "file": "dark/widget-tab-bar-tab-inactive-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 115.03125,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-tab-inactive",
+      "state": "idle",
+      "scene": "inactive tab; hover reveals the close button"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-tab-inactive-hover",
+      "file": "dark/widget-tab-bar-tab-inactive-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 115.03125,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-tab-inactive",
+      "state": "hover",
+      "scene": "inactive tab; hover reveals the close button"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-tab-active-idle",
+      "file": "dark/widget-tab-bar-tab-active-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 103.03125,
+        "y": 0,
+        "width": 121.03125,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-tab-active",
+      "state": "idle",
+      "scene": "active tab with its close button visible"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-tab-active-hover",
+      "file": "dark/widget-tab-bar-tab-active-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 103.03125,
+        "y": 0,
+        "width": 121.03125,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-tab-active",
+      "state": "hover",
+      "scene": "active tab with its close button visible"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-close-idle",
+      "file": "dark/widget-tab-bar-close-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 183.0625,
+        "y": 3.5,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "tab-bar-close",
+      "state": "idle",
+      "scene": "close button of the active tab"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-close-hover",
+      "file": "dark/widget-tab-bar-close-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 183.0625,
+        "y": 3.5,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "tab-bar-close",
+      "state": "hover",
+      "scene": "close button of the active tab"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-new-idle",
+      "file": "dark/widget-tab-bar-new-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 212.0625,
+        "y": 0,
+        "width": 48,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-new",
+      "state": "idle",
+      "scene": "new tab button (36x36)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tab-bar-new-hover",
+      "file": "dark/widget-tab-bar-new-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 212.0625,
+        "y": 0,
+        "width": 48,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-new",
+      "state": "hover",
+      "scene": "new tab button (36x36)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-tooltip-tab-close",
+      "file": "dark/widget-tooltip-tab-close.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 144.6875,
+        "y": 2,
+        "width": 109.609375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "tooltip",
+      "state": "tab-close",
+      "scene": "tooltip of the tab close button"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-scrollbar-idle",
+      "file": "dark/widget-scrollbar-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1175.796875,
+        "y": 111,
+        "width": 264.203125,
+        "height": 789
+      },
+      "set": "gaps",
+      "widget": "scrollbar",
+      "state": "idle",
+      "scene": "thin scrollbar of the design panel (native, not hidden)"
+    },
+    {
+      "theme": "dark",
+      "name": "widget-scrollbar-thumb-hover",
+      "file": "dark/widget-scrollbar-thumb-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1175.796875,
+        "y": 111,
+        "width": 264.203125,
+        "height": 789
+      },
+      "set": "gaps",
+      "widget": "scrollbar",
+      "state": "thumb-hover",
+      "scene": "thin scrollbar of the design panel (native, not hidden)"
+    },
+    {
+      "theme": "dark",
+      "name": "screen-scrollbar-design-panel",
+      "file": "dark/screen-scrollbar-design-panel.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "design panel scrolled content with the thin scrollbar"
+    },
+    {
+      "theme": "light",
+      "name": "screen-nested-frames-document",
+      "file": "light/screen-nested-frames-document.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "document with an outer frame, two rectangles and an inner frame holding one rectangle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-tree-idle",
+      "file": "light/widget-layer-tree-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 260.203125,
+        "height": 132
+      },
+      "set": "gaps",
+      "widget": "layer-tree",
+      "state": "idle",
+      "scene": "layer tree with nested frames, inner rectangle selected from the canvas"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-selected-unfocused-idle",
+      "file": "light/widget-layer-row-selected-unfocused-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 465.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-selected-unfocused",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-selected-unfocused-hover",
+      "file": "light/widget-layer-row-selected-unfocused-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 465.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-selected-unfocused",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-idle",
+      "file": "light/widget-layer-row-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row",
+      "state": "idle",
+      "scene": "unselected row; hover shows the row actions"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-hover",
+      "file": "light/widget-layer-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row",
+      "state": "hover",
+      "scene": "unselected row; hover shows the row actions"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-action-row-hover",
+      "file": "light/widget-layer-row-action-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 228.203125,
+        "y": 397.296875,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "layer-row-action",
+      "state": "row-hover",
+      "scene": "eye action of a hovered row"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-action-hover",
+      "file": "light/widget-layer-row-action-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 228.203125,
+        "y": 397.296875,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "layer-row-action",
+      "state": "hover",
+      "scene": "eye action of a hovered row"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-disclosure-idle",
+      "file": "light/widget-layer-disclosure-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 16,
+        "y": 445.296875,
+        "width": 24,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "layer-disclosure",
+      "state": "idle",
+      "scene": "inner frame disclosure, expanded"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-disclosure-hover",
+      "file": "light/widget-layer-disclosure-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 16,
+        "y": 445.296875,
+        "width": 24,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "layer-disclosure",
+      "state": "hover",
+      "scene": "inner frame disclosure, expanded"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-disclosure-collapsed",
+      "file": "light/widget-layer-disclosure-collapsed.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 14,
+        "y": 447.296875,
+        "width": 28,
+        "height": 24
+      },
+      "set": "gaps",
+      "widget": "layer-disclosure",
+      "state": "collapsed"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-tree-collapsed-frame",
+      "file": "light/widget-layer-tree-collapsed-frame.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 260.203125,
+        "height": 108
+      },
+      "set": "gaps",
+      "widget": "layer-tree",
+      "state": "collapsed-frame"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-hidden-idle",
+      "file": "light/widget-layer-row-hidden-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-hidden",
+      "state": "idle",
+      "scene": "row of a hidden layer"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-rename-focus",
+      "file": "light/widget-layer-row-rename-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "layer-row-rename",
+      "state": "focus",
+      "scene": "inline rename input in a layer row"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-selected-focused-idle",
+      "file": "light/widget-layer-row-selected-focused-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-selected-focused",
+      "state": "idle",
+      "scene": "selected row while the tree reports focus (after the rename input closed)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-row-selected-focused-hover",
+      "file": "light/widget-layer-row-selected-focused-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 393.296875,
+        "width": 260.203125,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layer-row-selected-focused",
+      "state": "hover",
+      "scene": "selected row while the tree reports focus (after the rename input closed)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layer-tree-selected-focused",
+      "file": "light/widget-layer-tree-selected-focused.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 369.296875,
+        "width": 260.203125,
+        "height": 132
+      },
+      "set": "gaps",
+      "widget": "layer-tree",
+      "state": "selected-focused"
+    },
+    {
+      "theme": "light",
+      "name": "widget-constraints-diagram-idle",
+      "file": "light/widget-constraints-diagram-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 279,
+        "width": 84,
+        "height": 76
+      },
+      "set": "gaps",
+      "widget": "constraints-diagram",
+      "state": "idle",
+      "scene": "constraints diagram with left and top pins active"
+    },
+    {
+      "theme": "light",
+      "name": "widget-constraints-pin-active-idle",
+      "file": "light/widget-constraints-pin-active-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1192.796875,
+        "y": 297,
+        "width": 28,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "constraints-pin-active",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-constraints-pin-active-hover",
+      "file": "light/widget-constraints-pin-active-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1192.796875,
+        "y": 297,
+        "width": 28,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "constraints-pin-active",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-constraints-pin-idle",
+      "file": "light/widget-constraints-pin-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1238.796875,
+        "y": 297,
+        "width": 28,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "constraints-pin",
+      "state": "idle",
+      "scene": "an inactive constraint pin"
+    },
+    {
+      "theme": "light",
+      "name": "widget-constraints-pin-hover",
+      "file": "light/widget-constraints-pin-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1238.796875,
+        "y": 297,
+        "width": 28,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "constraints-pin",
+      "state": "hover",
+      "scene": "an inactive constraint pin"
+    },
+    {
+      "theme": "light",
+      "name": "screen-constraints-selected",
+      "file": "light/screen-constraints-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "rectangle inside a frame selected: constraints section visible"
+    },
+    {
+      "theme": "light",
+      "name": "screen-auto-layout-section",
+      "file": "light/screen-auto-layout-section.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "inner frame with auto layout: direction, spacing, clip content, alignment grid"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layout-alignment-grid-idle",
+      "file": "light/widget-layout-alignment-grid-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 676,
+        "width": 88,
+        "height": 88
+      },
+      "set": "gaps",
+      "widget": "layout-alignment-grid",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layout-alignment-cell-active-idle",
+      "file": "light/widget-layout-alignment-cell-active-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 676,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layout-alignment-cell-active",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layout-alignment-cell-idle",
+      "file": "light/widget-layout-alignment-cell-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1213.796875,
+        "y": 676,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layout-alignment-cell",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-layout-alignment-cell-hover",
+      "file": "light/widget-layout-alignment-cell-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1213.796875,
+        "y": 676,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "layout-alignment-cell",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-checkbox-clip-content-idle",
+      "file": "light/widget-checkbox-clip-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 633,
+        "width": 25,
+        "height": 25
+      },
+      "set": "gaps",
+      "widget": "checkbox-clip-content",
+      "state": "idle",
+      "scene": "clip content checkbox, unchecked"
+    },
+    {
+      "theme": "light",
+      "name": "widget-checkbox-clip-content-hover",
+      "file": "light/widget-checkbox-clip-content-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 633,
+        "width": 25,
+        "height": 25
+      },
+      "set": "gaps",
+      "widget": "checkbox-clip-content",
+      "state": "hover",
+      "scene": "clip content checkbox, unchecked"
+    },
+    {
+      "theme": "light",
+      "name": "widget-checkbox-clip-content-checked-hover",
+      "file": "light/widget-checkbox-clip-content-checked-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 633,
+        "width": 25,
+        "height": 25
+      },
+      "set": "gaps",
+      "widget": "checkbox-clip-content",
+      "state": "checked-hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-checkbox-clip-content-checked",
+      "file": "light/widget-checkbox-clip-content-checked.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 633,
+        "width": 25,
+        "height": 25
+      },
+      "set": "gaps",
+      "widget": "checkbox-clip-content",
+      "state": "checked"
+    },
+    {
+      "theme": "light",
+      "name": "screen-context-menu-selection",
+      "file": "light/screen-context-menu-selection.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "canvas context menu for a selected rectangle (disabled, component-tone and submenu items)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-content-idle",
+      "file": "light/widget-menu-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 406,
+        "y": 182,
+        "width": 236,
+        "height": 718
+      },
+      "set": "gaps",
+      "widget": "menu-content",
+      "state": "idle",
+      "scene": "context menu content"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-idle",
+      "file": "light/widget-menu-item-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 364,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item",
+      "state": "idle",
+      "scene": "menu item with shortcut"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-hover",
+      "file": "light/widget-menu-item-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 364,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item",
+      "state": "hover",
+      "scene": "menu item with shortcut"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-disabled-idle",
+      "file": "light/widget-menu-item-disabled-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 485,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled",
+      "state": "idle",
+      "scene": "disabled menu item (no hover change)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-disabled-hover",
+      "file": "light/widget-menu-item-disabled-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 485,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled",
+      "state": "hover",
+      "scene": "disabled menu item (no hover change)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-component-idle",
+      "file": "light/widget-menu-item-component-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 690,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-component",
+      "state": "idle",
+      "scene": "component-tone menu item"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-component-hover",
+      "file": "light/widget-menu-item-component-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 690,
+        "width": 226,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-component",
+      "state": "hover",
+      "scene": "component-tone menu item"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-submenu-idle",
+      "file": "light/widget-menu-item-submenu-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 857,
+        "width": 226,
+        "height": 43
+      },
+      "set": "gaps",
+      "widget": "menu-item-submenu",
+      "state": "idle",
+      "scene": "submenu trigger, closed then open"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-submenu-open",
+      "file": "light/widget-menu-item-submenu-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 411,
+        "y": 857,
+        "width": 226,
+        "height": 43
+      },
+      "set": "gaps",
+      "widget": "menu-item-submenu",
+      "state": "open",
+      "scene": "submenu trigger, closed then open"
+    },
+    {
+      "theme": "light",
+      "name": "screen-context-submenu-open",
+      "file": "light/screen-context-submenu-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "context menu with the Copy/Paste as submenu open"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-submenu-content-idle",
+      "file": "light/widget-menu-submenu-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 625,
+        "y": 711,
+        "width": 201.828125,
+        "height": 189
+      },
+      "set": "gaps",
+      "widget": "menu-submenu-content",
+      "state": "idle",
+      "scene": "submenu content"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-in-submenu-hover",
+      "file": "light/widget-menu-item-in-submenu-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 630,
+        "y": 744,
+        "width": 191.828125,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-in-submenu",
+      "state": "hover",
+      "scene": "submenu item hover"
+    },
+    {
+      "theme": "light",
+      "name": "screen-toast-default",
+      "file": "light/screen-toast-default.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "default tone toast at the top centre after Copy node ID"
+    },
+    {
+      "theme": "light",
+      "name": "widget-toast-default",
+      "file": "light/widget-toast-default.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 642.859375,
+        "y": 2,
+        "width": 154.28125,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "toast",
+      "state": "default",
+      "scene": "default tone toast"
+    },
+    {
+      "theme": "light",
+      "name": "screen-toast-error",
+      "file": "light/screen-toast-error.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "error tone toast raised by an unhandled rejection"
+    },
+    {
+      "theme": "light",
+      "name": "widget-toast-error",
+      "file": "light/widget-toast-error.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 568.4375,
+        "y": 2,
+        "width": 303.125,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "toast",
+      "state": "error",
+      "scene": "error tone toast"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tooltip-toolbar-shortcut",
+      "file": "light/widget-tooltip-toolbar-shortcut.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 660.234375,
+        "y": 812.296875,
+        "width": 71.484375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "tooltip",
+      "state": "toolbar-shortcut",
+      "scene": "tooltip of a toolbar button with shortcut text (Pen (P))"
+    },
+    {
+      "theme": "light",
+      "name": "screen-tooltip-toolbar-shortcut",
+      "file": "light/screen-tooltip-toolbar-shortcut.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "tooltip over the toolbar pen button"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tooltip-panel-icon-button",
+      "file": "light/widget-tooltip-panel-icon-button.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1306.53125,
+        "y": 178.296875,
+        "width": 109.828125,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "tooltip",
+      "state": "panel-icon-button",
+      "scene": "tooltip of a panel icon button"
+    },
+    {
+      "theme": "light",
+      "name": "screen-toolbar-flyout-open",
+      "file": "light/screen-toolbar-flyout-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "frame tool flyout open above the toolbar"
+    },
+    {
+      "theme": "light",
+      "name": "widget-flyout-content-idle",
+      "file": "light/widget-flyout-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 613,
+        "y": 767,
+        "width": 149.734375,
+        "height": 78
+      },
+      "set": "gaps",
+      "widget": "flyout-content",
+      "state": "idle",
+      "scene": "toolbar flyout content"
+    },
+    {
+      "theme": "light",
+      "name": "widget-flyout-item-idle",
+      "file": "light/widget-flyout-item-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 618,
+        "y": 800,
+        "width": 139.734375,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "flyout-item",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-flyout-item-hover",
+      "file": "light/widget-flyout-item-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 618,
+        "y": 800,
+        "width": 139.734375,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "flyout-item",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "screen-menubar-edit-open",
+      "file": "light/screen-menubar-edit-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "Edit menu open"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-disabled-menubar-idle",
+      "file": "light/widget-menu-item-disabled-menubar-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 41,
+        "y": 91,
+        "width": 210,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled-menubar",
+      "state": "idle",
+      "scene": "disabled item in a menubar menu"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-disabled-menubar-hover",
+      "file": "light/widget-menu-item-disabled-menubar-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 41,
+        "y": 91,
+        "width": 210,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled-menubar",
+      "state": "hover",
+      "scene": "disabled item in a menubar menu"
+    },
+    {
+      "theme": "light",
+      "name": "screen-menubar-view-open",
+      "file": "light/screen-menubar-view-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "View menu open"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-checkbox-idle",
+      "file": "light/widget-menu-item-checkbox-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 80,
+        "y": 305,
+        "width": 210,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-checkbox",
+      "state": "idle",
+      "scene": "checkbox menu item"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-checkbox-hover",
+      "file": "light/widget-menu-item-checkbox-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 80,
+        "y": 305,
+        "width": 210,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-checkbox",
+      "state": "hover",
+      "scene": "checkbox menu item"
+    },
+    {
+      "theme": "light",
+      "name": "screen-file-menu-submenu-open",
+      "file": "light/screen-file-menu-submenu-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "File menu with the Export selection submenu open"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-disabled-page-delete-idle",
+      "file": "light/widget-menu-item-disabled-page-delete-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 130,
+        "y": 171,
+        "width": 146,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled-page-delete",
+      "state": "idle",
+      "scene": "Delete page while only one page exists"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-disabled-page-delete-hover",
+      "file": "light/widget-menu-item-disabled-page-delete-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 130,
+        "y": 171,
+        "width": 146,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "menu-item-disabled-page-delete",
+      "state": "hover",
+      "scene": "Delete page while only one page exists"
+    },
+    {
+      "theme": "light",
+      "name": "screen-grid-settings-popover",
+      "file": "light/screen-grid-settings-popover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "canvas grid popover with two switches"
+    },
+    {
+      "theme": "light",
+      "name": "widget-popover-grid-settings",
+      "file": "light/widget-popover-grid-settings.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 704,
+        "y": 650,
+        "width": 268,
+        "height": 195
+      },
+      "set": "gaps",
+      "widget": "popover",
+      "state": "grid-settings",
+      "scene": "popover content"
+    },
+    {
+      "theme": "light",
+      "name": "widget-grid-size-input-focus",
+      "file": "light/widget-grid-size-input-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 717,
+        "y": 715,
+        "width": 123,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "grid-size-input",
+      "state": "focus",
+      "scene": "native number input in the popover, autofocused"
+    },
+    {
+      "theme": "light",
+      "name": "widget-grid-size-input-idle",
+      "file": "light/widget-grid-size-input-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 836,
+        "y": 715,
+        "width": 123,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "grid-size-input",
+      "state": "idle",
+      "scene": "second input, not focused"
+    },
+    {
+      "theme": "light",
+      "name": "widget-grid-size-input-hover",
+      "file": "light/widget-grid-size-input-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 836,
+        "y": 715,
+        "width": 123,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "grid-size-input",
+      "state": "hover",
+      "scene": "second input, not focused"
+    },
+    {
+      "theme": "light",
+      "name": "widget-switch-idle",
+      "file": "light/widget-switch-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "idle",
+      "scene": "switch off (sm 28x16)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-switch-hover",
+      "file": "light/widget-switch-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "hover",
+      "scene": "switch off (sm 28x16)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-switch-focus",
+      "file": "light/widget-switch-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "focus"
+    },
+    {
+      "theme": "light",
+      "name": "widget-switch-on",
+      "file": "light/widget-switch-on.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "on"
+    },
+    {
+      "theme": "light",
+      "name": "widget-switch-on-hover",
+      "file": "light/widget-switch-on-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 919,
+        "y": 774,
+        "width": 40,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "switch",
+      "state": "on-hover"
+    },
+    {
+      "theme": "light",
+      "name": "screen-share-popover",
+      "file": "light/screen-share-popover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "share popover: name input focused, share and join buttons disabled"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-input-focus",
+      "file": "light/widget-text-input-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 69,
+        "width": 274,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "text-input",
+      "state": "focus",
+      "scene": "default tone md input, autofocused, placeholder shown"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-input-idle",
+      "file": "light/widget-text-input-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 176.5,
+        "width": 219.953125,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "text-input",
+      "state": "idle",
+      "scene": "default tone md input with placeholder"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-input-hover",
+      "file": "light/widget-text-input-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 176.5,
+        "width": 219.953125,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "text-input",
+      "state": "hover",
+      "scene": "default tone md input with placeholder"
+    },
+    {
+      "theme": "light",
+      "name": "widget-button-accent-disabled-idle",
+      "file": "light/widget-button-accent-disabled-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 107,
+        "width": 274,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "button-accent-disabled",
+      "state": "idle",
+      "scene": "accent button disabled"
+    },
+    {
+      "theme": "light",
+      "name": "widget-button-accent-disabled-hover",
+      "file": "light/widget-button-accent-disabled-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 107,
+        "width": 274,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "button-accent-disabled",
+      "state": "hover",
+      "scene": "accent button disabled"
+    },
+    {
+      "theme": "light",
+      "name": "widget-button-accent-disabled-small-idle",
+      "file": "light/widget-button-accent-disabled-small-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1366.953125,
+        "y": 175.5,
+        "width": 60.046875,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "button-accent-disabled-small",
+      "state": "idle",
+      "scene": "small accent button disabled"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-input-filled-focus",
+      "file": "light/widget-text-input-filled-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 69,
+        "width": 274,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "text-input",
+      "state": "filled-focus",
+      "scene": "typed value"
+    },
+    {
+      "theme": "light",
+      "name": "widget-button-accent-idle",
+      "file": "light/widget-button-accent-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 107,
+        "width": 274,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "button-accent",
+      "state": "idle",
+      "scene": "accent button enabled after a name was typed"
+    },
+    {
+      "theme": "light",
+      "name": "widget-button-accent-hover",
+      "file": "light/widget-button-accent-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1153,
+        "y": 107,
+        "width": 274,
+        "height": 44
+      },
+      "set": "gaps",
+      "widget": "button-accent",
+      "state": "hover",
+      "scene": "accent button enabled after a name was typed"
+    },
+    {
+      "theme": "light",
+      "name": "screen-assets-panel",
+      "file": "light/screen-assets-panel.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "assets tab with the search input and no local components"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-input-sm-idle",
+      "file": "light/widget-text-input-sm-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 2,
+        "y": 130.5,
+        "width": 254.203125,
+        "height": 38.5
+      },
+      "set": "gaps",
+      "widget": "text-input-sm",
+      "state": "idle",
+      "scene": "default tone sm search input"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-input-sm-hover",
+      "file": "light/widget-text-input-sm-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 2,
+        "y": 130.5,
+        "width": 254.203125,
+        "height": 38.5
+      },
+      "set": "gaps",
+      "widget": "text-input-sm",
+      "state": "hover",
+      "scene": "default tone sm search input"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-input-sm-focus",
+      "file": "light/widget-text-input-sm-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 2,
+        "y": 130.5,
+        "width": 254.203125,
+        "height": 38.5
+      },
+      "set": "gaps",
+      "widget": "text-input-sm",
+      "state": "focus"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-input-sm-filled-focus",
+      "file": "light/widget-text-input-sm-filled-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 2,
+        "y": 130.5,
+        "width": 254.203125,
+        "height": 38.5
+      },
+      "set": "gaps",
+      "widget": "text-input-sm",
+      "state": "filled-focus"
+    },
+    {
+      "theme": "light",
+      "name": "screen-dialog-variables-empty",
+      "file": "light/screen-dialog-variables-empty.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "variables dialog without collections: dim overlay, centred content"
+    },
+    {
+      "theme": "light",
+      "name": "widget-dialog-overlay-idle",
+      "file": "light/widget-dialog-overlay-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "set": "gaps",
+      "widget": "dialog-overlay",
+      "state": "idle",
+      "scene": "dialog overlay (black at 50%)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-dialog-content-idle",
+      "file": "light/widget-dialog-content-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 314,
+        "y": 106.5,
+        "width": 812,
+        "height": 687
+      },
+      "set": "gaps",
+      "widget": "dialog-content",
+      "state": "idle",
+      "scene": "dialog content, empty state"
+    },
+    {
+      "theme": "light",
+      "name": "widget-dialog-close-button-idle",
+      "file": "light/widget-dialog-close-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1073,
+        "y": 119.5,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "dialog-close-button",
+      "state": "idle",
+      "scene": "dialog close icon button"
+    },
+    {
+      "theme": "light",
+      "name": "widget-dialog-close-button-hover",
+      "file": "light/widget-dialog-close-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1073,
+        "y": 119.5,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "dialog-close-button",
+      "state": "hover",
+      "scene": "dialog close icon button"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-button-idle",
+      "file": "light/widget-text-button-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 654.015625,
+        "y": 468.5,
+        "width": 131.953125,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "text-button",
+      "state": "idle",
+      "scene": "neutral text button (Create collection)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-button-hover",
+      "file": "light/widget-text-button-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 654.015625,
+        "y": 468.5,
+        "width": 131.953125,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "text-button",
+      "state": "hover",
+      "scene": "neutral text button (Create collection)"
+    },
+    {
+      "theme": "light",
+      "name": "screen-dialog-variables-table-empty",
+      "file": "light/screen-dialog-variables-table-empty.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "variables dialog with an empty collection table"
+    },
+    {
+      "theme": "light",
+      "name": "widget-dialog-search-input-idle",
+      "file": "light/widget-dialog-search-input-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 936,
+        "y": 115.5,
+        "width": 108,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "dialog-search-input",
+      "state": "idle",
+      "scene": "search field in the dialog header"
+    },
+    {
+      "theme": "light",
+      "name": "widget-dialog-search-input-hover",
+      "file": "light/widget-dialog-search-input-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 936,
+        "y": 115.5,
+        "width": 108,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "dialog-search-input",
+      "state": "hover",
+      "scene": "search field in the dialog header"
+    },
+    {
+      "theme": "light",
+      "name": "widget-dialog-collection-tab-idle",
+      "file": "light/widget-dialog-collection-tab-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 327,
+        "y": 111.5,
+        "width": 115.859375,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "dialog-collection-tab",
+      "state": "idle",
+      "scene": "collection tab"
+    },
+    {
+      "theme": "light",
+      "name": "widget-dialog-collection-tab-hover",
+      "file": "light/widget-dialog-collection-tab-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 327,
+        "y": 111.5,
+        "width": 115.859375,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "dialog-collection-tab",
+      "state": "hover",
+      "scene": "collection tab"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-button-add-idle",
+      "file": "light/widget-text-button-add-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1016.015625,
+        "y": 744.5,
+        "width": 92.984375,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "text-button-add",
+      "state": "idle",
+      "scene": "Add button with chevron in the dialog footer"
+    },
+    {
+      "theme": "light",
+      "name": "widget-text-button-add-hover",
+      "file": "light/widget-text-button-add-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1016.015625,
+        "y": 744.5,
+        "width": 92.984375,
+        "height": 40
+      },
+      "set": "gaps",
+      "widget": "text-button-add",
+      "state": "hover",
+      "scene": "Add button with chevron in the dialog footer"
+    },
+    {
+      "theme": "light",
+      "name": "screen-dialog-variables-add-menu",
+      "file": "light/screen-dialog-variables-add-menu.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "add variable menu: items with a title and a description line"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-content-described-idle",
+      "file": "light/widget-menu-content-described-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 905,
+        "y": 561,
+        "width": 204,
+        "height": 187.3125
+      },
+      "set": "gaps",
+      "widget": "menu-content-described",
+      "state": "idle",
+      "scene": "menu with two-line items"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-described-idle",
+      "file": "light/widget-menu-item-described-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 910,
+        "y": 607.328125,
+        "width": 194,
+        "height": 53.328125
+      },
+      "set": "gaps",
+      "widget": "menu-item-described",
+      "state": "idle",
+      "scene": "menu item with title and description"
+    },
+    {
+      "theme": "light",
+      "name": "widget-menu-item-described-hover",
+      "file": "light/widget-menu-item-described-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 910,
+        "y": 607.328125,
+        "width": 194,
+        "height": 53.328125
+      },
+      "set": "gaps",
+      "widget": "menu-item-described",
+      "state": "hover",
+      "scene": "menu item with title and description"
+    },
+    {
+      "theme": "light",
+      "name": "screen-dialog-variables-table",
+      "file": "light/screen-dialog-variables-table.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "variables dialog with a number and a colour variable"
+    },
+    {
+      "theme": "light",
+      "name": "widget-variable-row-idle",
+      "file": "light/widget-variable-row-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 315,
+        "y": 177,
+        "width": 810,
+        "height": 45
+      },
+      "set": "gaps",
+      "widget": "variable-row",
+      "state": "idle",
+      "scene": "variable table row"
+    },
+    {
+      "theme": "light",
+      "name": "widget-variable-row-hover",
+      "file": "light/widget-variable-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 315,
+        "y": 177,
+        "width": 810,
+        "height": 45
+      },
+      "set": "gaps",
+      "widget": "variable-row",
+      "state": "hover",
+      "scene": "variable table row"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-x-mixed-idle",
+      "file": "light/widget-number-field-x-mixed-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 177,
+        "width": 126.09375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "number-field-x-mixed",
+      "state": "idle",
+      "scene": "two rectangles selected with different X: value shows Mixed"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-x-mixed-hover",
+      "file": "light/widget-number-field-x-mixed-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 177,
+        "width": 126.09375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "number-field-x-mixed",
+      "state": "hover",
+      "scene": "two rectangles selected with different X: value shows Mixed"
+    },
+    {
+      "theme": "light",
+      "name": "widget-icon-button-variable-trigger-idle",
+      "file": "light/widget-icon-button-variable-trigger-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1256.890625,
+        "y": 270,
+        "width": 32,
+        "height": 32
+      },
+      "set": "gaps",
+      "widget": "icon-button-variable-trigger",
+      "state": "idle",
+      "scene": "apply variable trigger (20x20) in a number field"
+    },
+    {
+      "theme": "light",
+      "name": "widget-icon-button-variable-trigger-hover",
+      "file": "light/widget-icon-button-variable-trigger-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1256.890625,
+        "y": 270,
+        "width": 32,
+        "height": 32
+      },
+      "set": "gaps",
+      "widget": "icon-button-variable-trigger",
+      "state": "hover",
+      "scene": "apply variable trigger (20x20) in a number field"
+    },
+    {
+      "theme": "light",
+      "name": "screen-binding-picker-open",
+      "file": "light/screen-binding-picker-open.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "binding picker: search row, variable item, create footer"
+    },
+    {
+      "theme": "light",
+      "name": "widget-binding-picker-idle",
+      "file": "light/widget-binding-picker-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1025,
+        "y": 232,
+        "width": 236,
+        "height": 109
+      },
+      "set": "gaps",
+      "widget": "binding-picker",
+      "state": "idle",
+      "scene": "binding picker popover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-binding-picker-search-focus",
+      "file": "light/widget-binding-picker-search-focus.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1026,
+        "y": 233,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-search",
+      "state": "focus",
+      "scene": "search row, autofocused"
+    },
+    {
+      "theme": "light",
+      "name": "widget-binding-picker-item-idle",
+      "file": "light/widget-binding-picker-item-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1030,
+        "y": 263,
+        "width": 226,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-item",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-binding-picker-item-hover",
+      "file": "light/widget-binding-picker-item-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1030,
+        "y": 263,
+        "width": 226,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-item",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-binding-picker-action-idle",
+      "file": "light/widget-binding-picker-action-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1030,
+        "y": 298,
+        "width": 226,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-action",
+      "state": "idle",
+      "scene": "footer action row"
+    },
+    {
+      "theme": "light",
+      "name": "widget-binding-picker-action-hover",
+      "file": "light/widget-binding-picker-action-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1030,
+        "y": 298,
+        "width": 226,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "binding-picker-action",
+      "state": "hover",
+      "scene": "footer action row"
+    },
+    {
+      "theme": "light",
+      "name": "widget-binding-pill-idle",
+      "file": "light/widget-binding-pill-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1209.640625,
+        "y": 272.671875,
+        "width": 59.25,
+        "height": 26.65625
+      },
+      "set": "gaps",
+      "widget": "binding-pill",
+      "state": "idle",
+      "scene": "bound variable pill replacing the value (component colour)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-binding-pill-hover",
+      "file": "light/widget-binding-pill-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1209.640625,
+        "y": 272.671875,
+        "width": 59.25,
+        "height": 26.65625
+      },
+      "set": "gaps",
+      "widget": "binding-pill",
+      "state": "hover",
+      "scene": "bound variable pill replacing the value (component colour)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-number-field-width-bound-idle",
+      "file": "light/widget-number-field-width-bound-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1187.796875,
+        "y": 267,
+        "width": 126.09375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "number-field-width-bound",
+      "state": "idle",
+      "scene": "width field bound to a variable"
+    },
+    {
+      "theme": "light",
+      "name": "screen-number-field-bound",
+      "file": "light/screen-number-field-bound.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "width bound to a variable"
+    },
+    {
+      "theme": "light",
+      "name": "screen-fill-picker-solid",
+      "file": "light/screen-fill-picker-solid.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "fill picker, solid tab"
+    },
+    {
+      "theme": "light",
+      "name": "widget-fill-picker-tab-active",
+      "file": "light/widget-fill-picker-tab-active.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 369,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "fill-picker-tab",
+      "state": "active",
+      "scene": "solid tab active"
+    },
+    {
+      "theme": "light",
+      "name": "widget-fill-picker-tab-idle",
+      "file": "light/widget-fill-picker-tab-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 966,
+        "y": 369,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "fill-picker-tab",
+      "state": "idle",
+      "scene": "inactive tab (idle, hover)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-fill-picker-tab-hover",
+      "file": "light/widget-fill-picker-tab-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 966,
+        "y": 369,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "fill-picker-tab",
+      "state": "hover",
+      "scene": "inactive tab (idle, hover)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-color-slider-hue-idle",
+      "file": "light/widget-color-slider-hue-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 549,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "color-slider-hue",
+      "state": "idle",
+      "scene": "hue slider (12 px track, 14 px thumb)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-color-slider-hue-hover",
+      "file": "light/widget-color-slider-hue-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 549,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "color-slider-hue",
+      "state": "hover",
+      "scene": "hue slider (12 px track, 14 px thumb)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-color-slider-alpha-idle",
+      "file": "light/widget-color-slider-alpha-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 583,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "color-slider-alpha",
+      "state": "idle",
+      "scene": "alpha slider over a checkerboard"
+    },
+    {
+      "theme": "light",
+      "name": "widget-color-slider-alpha-hover",
+      "file": "light/widget-color-slider-alpha-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 583,
+        "width": 234,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "color-slider-alpha",
+      "state": "hover",
+      "scene": "alpha slider over a checkerboard"
+    },
+    {
+      "theme": "light",
+      "name": "screen-gradient-editor",
+      "file": "light/screen-gradient-editor.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "fill picker, gradient tab: type select, bar with two stops, stop list"
+    },
+    {
+      "theme": "light",
+      "name": "widget-fill-picker-tab-active",
+      "file": "light/widget-fill-picker-tab-active.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 966,
+        "y": 291,
+        "width": 36,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "fill-picker-tab",
+      "state": "active"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-bar-idle",
+      "file": "light/widget-gradient-bar-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 357,
+        "width": 234,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "gradient-bar",
+      "state": "idle",
+      "scene": "gradient bar with stop handles"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-idle",
+      "file": "light/widget-gradient-stop-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 933,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop",
+      "state": "idle",
+      "scene": "stop handle (14 px, active)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-hover",
+      "file": "light/widget-gradient-stop-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 933,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop",
+      "state": "hover",
+      "scene": "stop handle (14 px, active)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-inactive-idle",
+      "file": "light/widget-gradient-stop-inactive-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1155,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-inactive",
+      "state": "idle",
+      "scene": "second stop handle, inactive"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-inactive-hover",
+      "file": "light/widget-gradient-stop-inactive-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1155,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-inactive",
+      "state": "hover",
+      "scene": "second stop handle, inactive"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-row-idle",
+      "file": "light/widget-gradient-stop-row-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 409.5,
+        "width": 234,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-row",
+      "state": "idle",
+      "scene": "stop list row, active (hover tint)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-row-hover",
+      "file": "light/widget-gradient-stop-row-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 409.5,
+        "width": 234,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-row",
+      "state": "hover",
+      "scene": "stop list row, active (hover tint)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-row-inactive-idle",
+      "file": "light/widget-gradient-stop-row-inactive-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 439.5,
+        "width": 234,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-row-inactive",
+      "state": "idle"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-row-inactive-hover",
+      "file": "light/widget-gradient-stop-row-inactive-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 439.5,
+        "width": 234,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-row-inactive",
+      "state": "hover"
+    },
+    {
+      "theme": "light",
+      "name": "widget-icon-button-add-stop-idle",
+      "file": "light/widget-icon-button-add-stop-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1146,
+        "y": 389.25,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "icon-button-add-stop",
+      "state": "idle",
+      "scene": "add stop (16 px icon button)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-icon-button-add-stop-hover",
+      "file": "light/widget-icon-button-add-stop-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1146,
+        "y": 389.25,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "icon-button-add-stop",
+      "state": "hover",
+      "scene": "add stop (16 px icon button)"
+    },
+    {
+      "theme": "light",
+      "name": "screen-gradient-editor-stop-selected",
+      "file": "light/screen-gradient-editor-stop-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "second stop selected: handle white, list row tinted"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-stop-inactive-selected",
+      "file": "light/widget-gradient-stop-inactive-selected.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1155,
+        "y": 362,
+        "width": 26,
+        "height": 26
+      },
+      "set": "gaps",
+      "widget": "gradient-stop-inactive",
+      "state": "selected"
+    },
+    {
+      "theme": "light",
+      "name": "widget-gradient-bar-dragging",
+      "file": "light/widget-gradient-bar-dragging.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 940,
+        "y": 357,
+        "width": 234,
+        "height": 36
+      },
+      "set": "gaps",
+      "widget": "gradient-bar",
+      "state": "dragging",
+      "scene": "second stop dragged left, button still down (grabbing)"
+    },
+    {
+      "theme": "light",
+      "name": "screen-fill-picker-image",
+      "file": "light/screen-fill-picker-image.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "fill picker, image tab"
+    },
+    {
+      "theme": "light",
+      "name": "screen-tab-bar-two-documents",
+      "file": "light/screen-tab-bar-two-documents.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "tab bar with an inactive and an active document tab and the new-tab button"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-idle",
+      "file": "light/widget-tab-bar-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 42
+      },
+      "set": "gaps",
+      "widget": "tab-bar",
+      "state": "idle",
+      "scene": "tab bar root (36 px, bottom border)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-tab-inactive-idle",
+      "file": "light/widget-tab-bar-tab-inactive-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 115.03125,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-tab-inactive",
+      "state": "idle",
+      "scene": "inactive tab; hover reveals the close button"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-tab-inactive-hover",
+      "file": "light/widget-tab-bar-tab-inactive-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 115.03125,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-tab-inactive",
+      "state": "hover",
+      "scene": "inactive tab; hover reveals the close button"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-tab-active-idle",
+      "file": "light/widget-tab-bar-tab-active-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 103.03125,
+        "y": 0,
+        "width": 121.03125,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-tab-active",
+      "state": "idle",
+      "scene": "active tab with its close button visible"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-tab-active-hover",
+      "file": "light/widget-tab-bar-tab-active-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 103.03125,
+        "y": 0,
+        "width": 121.03125,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-tab-active",
+      "state": "hover",
+      "scene": "active tab with its close button visible"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-close-idle",
+      "file": "light/widget-tab-bar-close-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 183.0625,
+        "y": 3.5,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "tab-bar-close",
+      "state": "idle",
+      "scene": "close button of the active tab"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-close-hover",
+      "file": "light/widget-tab-bar-close-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 183.0625,
+        "y": 3.5,
+        "width": 28,
+        "height": 28
+      },
+      "set": "gaps",
+      "widget": "tab-bar-close",
+      "state": "hover",
+      "scene": "close button of the active tab"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-new-idle",
+      "file": "light/widget-tab-bar-new-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 212.0625,
+        "y": 0,
+        "width": 48,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-new",
+      "state": "idle",
+      "scene": "new tab button (36x36)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tab-bar-new-hover",
+      "file": "light/widget-tab-bar-new-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 212.0625,
+        "y": 0,
+        "width": 48,
+        "height": 41
+      },
+      "set": "gaps",
+      "widget": "tab-bar-new",
+      "state": "hover",
+      "scene": "new tab button (36x36)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-tooltip-tab-close",
+      "file": "light/widget-tooltip-tab-close.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 144.6875,
+        "y": 2,
+        "width": 109.609375,
+        "height": 38
+      },
+      "set": "gaps",
+      "widget": "tooltip",
+      "state": "tab-close",
+      "scene": "tooltip of the tab close button"
+    },
+    {
+      "theme": "light",
+      "name": "widget-scrollbar-idle",
+      "file": "light/widget-scrollbar-idle.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1175.796875,
+        "y": 111,
+        "width": 264.203125,
+        "height": 789
+      },
+      "set": "gaps",
+      "widget": "scrollbar",
+      "state": "idle",
+      "scene": "thin scrollbar of the design panel (native, not hidden)"
+    },
+    {
+      "theme": "light",
+      "name": "widget-scrollbar-thumb-hover",
+      "file": "light/widget-scrollbar-thumb-hover.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": {
+        "x": 1175.796875,
+        "y": 111,
+        "width": 264.203125,
+        "height": 789
+      },
+      "set": "gaps",
+      "widget": "scrollbar",
+      "state": "thumb-hover",
+      "scene": "thin scrollbar of the design panel (native, not hidden)"
+    },
+    {
+      "theme": "light",
+      "name": "screen-scrollbar-design-panel",
+      "file": "light/screen-scrollbar-design-panel.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "clip": null,
+      "set": "gaps",
+      "scene": "design panel scrolled content with the thin scrollbar"
     }
   ]
 }
