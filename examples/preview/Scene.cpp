@@ -87,7 +87,7 @@ Scene::Scene(r1ui::theme::Theme& theme, TextEngine& text)
   }
   ids_.root = router_.root();
   SceneBuilder(*this).build();
-  setMode(Mode::Gallery);
+  setMode(Mode::Editor);
   invalidator_.setRoot(ids_.root, 0.0, 0.0);
 }
 

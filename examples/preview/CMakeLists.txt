@@ -1,7 +1,7 @@
 # Interactive preview application (owner requirement: launchable after every phase).
 # Built from the real toolkit modules; grows cumulatively each phase.
 #   r1gui-preview-core  everything except main.cpp (also linked by tests/preview)
-#   r1gui-preview       the borderless preview window; --bench and --shot command lines
+#   r1gui-preview       the borderless preview window; --bench, --bench-editor and --shot command lines
 # Assets next to the executable: assets/theme/tokens.json, assets/fonts/*.ttf, assets/icons/lucide/*.svg
 # (copied) and <ref>/<theme>/screen-*.r1img (generated from the reference PNGs by
 # tools/spec/png_to_raw.py; never committed).
@@ -12,6 +12,7 @@ endif()
 add_library(r1gui-preview-core STATIC
   Assets.cpp
   Bench.cpp
+  BenchEditor.cpp
   CanvasView.cpp
   ComposedApp.cpp
   ComposedCanvas.cpp
@@ -19,6 +20,14 @@ add_library(r1gui-preview-core STATIC
   ComposedPanel.cpp
   ComposedSide.cpp
   DockSandbox.cpp
+  DriveStatus.cpp
+  editor/EditorApp.cpp
+  editor/EditorCommands.cpp
+  editor/EditorLayouts.cpp
+  editor/EditorMenus.cpp
+  editor/EditorModel.cpp
+  editor/EditorPanels.cpp
+  editor/EditorViewport.cpp
   GalleryApp.cpp
   ModeViews.cpp
   PreviewApp.cpp

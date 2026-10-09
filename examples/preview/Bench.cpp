@@ -306,6 +306,7 @@ int runBench(const std::filesystem::path& outputDirectory) {
   options.width = 1440;
   options.height = 900;
   options.logicalSize = false;
+  options.mode = Mode::Gallery;
   PreviewApp app(options);
   while (app.framesPresented() == 0) app.step(false);
   const double galleryStartupMs = app.startupMs();

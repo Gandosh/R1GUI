@@ -17,4 +17,9 @@ namespace preview {
 // std::runtime_error for unrecoverable problems (the shell shows them in a message box).
 int runBench(const std::filesystem::path& outputDirectory);
 
+// The Phase 5 baseline (slice 5.12, BenchEditor.cpp): the Editor screen's frame cost, the cost with one
+// native floating window, idle CPU with and without it, memory and startup. Writes
+// <directory>/phase5_baseline.md.
+int runBenchEditor(const std::filesystem::path& outputDirectory);
+
 }  // namespace preview

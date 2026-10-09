@@ -1,7 +1,8 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: implementation of PreviewApp.h: construction, mode switching, key policy, event routing to
-//   the title-bar scene, the active UiContext and the direct-drawn modes, the frame and the loop.
-// Invariants: redraw_ is true whenever something outside the scene's and the active context's own
+//   the title-bar scene, the active UiContext and the direct-drawn modes, the frame and the hooks of
+//   the multi-window loop.
+// Invariants: the loop (AppLoop) drives the main window and every native floating window; redraw_ is true whenever something outside the scene's and the active context's own
 //   invalidation changed what must be shown (mode, theme, screens, sandbox, resize); frame() clears
 //   it only after a frame was presented. The window's chrome layout is refreshed after every shell
 //   layout pass. Only the active mode's context receives input and frames; the other context keeps
@@ -13,9 +14,13 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <fstream>
 #include <stdexcept>
 
 #include "ComposedUtil.h"
+#include "DriveStatus.h"
+#include "r1ui/platform/Monitors.h"
 #include "r1ui/core/CheckedCast.h"
 
 namespace preview {
@@ -37,6 +42,18 @@ constexpr uint32_t kKeyT = 'T';
 constexpr uint32_t kKeyS = 'S';
 constexpr uint32_t kKeyL = 'L';
 constexpr uint32_t kKeyR = 'R';
+
+// The toolkit's key code for a Windows virtual key (named keys only, like UiContext's own mapping).
+r1ui::core::events::Key toolkitKey(uint32_t vk) {
+  const bool named = vk == 8 || vk == 9 || vk == 13 || vk == 27 || vk == 32 || (vk >= 33 && vk <= 40) || vk == 45 || vk == 46 || (vk >= 48 && vk <= 57) ||
+                     (vk >= 65 && vk <= 90) || (vk >= 112 && vk <= 123);
+  return named ? static_cast<r1ui::core::events::Key>(vk) : r1ui::core::events::Key::Unknown;
+}
+
+uint8_t toolkitModifiers(const platform::Modifiers& m) {
+  namespace mod = r1ui::core::events::Mod;
+  return static_cast<uint8_t>((m.shift ? mod::kShift : 0) | (m.ctrl ? mod::kCtrl : 0) | (m.alt ? mod::kAlt : 0) | (m.meta ? mod::kMeta : 0));
+}
 
 double millis(Clock::time_point from, Clock::time_point to) { return std::chrono::duration<double, std::milli>(to - from).count(); }
 
@@ -96,6 +113,7 @@ PreviewApp::PreviewApp(const AppOptions& options) : started_(Clock::now()), path
   textures_ = std::make_unique<GpuTextureFactory>(*device_);
   services_ = std::make_unique<widgets::Services>(tokens_, *textures_, widgets::ServicesPaths{paths_.fonts(), {paths_.icons(), paths_.customIcons()}});
   windowAtlas_ = std::make_unique<widgets::AtlasConsumer>(services_->text());
+  backend_ = std::make_unique<widgets::NativeFloatingBackend>(*window_, *device_, *services_);
   scene_ = std::make_unique<Scene>(services_->theme(), services_->text());
   scene_->setGlobalKeyHandler(this);
   swatches_ = std::make_unique<SwatchesView>(*tokens_);
@@ -107,13 +125,38 @@ PreviewApp::PreviewApp(const AppOptions& options) : started_(Clock::now()), path
   window_->setChromeLayout(scene_->chromeLayout());
   setMode(options.mode);
 
-  // While Windows runs its own move/size loop pumpEvents() does not return; the window calls back so
-  // the content keeps following the window.
-  window_->setLiveCallback([this] { liveFrame(); });
+  // The loop also installs the live callbacks: while Windows runs its own move/size loop pumpEvents()
+  // does not return, and every window calls back so all windows keep following.
+  if (char* path = nullptr; _dupenv_s(&path, nullptr, "R1GUI_PREVIEW_STATUS") == 0 && path != nullptr) {
+    statusPath_ = path;
+    std::free(path);
+  }
+  widgets::AppLoopHooks hooks;
+  hooks.processMain = [this](uint64_t) { processEvents(); };
+  hooks.mainNeedsFrame = [this] { return needsFrame(); };
+  hooks.renderMain = [this](uint64_t) { frame(); };
+  hooks.mainMsUntilTick = [this](uint64_t) -> std::optional<uint64_t> {
+    std::optional<uint64_t> wake;
+    if (widgets::UiContext* ui = activeUi()) {
+      ui->setTime(nowMs());
+      wake = ui->msUntilTick();
+    }
+    if (editor_ && mode() == Mode::Editor) {
+      if (const std::optional<uint64_t> save = editor_->msUntilTick()) wake = wake ? std::min(*wake, *save) : *save;
+    }
+    return wake;
+  };
+  hooks.quitRequested = [this] { return quit_; };
+  loop_ = std::make_unique<widgets::AppLoop>(*window_, *backend_, std::move(hooks));
 }
 
+// Teardown order (docs/dev/native-windows.md section 5): the loop, then the Editor (it flushes its files
+// and its dock closes the native windows), its context, and only then, by member order, the backend, the
+// services, the device and the window.
 PreviewApp::~PreviewApp() {
-  if (window_) window_->setLiveCallback({});  // nothing may call back into a half-destroyed app
+  loop_.reset();
+  editor_.reset();
+  editorUi_.reset();
   if (device_ && !device_->lost()) device_->waitIdle();
 }
 
@@ -144,7 +187,24 @@ std::unique_ptr<widgets::UiContext> PreviewApp::makeContext(r1ui::core::tree::Wi
 
 void PreviewApp::ensureModeBuilt(Mode mode) {
   r1ui::core::tree::WidgetId content;
-  if (mode == Mode::Gallery && !galleryUi_) {
+  if (mode == Mode::Editor && !editorUi_) {
+    editorUi_ = makeContext(content);
+    editor::EditorHost host;
+    host.dataRoot = editor::defaultDataRoot();
+    host.setDarkTheme = [this](bool dark) { setDarkTheme(dark); };
+    host.isDark = [this] { return scene_->theme().id() == r1ui::theme::ThemeId::Dark; };
+    host.quit = [this] { quit_ = true; };
+    host.showScreen = [this](int screen) {
+      if (screen >= 0 && screen < kModeCount) setMode(static_cast<Mode>(screen));
+    };
+    host.screenNames = [] {
+      std::vector<std::string> names;
+      for (int i = 0; i < kModeCount; ++i) names.emplace_back(modeName(static_cast<Mode>(i)));
+      return names;
+    };
+    host.monitors = [this] { return monitorSet(); };
+    editor_ = std::make_unique<editor::EditorApp>(*editorUi_, content, *backend_, std::move(host));
+  } else if (mode == Mode::Gallery && !galleryUi_) {
     galleryUi_ = makeContext(content);
     gallery_ = std::make_unique<GalleryApp>(*galleryUi_, content);
   } else if (mode == Mode::Widgets && !widgetsUi_) {
@@ -157,8 +217,27 @@ void PreviewApp::ensureModeBuilt(Mode mode) {
   }
 }
 
+// The connected monitors as the dock's layout loading wants them (logical units).
+r1ui::dock::MonitorSet PreviewApp::monitorSet() {
+  r1ui::dock::MonitorSet set;
+  const r1ui::widgets::native::ScreenSpace& space = backend_->screenSpace();
+  const std::vector<platform::MonitorInfo>& monitors = space.monitors();
+  for (size_t i = 0; i < monitors.size(); ++i) {
+    const int index = static_cast<int>(i);
+    r1ui::dock::MonitorInfo info;
+    info.name = monitors[i].name;
+    info.bounds = space.logicalBounds(index);
+    info.workArea = space.logicalWorkArea(index);
+    info.scale = space.scaleOf(index);
+    if (monitors[i].primary) set.primary = i;
+    set.monitors.push_back(std::move(info));
+  }
+  return set;
+}
+
 widgets::UiContext* PreviewApp::activeUi() {
   switch (mode()) {
+    case Mode::Editor: return editorUi_.get();
     case Mode::Gallery: return galleryUi_.get();
     case Mode::Widgets: return widgetsUi_.get();
     default: return nullptr;
@@ -244,6 +323,7 @@ bool PreviewApp::onGlobalKey(const events::Event& e, events::Router& router) {
 bool PreviewApp::tabCyclesModes(const platform::Event& e) {
   if (e.virtualKey != VK_TAB || e.modifiers.alt || e.modifiers.meta) return false;
   if (e.modifiers.ctrl) return true;
+  if (mode() == Mode::Editor) return false;  // the Editor owns the plain keys (Tab is focus navigation there)
   widgets::UiContext* ui = activeUi();
   if (ui == nullptr) return true;
   return !ui->router().focused().valid() && ui->overlays().stack().empty();
@@ -253,7 +333,7 @@ bool PreviewApp::tabCyclesModes(const platform::Event& e) {
 
 void PreviewApp::syncViewport() {
   scene_->setViewport(window_->clientWidth(), window_->clientHeight(), window_->dpiScale());
-  for (widgets::UiContext* ui : {galleryUi_.get(), widgetsUi_.get()}) {
+  for (widgets::UiContext* ui : {editorUi_.get(), galleryUi_.get(), widgetsUi_.get()}) {
     if (ui != nullptr) ui->setViewport(window_->clientWidth(), window_->clientHeight(), window_->dpiScale());
   }
 }
@@ -283,6 +363,7 @@ void PreviewApp::routeToMode(const platform::Event& e) {
         redraw_ = true;
       }
       break;
+    case Mode::Editor:
     case Mode::Gallery:
     case Mode::Widgets: break;
   }
@@ -315,6 +396,7 @@ void PreviewApp::processEvents() {
       case ET::Char:
         if (ui != nullptr) ui->handlePlatformEvent(e);
         else scene_->handleEvent(e, now);
+        if (e.type == ET::KeyUp && editor_ && ui == editorUi_.get()) editor_->onKeyUp(toolkitKey(e.virtualKey), toolkitModifiers(e.modifiers));
         break;
       case ET::MouseMove:
       case ET::MouseDown:
@@ -335,17 +417,29 @@ void PreviewApp::processEvents() {
       case ET::FocusGained:
       case ET::FocusLost:
         scene_->handleEvent(e, now);
-        for (widgets::UiContext* each : {galleryUi_.get(), widgetsUi_.get()}) {
+        for (widgets::UiContext* each : {editorUi_.get(), galleryUi_.get(), widgetsUi_.get()}) {
           if (each != nullptr) each->handlePlatformEvent(e);
         }
         redraw_ = true;
         break;
       case ET::CloseRequested: break;  // the window closes itself (default policy)
+      case ET::DisplayChanged: backend_->onDisplayChanged(); break;  // monitors changed: bring floating windows back
       default: scene_->handleEvent(e, now); break;
     }
   }
   if (ui != nullptr && ui->tick()) redraw_ = true;  // a due timer (tooltip, toast, menu delay) changed something
+  if (editor_ && ui == editorUi_.get()) editor_->tick();  // layout auto-save is due on a timer, not on a frame
+  writeDriveStatus();
   applyCursor();
+}
+
+// The scripted drive's coordinates (DriveStatus.h): rewritten only when the text changed.
+void PreviewApp::writeDriveStatus() {
+  if (statusPath_.empty() || mode() != Mode::Editor || !editor_) return;
+  const std::string text = driveStatus(*this);
+  if (text == lastStatus_) return;
+  lastStatus_ = text;
+  std::ofstream(statusPath_, std::ios::trunc) << text;
 }
 
 void PreviewApp::applyCursor() {
@@ -373,6 +467,7 @@ void PreviewApp::paintMode(r1ui::render::Painter& painter) {
       sandbox_->setBounds(body);
       sandbox_->draw(painter, services_->text(), theme);
       break;
+    case Mode::Editor:
     case Mode::Gallery:
     case Mode::Widgets: break;
   }
@@ -403,6 +498,7 @@ bool PreviewApp::frame(FrameTimes* times) {
   const LayoutResult layoutResult = scene_->layout();
   if (ui != nullptr) {
     ui->setTime(nowMs());
+    if (editor_ && ui == editorUi_.get()) editor_->update();
     ui->frame();
   }
   if (layoutResult.ran) window_->setChromeLayout(scene_->chromeLayout());
@@ -439,58 +535,18 @@ bool PreviewApp::frame(FrameTimes* times) {
     times->totalMs = millis(t0, t3);
     times->presented = presented;
   }
+  writeDriveStatus();  // commands run from a native window change the main window's texts without an event of its own
   return presented;
 }
 
-void PreviewApp::liveFrame() {
-  if (pending_ != nullptr) return;
-  try {
-    processEvents();
-    if (!window_->clientWidth() || !window_->clientHeight()) return;
-    if (needsFrame()) frame();
-  } catch (...) {
-    pending_ = std::current_exception();
-  }
-}
-
-void PreviewApp::rethrowPending() {
-  if (pending_ == nullptr) return;
-  const std::exception_ptr error = pending_;
-  pending_ = nullptr;
-  std::rethrow_exception(error);
-}
-
 bool PreviewApp::pumpMessages() {
-  const bool open = window_->pumpEvents();
-  rethrowPending();
-  if (!open) return false;
+  if (!window_->pumpEvents()) return false;
   processEvents();
   return !quit_;
 }
 
-bool PreviewApp::step(bool block, unsigned maxWaitMs) {
-  if (!pumpMessages()) return false;
-  const bool canDraw = window_->clientWidth() > 0 && window_->clientHeight() > 0;
-  if (canDraw && needsFrame()) {
-    frame();
-    return true;
-  }
-  if (block) {
-    widgets::UiContext* ui = activeUi();
-    std::optional<uint64_t> wake;
-    if (ui != nullptr) {
-      ui->setTime(nowMs());
-      wake = ui->msUntilTick();
-    }
-    const unsigned scheduled = wake ? static_cast<unsigned>(std::min<uint64_t>(*wake, 0x7FFFFFFFu)) : platform::kWaitForever;
-    window_->waitForEvents(std::min(scheduled, maxWaitMs));
-  }
-  return true;
-}
+bool PreviewApp::step(bool block, unsigned maxWaitMs) { return loop_->step(block, maxWaitMs); }
 
-void PreviewApp::run() {
-  while (step(true)) {
-  }
-}
+void PreviewApp::run() { loop_->run(); }
 
 }  // namespace preview

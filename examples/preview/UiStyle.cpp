@@ -57,6 +57,7 @@ constexpr r1ui::theme::StyleRuleEntry kRules[] = {
 
 const char* modeName(Mode mode) {
   switch (mode) {
+    case Mode::Editor: return "Editor";
     case Mode::Gallery: return "Widget gallery";
     case Mode::Widgets: return "Widgets";
     case Mode::Swatches: return "Token swatches";
