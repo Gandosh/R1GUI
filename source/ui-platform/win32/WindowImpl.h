@@ -49,6 +49,7 @@ struct Window::Impl {
   std::function<void()> live;               // see Window::setLiveCallback
   bool inSizeMove = false;                  // the OS move/size loop is running
   bool inLive = false;                      // live callback active (never re-entered)
+  bool keepCapture = false;                 // setVisible(false) is moving the capture: WM_CAPTURECHANGED is not a loss
 
   BoundedQueue<KeyEvent> keyQueue{kMaxQueuedEvents};
   BoundedQueue<MouseClick> clickQueue{kMaxQueuedEvents};

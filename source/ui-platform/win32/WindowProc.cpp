@@ -213,6 +213,9 @@ bool Window::Impl::handleState(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result) 
       pushEvent(e);
       return true;
     }
+    case WM_DISPLAYCHANGE:
+      pushEvent(makeEvent(EventType::DisplayChanged));
+      return false;  // the default handler has nothing to do, but other handlers of the chain may
     case WM_SETFOCUS:
       pushEvent(makeEvent(EventType::FocusGained));
       return true;
@@ -363,6 +366,7 @@ bool Window::Impl::handlePointer(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result
       return true;
     }
     case WM_CAPTURECHANGED:
+      if (keepCapture) return true;  // the window hides itself and takes the capture back at once
       chromePressed = HitZone::Client;
       if (buttonsDown > 0) {  // capture taken by the OS while buttons were held
         buttonsDown = 0;

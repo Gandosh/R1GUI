@@ -103,7 +103,7 @@ Window::Window(const WindowDesc& desc) : impl_(std::make_unique<Impl>()) {
   impl.hwnd = CreateWindowExW(exStyle, kClassName, title.c_str(), style,
                               desc.position ? desc.position->x : CW_USEDEFAULT,
                               desc.position ? desc.position->y : CW_USEDEFAULT, rect.right - rect.left,
-                              rect.bottom - rect.top, nullptr, nullptr, instance, &impl);
+                              rect.bottom - rect.top, desc.owner != nullptr ? desc.owner->impl_->hwnd : nullptr, nullptr, instance, &impl);
   if (impl.hwnd == nullptr) throw std::runtime_error("Window: CreateWindowEx failed");
 
   impl.dpi = GetDpiForWindow(impl.hwnd);
@@ -163,24 +163,52 @@ float Window::dpiScale() const { return dpiScaleFromDpi(impl_->dpi); }
 
 Rect Window::windowRect() const {
   RECT r{};
-  if (GetWindowRect(impl_->hwnd, &r) == FALSE) return {};
+  if (impl_->hwnd == nullptr || GetWindowRect(impl_->hwnd, &r) == FALSE) return {};
   return {r.left, r.top, r.right - r.left, r.bottom - r.top};
 }
 
+Point Window::clientOrigin() const {
+  POINT origin{0, 0};
+  if (impl_->hwnd == nullptr || ClientToScreen(impl_->hwnd, &origin) == FALSE) return {};
+  return {origin.x, origin.y};
+}
+
 bool Window::setWindowRect(const Rect& rect) {
-  if (rect.empty()) return false;
+  if (rect.empty() || impl_->hwnd == nullptr) return false;
   return SetWindowPos(impl_->hwnd, nullptr, rect.x, rect.y, rect.width, rect.height,
                       SWP_NOZORDER | SWP_NOACTIVATE) != FALSE;
 }
 
-void Window::minimize() { ShowWindow(impl_->hwnd, SW_MINIMIZE); }
+void Window::minimize() {
+  if (impl_->hwnd != nullptr) ShowWindow(impl_->hwnd, SW_MINIMIZE);
+}
 void Window::maximizeToggle() {
-  if (!impl_->resizable) return;
+  if (!impl_->resizable || impl_->hwnd == nullptr) return;
   ShowWindow(impl_->hwnd, (IsZoomed(impl_->hwnd) != FALSE) ? SW_RESTORE : SW_MAXIMIZE);
 }
-bool Window::isMaximized() const { return IsZoomed(impl_->hwnd) != FALSE; }
-bool Window::isMinimized() const { return IsIconic(impl_->hwnd) != FALSE; }
-void Window::requestClose() { PostMessageW(impl_->hwnd, WM_CLOSE, 0, 0); }
+bool Window::isMaximized() const { return impl_->hwnd != nullptr && IsZoomed(impl_->hwnd) != FALSE; }
+bool Window::isMinimized() const { return impl_->hwnd != nullptr && IsIconic(impl_->hwnd) != FALSE; }
+bool Window::setVisible(bool visible) {
+  HWND hwnd = impl_->hwnd;
+  if (hwnd == nullptr) return false;
+  if (visible) {
+    ShowWindow(hwnd, SW_SHOWNA);  // current size and position (a maximized window stays maximized), no activation
+    return true;
+  }
+  // Hiding releases the pointer capture; a drag that started in this window must go on, so the
+  // capture is taken again at once and the loss is not reported.
+  const bool holdsCapture = GetCapture() == hwnd;
+  impl_->keepCapture = holdsCapture;
+  ShowWindow(hwnd, SW_HIDE);
+  if (holdsCapture) SetCapture(hwnd);
+  impl_->keepCapture = false;
+  return true;
+}
+bool Window::isVisible() const { return impl_->hwnd != nullptr && IsWindowVisible(impl_->hwnd) != FALSE; }
+bool Window::isAlive() const { return impl_->hwnd != nullptr; }
+void Window::requestClose() {
+  if (impl_->hwnd != nullptr) PostMessageW(impl_->hwnd, WM_CLOSE, 0, 0);
+}
 void Window::setCloseNeedsConfirmation(bool enabled) { impl_->needsConfirm = enabled; }
 void Window::confirmClose() { impl_->closed = true; }
 

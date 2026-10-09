@@ -13,10 +13,20 @@ set(R1UI_WIDGETS_TEST_DEFS
   R1UI_REFERENCE_DIR="${CMAKE_SOURCE_DIR}/tests/reference"
   R1UI_ARTIFACT_DIR="${CMAKE_BINARY_DIR}/artifacts/ui-widgets")
 
-file(GLOB R1UI_WIDGETS_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*/*_test.cpp)
+# A subfolder one level deeper (tests/ui-widgets/dock/native/<name>_test.cpp) is registered the same way
+# under the name <parent>-<folder>; it also sees its parent folder's headers (the dock backend
+# conformance suite lives in tests/ui-widgets/dock).
+file(GLOB R1UI_WIDGETS_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*/*_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/*/*/*_test.cpp)
 foreach(src ${R1UI_WIDGETS_TEST_SOURCES})
   get_filename_component(dir ${src} DIRECTORY)
   get_filename_component(folder ${dir} NAME)
+  get_filename_component(parentDir ${dir} DIRECTORY)
+  set(nested FALSE)
+  if(NOT parentDir STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    get_filename_component(parentName ${parentDir} NAME)
+    set(folder ${parentName}-${folder})
+    set(nested TRUE)
+  endif()
   get_filename_component(stem ${src} NAME_WE)
   if(folder STREQUAL "support")
     continue()
@@ -31,6 +41,9 @@ foreach(src ${R1UI_WIDGETS_TEST_SOURCES})
   set(exe ui-widgets-${folder}-${stem})
   add_executable(${exe} ${src})
   target_include_directories(${exe} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/support)
+  if(nested)
+    target_include_directories(${exe} PRIVATE ${parentDir})
+  endif()
   target_compile_definitions(${exe} PRIVATE ${R1UI_WIDGETS_TEST_DEFS})
   if(is_gpu)
     target_link_libraries(${exe} PRIVATE r1ui::widgets_gpu r1ui_options)

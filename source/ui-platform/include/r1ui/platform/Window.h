@@ -78,6 +78,8 @@ enum class CursorShape {
   Wait
 };
 
+class Window;
+
 struct WindowDesc {
   std::string title = "R1GUI";  // UTF-8
   int width = 1280;             // initial client width (physical pixels unless sizesAreLogical)
@@ -98,6 +100,10 @@ struct WindowDesc {
   // visuals; design tools use Alt as a modifier constantly. Alt+Space (window menu) and Alt+F4
   // keep working. Set true to restore the OS behaviour. Native-frame windows always keep it.
   bool altTapOpensSystemMenu = false;
+  // Owned window (floating panels): stays above `owner`, is hidden and restored with it, is destroyed
+  // with it and has no taskbar button of its own. Must outlive this window's creation only; the OS
+  // keeps the relationship. Null (default): an unowned top-level window.
+  const Window* owner = nullptr;
 };
 
 // Opaque OS handles for the renderer's surface creation; meaning is backend-defined.
@@ -150,6 +156,8 @@ class Window {
 
   // ---- Position and size (physical pixels, screen coordinates) ----
   Rect windowRect() const;  // outer rectangle; includes the invisible resize border when maximized
+  // Screen position (physical pixels) of the client area's top-left corner; {0, 0} once the OS window is gone.
+  Point clientOrigin() const;
   // Ignores an empty rectangle. Returns false if the OS call failed or the rectangle was empty.
   bool setWindowRect(const Rect& rect);
 
@@ -158,6 +166,14 @@ class Window {
   void maximizeToggle();  // maximize, or restore if maximized; no-op for a non-resizable window
   bool isMaximized() const;
   bool isMinimized() const;
+  // Shows or hides the window without activating it. Hiding a window that holds the pointer capture
+  // (a drag started in it) keeps the capture: moves and the release keep arriving, also outside every
+  // window, and no CaptureLost event is produced. Returns false when the OS window is gone.
+  bool setVisible(bool visible);
+  bool isVisible() const;  // shown by the OS: false while hidden, minimized away with its owner or gone
+  // False once the OS window was destroyed behind the Window's back (DestroyWindow from outside, the
+  // owner closing); all other calls are then harmless no-ops and no further events arrive.
+  bool isAlive() const;
   void requestClose();  // posts a close request, exactly like the user closing the window
   // By default a close request closes the window (pumpEvents returns false). With confirmation
   // enabled the request only queues a CloseRequested event; call confirmClose() to proceed.
