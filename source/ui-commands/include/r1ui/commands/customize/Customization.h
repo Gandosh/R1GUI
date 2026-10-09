@@ -102,6 +102,11 @@ class Customization {
   // Why an edit of this node is refused ("" = allowed): the sentence for the lock tooltip.
   std::string lockReason(const std::string& id) const;
 
+  // Runs `op` (any of the editing operations below) in dry-run mode: it is validated exactly as a real
+  // call would be and its result returned, but nothing is stored and nobody is notified. The edit mode
+  // uses it to show an insertion indicator only where a drop would be accepted.
+  EditResult preview(const std::function<EditResult(Customization&)>& op);
+
   // ---- editing: visibility, labels, order -----------------------------------------------------
   EditResult setHidden(const std::string& id, bool hidden);
   EditResult hideEntry(const std::string& id) { return setHidden(id, true); }
@@ -188,6 +193,7 @@ class Customization {
   std::vector<std::pair<ListenerId, Listener>> listeners_;
   ListenerId nextListener_ = 1;
   bool notifying_ = false;
+  bool dryRun_ = false;
   mutable std::optional<EffectiveResult> normal_;
   mutable std::optional<EffectiveResult> edit_;
 };

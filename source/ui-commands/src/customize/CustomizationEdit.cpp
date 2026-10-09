@@ -90,6 +90,14 @@ void collectNodeIds(const Node& node, std::unordered_set<std::string>& out) {
 
 }  // namespace
 
+EditResult Customization::preview(const std::function<EditResult(Customization&)>& op) {
+  const bool before = dryRun_;
+  dryRun_ = true;
+  EditResult result = op(*this);
+  dryRun_ = before;
+  return result;
+}
+
 EditResult Customization::tryCommit(Delta candidate, const std::string& subject, EditResult ok) {
   const Report& before = editView().report;
   std::unordered_set<std::string> known;
@@ -101,7 +109,7 @@ EditResult Customization::tryCommit(Delta candidate, const std::string& subject,
     (void)subject;
     return failure(errorFor(e.code), reasonFor(e));
   }
-  if (candidate == user_) return ok;  // nothing to store (the request matched the current state)
+  if (dryRun_ || candidate == user_) return ok;  // a preview, or nothing to store (the request matched the current state)
   user_ = std::move(candidate);
   changed();
   return ok;

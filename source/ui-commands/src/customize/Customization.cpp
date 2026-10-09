@@ -204,6 +204,15 @@ std::string Customization::lockReason(const std::string& id) const {
       if (n->locked) return "\"" + shownLabel(*n) + "\" is locked by the application and cannot be changed.";
     }
   }
+  for (const ToolbarLayout& t : set.toolbars) {
+    path.clear();
+    if (t.locked && (t.id == id || pathTo(t.items, id, path))) return "\"" + (t.title.empty() ? t.id : t.title) + "\" is locked by the application and cannot be changed.";
+  }
+  for (const FreeFormPanelLayout& p : set.panels) {
+    path.clear();
+    if (p.locked && (p.id == id || pathTo(p.buttons, id, path))) return "\"" + (p.title.empty() ? p.id : p.title) + "\" is locked by the application and cannot be changed.";
+  }
+  if (set.menuBar.locked && id == set.menuBar.id) return "The menu bar is locked by the application and cannot be changed.";
   return "This part of the interface is locked by the application and cannot be changed.";
 }
 
