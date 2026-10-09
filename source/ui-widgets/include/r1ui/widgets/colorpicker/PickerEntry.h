@@ -63,6 +63,8 @@ class PickerEntry : public WidgetObject {
   std::function<bool(std::string_view)> onCommit;
   // Up / Down arrows: +-1, or +-10 with Shift. Absent: the keys are ignored.
   std::function<void(int steps)> onStep;
+  // The entry took keyboard focus (a row that contains it can select itself).
+  std::function<void()> onFocused;
 
   // ---- input ----
   void onPointerDown(Event& e) override;

@@ -9,6 +9,7 @@
 
 #include <algorithm>
 
+#include "r1ui/widgets/colorpicker/PickerDraw.h"
 #include "r1ui/widgets/runtime/UiContext.h"
 
 namespace r1ui::widgets {
@@ -227,22 +228,7 @@ void ColorPicker::commit(const color::ColorState& next) {
 }
 
 void ColorPicker::paint(PaintContext& ctx) {
-  if (!chrome_) return;
-  const render::Rect box = ctx.box();
-  const theme::ResolvedStyle& rs = ctx.resolve("picker.panel", 0);
-  const render::CornerRadii radii = render::CornerRadii::uniform(ctx.px(rs.radius));
-  if (const auto layers = ctx.ui().services().tokens().shadow("xl")) {
-    for (auto it = layers->rbegin(); it != layers->rend(); ++it) {
-      render::ShadowSpec spec;
-      spec.offsetX = ctx.px(it->offsetX);
-      spec.offsetY = ctx.px(it->offsetY);
-      spec.blur = ctx.px(it->blur);
-      spec.spread = ctx.px(it->spread);
-      spec.color = ctx.color(it->color);
-      ctx.painter().shadow(box, radii, spec);
-    }
-  }
-  ctx.fillBox(rs, box);
+  if (chrome_) pickerdraw::drawPanelSurface(ctx);
 }
 
 }  // namespace r1ui::widgets

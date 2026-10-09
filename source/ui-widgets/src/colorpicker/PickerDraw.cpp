@@ -1,8 +1,8 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: implementation of PickerDraw.h.
-// Invariants: rectangles are snapped to whole physical pixels first; the vertical (or horizontal)
-//   extent of an end column follows the exact circle of the corner radius evaluated at the pixel
-//   centre, so a radius of half the height gives a true semicircular end.
+// Invariants: rectangles are snapped to whole physical pixels first; strips between the corner zones
+//   are whole rectangles, corner pixels are single pixels whose alpha is the exact (4 x 4 sampled)
+//   area under the corner arc, so a radius of half the height gives a true semicircular end.
 // Callers: the colour picker and the gradient editor widgets.
 #include "r1ui/widgets/colorpicker/PickerDraw.h"
 
@@ -30,20 +30,39 @@ Snapped snap(const render::Rect& box) {
   return {x0, y0, x1 - x0, y1 - y0, true};
 }
 
-// How far the rounded outline is pulled in at distance `centre` from one end of a span of `length`
-// whose corners have radius `r`.
-float cornerInset(float centre, float length, float r) {
-  if (r <= 0.0f) return 0.0f;
-  float d = 0.0f;
-  if (centre < r) d = r - centre;
-  else if (centre > length - r) d = centre - (length - r);
-  else return 0.0f;
-  return r - std::sqrt(std::max(0.0f, r * r - d * d));
-}
-
 float clampRadius(float radius, float w, float h) {
   if (!(radius > 0.0f)) return 0.0f;
   return std::min(radius, std::min(w, h) * 0.5f);
+}
+
+// Centre of the corner circle on one axis for pixel `p` of a span of `length`, or a negative value
+// when the pixel is outside both corner zones of that axis.
+float axisCentre(int p, float length, float r) {
+  if (static_cast<float>(p) < r) return r;
+  if (static_cast<float>(p + 1) > length - r) return length - r;
+  return -1.0f;
+}
+
+// Area of pixel (px, py) of a w x h rounded rectangle with corner radius r that lies inside it, in
+// 0..1 (exact away from the arc, 4 x 4 supersampling on it).
+float coverage(int px, int py, float w, float h, float r) {
+  const float cx = axisCentre(px, w, r);
+  const float cy = axisCentre(py, h, r);
+  if (cx < 0.0f || cy < 0.0f) return 1.0f;
+  int inside = 0;
+  for (int a = 0; a < 4; ++a) {
+    for (int b = 0; b < 4; ++b) {
+      const float sx = static_cast<float>(px) + (static_cast<float>(a) + 0.5f) * 0.25f - cx;
+      const float sy = static_cast<float>(py) + (static_cast<float>(b) + 0.5f) * 0.25f - cy;
+      if (sx * sx + sy * sy <= r * r) ++inside;
+    }
+  }
+  return static_cast<float>(inside) / 16.0f;
+}
+
+render::Color withCoverage(render::Color c, float cov) {
+  c.a *= cov;
+  return c;
 }
 
 }  // namespace
@@ -53,10 +72,22 @@ void fillRoundedHorizontal(render::Painter& painter, const render::Rect& box, fl
   if (!s.valid) return;
   const float r = clampRadius(radius, s.w, s.h);
   const int columns = static_cast<int>(s.w);
-  for (int i = 0; i < columns; ++i) {
-    const float centre = static_cast<float>(i) + 0.5f;
-    const float inset = cornerInset(centre, s.w, r);
-    painter.fillRect({s.x + static_cast<float>(i), s.y + inset, 1.0f, s.h - 2.0f * inset}, colourAt(centre / s.w));
+  const int rows = static_cast<int>(s.h);
+  const int ri = static_cast<int>(std::ceil(r));
+  for (int c = 0; c < columns; ++c) {
+    const render::Color colour = colourAt((static_cast<float>(c) + 0.5f) / s.w);
+    const float x = s.x + static_cast<float>(c);
+    if (r <= 0.0f || (c >= ri && c + ri < columns)) {
+      painter.fillRect({x, s.y, 1.0f, s.h}, colour);
+      continue;
+    }
+    // End column: the rows between the corner zones in one rectangle, the corner pixels singly.
+    if (rows > 2 * ri) painter.fillRect({x, s.y + static_cast<float>(ri), 1.0f, static_cast<float>(rows - 2 * ri)}, colour);
+    for (int j = 0; j < rows; ++j) {
+      if (j >= ri && j < rows - ri) continue;
+      const float cov = coverage(c, j, s.w, s.h, r);
+      if (cov > 0.0f) painter.fillRect({x, s.y + static_cast<float>(j), 1.0f, 1.0f}, withCoverage(colour, cov));
+    }
   }
 }
 
@@ -64,11 +95,22 @@ void fillRoundedVertical(render::Painter& painter, const render::Rect& box, floa
   const Snapped s = snap(box);
   if (!s.valid) return;
   const float r = clampRadius(radius, s.w, s.h);
+  const int columns = static_cast<int>(s.w);
   const int rows = static_cast<int>(s.h);
-  for (int i = 0; i < rows; ++i) {
-    const float centre = static_cast<float>(i) + 0.5f;
-    const float inset = cornerInset(centre, s.h, r);
-    painter.fillRect({s.x + inset, s.y + static_cast<float>(i), s.w - 2.0f * inset, 1.0f}, colourAt(centre / s.h));
+  const int ri = static_cast<int>(std::ceil(r));
+  for (int j = 0; j < rows; ++j) {
+    const render::Color colour = colourAt((static_cast<float>(j) + 0.5f) / s.h);
+    const float y = s.y + static_cast<float>(j);
+    if (r <= 0.0f || (j >= ri && j + ri < rows)) {
+      painter.fillRect({s.x, y, s.w, 1.0f}, colour);
+      continue;
+    }
+    if (columns > 2 * ri) painter.fillRect({s.x + static_cast<float>(ri), y, static_cast<float>(columns - 2 * ri), 1.0f}, colour);
+    for (int c = 0; c < columns; ++c) {
+      if (c >= ri && c < columns - ri) continue;
+      const float cov = coverage(c, j, s.w, s.h, r);
+      if (cov > 0.0f) painter.fillRect({s.x + static_cast<float>(c), y, 1.0f, 1.0f}, withCoverage(colour, cov));
+    }
   }
 }
 
@@ -78,34 +120,31 @@ void drawCheckerboard(const PaintContext& ctx, const render::Rect& box, float ra
   if (!s.valid) return;
   render::Painter& painter = ctx.painter();
   const float r = clampRadius(radius, s.w, s.h);
-  const float square = std::max(1.0f, std::round(ctx.px(squareLogical)));
-  // One rectangle per square would overdraw the rounded corners, so squares are drawn per pixel
-  // column inside the two end caps and as whole squares (clipped to the box) in between.
-  const int capColumns = static_cast<int>(std::ceil(r));
-  const int total = static_cast<int>(s.w);
-  const auto colourFor = [&](int column, int row) { return ((column / static_cast<int>(square) + row / static_cast<int>(square)) % 2 == 0) ? first : second; };
-  const int rowsOfSquares = static_cast<int>(std::ceil(s.h / square));
-  for (int c = 0; c < total; ++c) {
-    const bool inCap = c < capColumns || c >= total - capColumns;
-    if (!inCap) {
-      // Interior: jump to the end of the interior run, drawing squares that span whole columns.
-      const int runEnd = total - capColumns;
-      const int squareEnd = std::min(runEnd, (c / static_cast<int>(square) + 1) * static_cast<int>(square));
-      for (int row = 0; row < rowsOfSquares; ++row) {
-        const float top = static_cast<float>(row) * square;
-        const float height = std::min(square, s.h - top);
-        painter.fillRect({s.x + static_cast<float>(c), s.y + top, static_cast<float>(squareEnd - c), height}, colourFor(c, row * static_cast<int>(square)));
+  const int square = std::max(1, static_cast<int>(std::lround(ctx.px(squareLogical))));
+  const int columns = static_cast<int>(s.w);
+  const int rows = static_cast<int>(s.h);
+  const int ri = static_cast<int>(std::ceil(r));
+  const auto colourFor = [&](int column, int row) { return ((column / square + row / square) % 2 == 0) ? first : second; };
+  const int rowsOfSquares = (rows + square - 1) / square;
+  // The end caps (the first and last ceil(r) columns) are drawn per pixel with the corner coverage;
+  // the columns between them as whole squares, one rectangle per square.
+  for (int c = 0; c < columns; ++c) {
+    if (r > 0.0f && (c < ri || c + ri >= columns)) {
+      for (int j = 0; j < rows; ++j) {
+        const float cov = coverage(c, j, s.w, s.h, r);
+        if (cov > 0.0f) painter.fillRect({s.x + static_cast<float>(c), s.y + static_cast<float>(j), 1.0f, 1.0f}, withCoverage(colourFor(c, j), cov));
       }
-      c = squareEnd - 1;
       continue;
     }
-    const float inset = cornerInset(static_cast<float>(c) + 0.5f, s.w, r);
+    const int runEnd = r > 0.0f ? columns - ri : columns;
+    const int squareEnd = std::min(runEnd, (c / square + 1) * square);
     for (int row = 0; row < rowsOfSquares; ++row) {
-      const float top = std::max(static_cast<float>(row) * square, inset);
-      const float bottom = std::min(static_cast<float>(row + 1) * square, s.h - inset);
-      if (bottom <= top) continue;
-      painter.fillRect({s.x + static_cast<float>(c), s.y + top, 1.0f, bottom - top}, colourFor(c, row * static_cast<int>(square)));
+      const int top = row * square;
+      const int height = std::min(square, rows - top);
+      painter.fillRect({s.x + static_cast<float>(c), s.y + static_cast<float>(top), static_cast<float>(squareEnd - c), static_cast<float>(height)},
+                       colourFor(c, top));
     }
+    c = squareEnd - 1;
   }
 }
 
@@ -136,6 +175,24 @@ void drawRoundThumb(const PaintContext& ctx, float cx, float cy, double diameter
   ctx.painter().fillRoundedRect(outer, render::CornerRadii::uniform(outer.w * 0.5f), render::Color{1, 1, 1, 1});
   const render::Rect inner{box.x + b, box.y + b, std::max(0.0f, d - 2 * b), std::max(0.0f, d - 2 * b)};
   ctx.painter().fillRoundedRect(inner, render::CornerRadii::uniform(inner.w * 0.5f), fill);
+}
+
+void drawPanelSurface(const PaintContext& ctx) {
+  const render::Rect box = ctx.box();
+  const theme::ResolvedStyle& panel = ctx.resolve("picker.panel", 0);
+  const render::CornerRadii radii = render::CornerRadii::uniform(ctx.px(panel.radius));
+  if (const auto layers = ctx.ui().services().tokens().shadow("xl")) {
+    for (auto it = layers->rbegin(); it != layers->rend(); ++it) {
+      render::ShadowSpec spec;
+      spec.offsetX = ctx.px(it->offsetX);
+      spec.offsetY = ctx.px(it->offsetY);
+      spec.blur = ctx.px(it->blur);
+      spec.spread = ctx.px(it->spread);
+      spec.color = ctx.color(it->color);
+      ctx.painter().shadow(box, radii, spec);
+    }
+  }
+  ctx.fillBox(panel, box);
 }
 
 void drawSquareHandle(const PaintContext& ctx, const render::Rect& box, double radiusLogical, double borderLogical, const render::Color& border,

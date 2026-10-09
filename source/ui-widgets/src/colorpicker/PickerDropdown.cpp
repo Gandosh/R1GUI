@@ -35,7 +35,7 @@ const StyleRuleEntry kRows[] = {
     {"picker.dropdown", kNone, StyleProperty::PaddingX, "number:6"},
     {"picker.dropdown", kNone, StyleProperty::FontSize, "fontSize:xs"},
     {"picker.dropdown", kNone, StyleProperty::LineHeight, "lineHeight:xs"},
-    {"picker.dropdown", kNone, StyleProperty::FontWeight, "weight:semibold"},
+    {"picker.dropdown", kNone, StyleProperty::FontWeight, "weight:medium"},
     {"picker.dropdown", kDisabled, StyleProperty::Opacity, "number:0.6"},
 
     {"picker.dropdown.item", kNone, StyleProperty::Background, "transparent"},

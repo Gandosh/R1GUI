@@ -63,7 +63,7 @@ const StyleRuleEntry kRows[] = {
     {"picker.entry.bare", kNone, StyleProperty::PaddingX, "number:7"},
     {"picker.entry.bare", kNone, StyleProperty::FontSize, "fontSize:xs"},
     {"picker.entry.bare", kNone, StyleProperty::LineHeight, "lineHeight:xs"},
-    {"picker.entry.bare", kNone, StyleProperty::FontWeight, "weight:semibold"},
+    {"picker.entry.bare", kNone, StyleProperty::FontWeight, "weight:medium"},
     {"picker.entry.bare", kDisabled, StyleProperty::Opacity, "number:0.6"},
 };
 
@@ -263,6 +263,7 @@ void PickerEntry::revert() {
 void PickerEntry::onFocusIn(Event& e) {
   if (e.focusReason == events::FocusReason::Keyboard) editor_->selectAll();
   requestPaint();
+  if (onFocused) onFocused();
 }
 
 void PickerEntry::onFocusOut(Event&) {

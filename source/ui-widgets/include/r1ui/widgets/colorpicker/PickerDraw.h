@@ -42,6 +42,10 @@ void drawSmallShadow(const PaintContext& ctx, const render::Rect& box, float rad
 void drawRoundThumb(const PaintContext& ctx, float centreX, float centreY, double diameterLogical, double borderLogical,
                     double ringLogical, const render::Color& fill);
 
+// The popover surface of the pickers: the xl shadow token, then the `picker.panel` row (fill `panel`,
+// 1 px border `border`, radius 8) over the widget's whole box. The row is registered by ColorPicker.
+void drawPanelSurface(const PaintContext& ctx);
+
 // A square stop handle (radius from the measured 4 px) with border colour `border`.
 void drawSquareHandle(const PaintContext& ctx, const render::Rect& box, double radiusLogical, double borderLogical,
                       const render::Color& border, const render::Color& fill);

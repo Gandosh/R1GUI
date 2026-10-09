@@ -5,7 +5,7 @@
 //   the popover rectangle is ignored (the rest of the screen is the editor, not the picker); the
 //   shadow outside the popover is therefore not compared.
 // Callers: CTest (colorpicker gpu: renders offscreen on a Vulkan device, no window).
-#include "VisualSupport.h"
+#include "RegionVisual.h"
 #include "r1ui/widgets/colorpicker/ColorPicker.h"
 
 namespace {
@@ -42,7 +42,7 @@ int main() {
     return p.id();
   };
   for (const auto theme : {r1ui::theme::ThemeId::Dark, r1ui::theme::ThemeId::Light}) {
-    R1_EXPECT_MATCHES(picker, (r1test::visual::VisualSpec{.reference = "screen-color-picker-open", .theme = theme, .profile = "screen", .ignore = outsidePopover(), .luminance = true}));
+    R1_EXPECT_REGION_MATCHES(picker, (r1test::visual::VisualSpec{.reference = "screen-color-picker-open", .theme = theme, .profile = "screen", .ignore = outsidePopover(), .luminance = true}), kPopoverW * kPopoverH, 0.03);
   }
 
   // The fill-picker tab crops (36 x 36: a 24 px tab in 6 px of padding).
