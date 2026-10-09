@@ -225,6 +225,21 @@ MenuItemSpec MenuPanel::applyActivationState(int index) {
   return spec;
 }
 
+bool MenuPanel::refreshItem(int index, const MenuItemSpec& live) {
+  if (index < 0 || static_cast<size_t>(index) >= items_.size()) return false;
+  const size_t i = static_cast<size_t>(index);
+  MenuItemSpec& spec = items_[i];
+  if (!shown_[i] || !widgets_[i].valid() || !selectableKind(spec.kind)) return false;
+  spec.label = sanitizeMenuText(live.label);
+  spec.shortcut = sanitizeMenuText(live.shortcut);
+  spec.tooltip = sanitizeMenuText(live.tooltip);
+  spec.enabled = live.enabled;
+  spec.checked = live.checked;
+  if (MenuItemWidget* w = ui().objectAs<MenuItemWidget>(widgets_[i])) w->refresh(spec);
+  if (!spec.enabled && highlighted_ == index) setHighlight(-1, false);
+  return true;
+}
+
 // ---- scrolling ----------------------------------------------------------------------------------
 
 double MenuPanel::maxScroll() const {

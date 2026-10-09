@@ -62,6 +62,9 @@ class MenuItemWidget final : public WidgetObject {
 
   const MenuItemSpec& spec() const { return spec_; }
   void setChecked(bool checked);
+  // Takes label, shortcut, tooltip, enabled and checked from `live` while the menu is open (command
+  // driven menus follow their commands, spec 07 rules 30 to 32); the row re-measures when the text changed.
+  void refresh(const MenuItemSpec& live);
   bool highlighted() const { return highlighted_; }
   void setHighlighted(bool on);
   // Style row names for this item's tone (tests).

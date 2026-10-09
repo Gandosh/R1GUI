@@ -159,6 +159,7 @@ bool MenuBar::openMenu(int index, bool fromKeyboard) {
     if (open_ == index) setOpen(-1);
   };
   MenuSpec copy = entry.spec;
+  if (beforeOpen_) beforeOpen_(index, copy);
   if (!controller_->open(std::move(copy), o)) return false;  // a replaced menu already reset its title
   setOpen(index);
   return true;
