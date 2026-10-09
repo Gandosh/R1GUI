@@ -24,8 +24,10 @@ int hexDigit(char c) {
   return -1;
 }
 
+}  // namespace
+
 // Parses "#rrggbb" or "#rrggbbaa"; std::nullopt for any other shape.
-std::optional<Color> parseHexColor(const std::string& text) {
+std::optional<Color> parseColor(std::string_view text) {
   if ((text.size() != 7 && text.size() != 9) || text[0] != '#') return std::nullopt;
   uint8_t channels[4] = {0, 0, 0, 255};
   for (size_t i = 0; i < (text.size() - 1) / 2; ++i) {
@@ -36,6 +38,8 @@ std::optional<Color> parseHexColor(const std::string& text) {
   }
   return Color{channels[0], channels[1], channels[2], channels[3]};
 }
+
+namespace {
 
 TokensResult failure(std::string message) {
   TokensResult result;
@@ -59,7 +63,7 @@ std::string toHex(const Color& color) {
   return out;
 }
 
-TokensResult Tokens::loadFile(const std::filesystem::path& path) {
+TokensResult Tokens::loadFile(const std::filesystem::path& path, const ParseOptions& options) {
   std::ifstream file(path, std::ios::binary);
   if (!file) return failure("cannot open tokens file: " + path.string());
   file.seekg(0, std::ios::end);
@@ -72,12 +76,12 @@ TokensResult Tokens::loadFile(const std::filesystem::path& path) {
   std::string text(static_cast<size_t>(size), '\0');
   file.read(text.data(), size);
   if (file.gcount() != size) return failure("short read of tokens file: " + path.string());
-  TokensResult result = parse(text);
+  TokensResult result = parse(text, options);
   if (!result.ok()) result.error = path.string() + ": " + result.error;
   return result;
 }
 
-TokensResult Tokens::parse(std::string_view jsonText) {
+TokensResult Tokens::parse(std::string_view jsonText, const ParseOptions& options) {
   const core::JsonResult json = core::parseJson(jsonText);
   if (!json.ok()) {
     return failure("invalid JSON at byte " + std::to_string(json.error.offset) + ": " +
@@ -109,7 +113,7 @@ TokensResult Tokens::parse(std::string_view jsonText) {
       if (!value.isString()) {
         return failure(std::string("themes.") + themeName(id) + "." + name + " is not a string");
       }
-      const std::optional<Color> color = parseHexColor(value.stringValue());
+      const std::optional<Color> color = parseColor(value.stringValue());
       if (!color) {
         return failure(std::string("themes.") + themeName(id) + "." + name +
                        " is not #rrggbb or #rrggbbaa");
@@ -128,7 +132,11 @@ TokensResult Tokens::parse(std::string_view jsonText) {
   for (const std::string& name : tokens.names_) {
     const core::JsonValue* value = light.find(name);
     if (value == nullptr) return failure("light theme lacks colour '" + name + "'");
-    lightColors.push_back(*parseHexColor(value->stringValue()));
+    lightColors.push_back(*parseColor(value->stringValue()));
+  }
+
+  if (std::string error = tokens.parseSections(*json.value, options); !error.empty()) {
+    return failure(std::move(error));
   }
 
   TokensResult result;
