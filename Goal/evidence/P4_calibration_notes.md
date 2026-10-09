@@ -48,4 +48,4 @@ Tooling: `R1UI_TOLERANCE_FILE` (any tolerance file, read by every visual harness
 | After, committed profiles | 80 / 80 | 52 / 57 (5 failing: dialog, iconbutton, menu, toast, tooltip) | 38 of 300 |
 | After, proposed profiles | | 57 / 57 | 0 of 300 |
 
-Debug tree results: see the final report of the slice (appended below when run).
+Debug tree (`build/p4-cald`, validation layers on): `ctest -L fast` 80 / 80 on two of three runs; the third run failed `curvegraph_test` (a debug timing bound, 5.5 s, unrelated code, only seen under `-j 4` load) and passed on rerun. `ctest -L gpu` with committed profiles 52 / 57 (the same five visual tests as the dev tree), with the proposed file 57 / 57, zero validation messages in the output.
