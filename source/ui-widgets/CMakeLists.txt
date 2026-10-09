@@ -20,7 +20,7 @@ add_library(ui-widgets STATIC ${R1UI_WIDGETS_SOURCES})
 add_library(r1ui::widgets ALIAS ui-widgets)
 target_include_directories(ui-widgets PUBLIC include)
 target_compile_features(ui-widgets PUBLIC cxx_std_20)
-target_link_libraries(ui-widgets PUBLIC r1ui::core r1ui::theme r1ui::text r1ui::render_paint r1ui::platform
+target_link_libraries(ui-widgets PUBLIC r1ui::core r1ui::dock r1ui::theme r1ui::text r1ui::render_paint r1ui::platform
                       PRIVATE r1ui_options)
 
 if(TARGET ui-render)
