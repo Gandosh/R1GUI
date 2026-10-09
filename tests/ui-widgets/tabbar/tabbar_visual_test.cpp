@@ -60,5 +60,6 @@ int main() {
     R1_EXPECT_MATCHES_REGION(makeBar(212, Where::None), (RegionSpec{.reference = "widget-tab-bar-new-idle", .x = 0, .y = 0, .w = 48, .h = 35, .theme = theme, .profile = "text", .background = "canvas", .tag = "tabbar-new-idle", .luminance = true}));
     R1_EXPECT_MATCHES_REGION(makeBar(212, Where::NewButton), (RegionSpec{.reference = "widget-tab-bar-new-hover", .x = 0, .y = 0, .w = 48, .h = 35, .theme = theme, .profile = "text", .background = "canvas", .tag = "tabbar-new-hover", .luminance = true}));
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // the Debug tree runs the validation layers
   return r1test::finish();
 }

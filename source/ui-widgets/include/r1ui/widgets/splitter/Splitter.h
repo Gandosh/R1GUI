@@ -50,6 +50,7 @@ struct PaneOptions {
   double minSize = -1.0;     // px along the split; < 0 uses the splitter's floor
   double fixedSize = -1.0;   // >= 0: a fixed pane of that size, not resizable
   bool collapsible = false;  // whether collapse() is allowed
+  bool startCollapsed = false;  // a collapsible pane that begins collapsed (it expands to about a quarter)
 };
 
 // What a layout needs to remember: pane proportions and collapse flags (pane count must match).
@@ -63,6 +64,7 @@ class Splitter : public WidgetObject {
   static constexpr double kDefaultHandle = 5.0;
   static constexpr double kDefaultFloor = 20.0;
   static constexpr size_t kMaxPanes = 256;
+  static constexpr double kMinWeight = 1e-6;  // flex weights never reach 0
 
   explicit Splitter(SplitOrientation orientation = SplitOrientation::Row) : orientation_(orientation) {}
   static std::span<const theme::StyleRuleEntry> styleRows();

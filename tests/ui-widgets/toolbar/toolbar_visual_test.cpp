@@ -116,5 +116,6 @@ int main() {
     // The flyout of the frame tool.
     R1_EXPECT_MATCHES_REGION(flyoutAt(-1), (RegionSpec{.reference = "widget-flyout-content-idle", .x = 0, .y = 0, .w = 149, .h = 78, .theme = theme, .profile = "text", .tag = "flyout-content", .luminance = true, .clip = {6, 6, 138, 66, 8}}));
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // the Debug tree runs the validation layers
   return r1test::finish();
 }

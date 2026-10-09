@@ -68,6 +68,7 @@ int main() {
     const Pixel border = token(probe, "border");
     const Pixel strong = token(probe, "border-strong");
     const Pixel accent = token(probe, "accent");
+    const Pixel focus = token(probe, "panel-focus");
     const char* name = theme == ThemeId::Dark ? "dark" : "light";
     for (const Mode mode : {Mode::Idle, Mode::Hover, Mode::Drag, Mode::Focus}) {
       RenderSpec spec;
@@ -92,12 +93,13 @@ int main() {
           R1_EXPECT(near(at(img, 100, 30), accent) && near(at(img, 104, 30), accent));
           break;
         case Mode::Focus:
-          // The idle line plus a focus ring around the handle: the ring is not the panel colour at the handle's edge.
-          R1_EXPECT(near(at(img, 102, 30), border) == false || !near(at(img, 100, 30), panel));
+          // The idle line plus a 1 px ring in the focus colour around the handle's bar.
+          R1_EXPECT(near(at(img, 102, 30), border) && near(at(img, 100, 30), focus) && near(at(img, 104, 30), focus));
           break;
       }
       std::printf("visual splitter-%s-%s: handle pixel (102,30) = %d,%d,%d\n", modeName, name, at(img, 102, 30).r, at(img, 102, 30).g, at(img, 102, 30).b);
     }
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // the Debug tree runs the validation layers
   return r1test::finish();
 }

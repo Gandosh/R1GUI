@@ -67,5 +67,6 @@ int main() {
     R1_EXPECT_MATCHES_REGION(appearanceSection, (r1test::visual::RegionSpec{.reference = "screen-rectangle-selected", .x = 1182, .y = 307, .w = 258, .h = 35, .theme = theme, .profile = "text", .tag = "section-header-appearance", .luminance = true}));
     R1_EXPECT_MATCHES_REGION(fillSection, (r1test::visual::RegionSpec{.reference = "screen-rectangle-selected", .x = 1182, .y = 491, .w = 258, .h = 35, .theme = theme, .profile = "text", .tag = "section-header-fill", .luminance = true}));
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // the Debug tree runs the validation layers
   return r1test::finish();
 }

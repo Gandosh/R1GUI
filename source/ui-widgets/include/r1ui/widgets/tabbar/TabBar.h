@@ -153,7 +153,6 @@ class TabBar : public WidgetObject {
     size_t slot = 0;
     double grab = 0.0;      // pointer offset inside the tab at the press
     double pointerX = 0.0;
-    double pressX = 0.0;
   };
 
   const Layout& layout() const;
@@ -166,7 +165,6 @@ class TabBar : public WidgetObject {
   size_t slotFor(double pointerX) const;
   void clampScroll();
   void endDrag(bool commit);
-  void repaintBar() { requestPaint(); }
   std::string_view fullTitle(size_t index) const;
 
   std::vector<TabInfo> tabs_;
@@ -174,6 +172,7 @@ class TabBar : public WidgetObject {
   bool showNew_ = true;
   std::string newTooltip_ = "New tab";
   mutable double scroll_ = 0.0;  // clamped by layout()
+  mutable bool revealPending_ = false;  // scrollToTab was asked before the bar had a width
   Hit hover_;
   Hit pressHit_;
   Drag drag_;

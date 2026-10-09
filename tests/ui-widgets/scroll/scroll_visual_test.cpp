@@ -58,5 +58,6 @@ int main() {
     R1_EXPECT_MATCHES_REGION(panelScroll(false), (RegionSpec{.reference = "widget-scrollbar-idle", .x = 0, .y = 0, .w = 264, .h = 789, .theme = theme, .profile = "default", .tag = "scrollbar-idle", .ignore = onlyGutter}));
     R1_EXPECT_MATCHES_REGION(panelScroll(true), (RegionSpec{.reference = "widget-scrollbar-thumb-hover", .x = 0, .y = 0, .w = 264, .h = 789, .theme = theme, .profile = "default", .tag = "scrollbar-thumb-hover", .ignore = onlyGutter}));
   }
+  R1_EXPECT(r1ui::widgets::testing::validationMessageCount() == 0);  // the Debug tree runs the validation layers
   return r1test::finish();
 }

@@ -166,7 +166,7 @@ class TreeView : public WidgetObject {
   double maxScroll();
   bool scrollTo(double offset);
   // Brings the node's row fully into view with the least movement (centred when `centre` is set and
-  // the row was not visible); expands its ancestors? No: only visible rows can be revealed.
+  // the row was not visible). Only visible rows can be revealed: a node inside a collapsed branch gives false.
   bool scrollToNode(NodeId id, bool centre = false);
   size_t wholeRowsVisible() const;
   // ---- rename ----
@@ -229,7 +229,6 @@ class TreeView : public WidgetObject {
     DropPreview preview;
     double pointerX = 0.0;
     double pointerY = 0.0;
-    uint64_t lastMs = 0;
   };
 
   // model / rows
