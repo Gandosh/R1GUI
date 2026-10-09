@@ -63,7 +63,7 @@ void layouts_round_trip_equality() {
   expect(loaded.ok() && loaded.droppedPanels == 0, "loads");
   expect(loaded.ok() && *loaded.layout == dock, "round trip equals the original");
   expect(loaded.ok() && loaded.layout->toJson() == json, "second serialisation is byte-identical");
-  expect(json.find("\"version\":1") != std::string::npos, "versioned");
+  expect(json.find("\"version\":2") != std::string::npos, "versioned (schema 2)");
 }
 
 // Scenario 3: a floating panel keeps its rectangle and front tab across save/load.
@@ -115,7 +115,8 @@ void layouts_scenario_10_unknown_only_floating() {
 // Scenario 11: an older (or any other) version is refused; the host then builds its default.
 void layouts_scenario_11_version() {
   expectRejected(docWith(stackJson("1"), "", "0"), "version 0 refused");
-  expectRejected(docWith(stackJson("1"), "", "2"), "newer version refused");
+  expectRejected(docWith(stackJson("1"), "", "3"), "newer version refused");
+  expectRejected(docWith(stackJson("1"), "", "1000000000000"), "absurd version refused");
   expectRejected(docWith(stackJson("1"), "", "\"1\""), "version as a string refused");
   expectRejected(docWith(stackJson("1"), "", "1.5"), "fractional version refused");
   expectRejected(R"({"main":{"root":null},"floating":[]})", "missing version refused");

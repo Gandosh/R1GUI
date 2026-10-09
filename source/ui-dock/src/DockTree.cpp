@@ -81,12 +81,14 @@ bool normaliseNode(Node& node) {
   for (Node& child : node.children) {
     if (!normaliseNode(child)) continue;
     if (child.kind == Node::Kind::Split && child.axis == node.axis) {
-      // Spec 02 rule 45: dissolve a same-direction child, preserving visible proportions.
+      // Spec 02 rule 45: dissolve a same-direction child, preserving visible proportions. A
+      // collapsed child collapses everything it held; its pin is dropped with it.
       double total = 0.0;
       for (const Node& grand : child.children) total += grand.weight;
       const double factor = total > 0.0 ? child.weight / total : 1.0;
       for (Node& grand : child.children) {
         grand.weight *= factor;
+        grand.collapsed = grand.collapsed || child.collapsed;
         kept.push_back(std::move(grand));
       }
     } else {
@@ -95,29 +97,71 @@ bool normaliseNode(Node& node) {
   }
   if (kept.empty()) return false;
   if (kept.size() == 1) {
+    // The survivor takes the place of this node, so it inherits the node's share, pin and collapse.
     const double weight = node.weight;
+    const bool pinned = node.pinned;
+    const double pinnedSize = node.pinnedSize;
+    const bool collapsed = node.collapsed;
     node = std::move(kept.front());
     node.weight = weight;
+    node.pinned = pinned;
+    node.pinnedSize = pinnedSize;
+    node.collapsed = collapsed;
     return true;
+  }
+  // At least one child stays visible, and at least one stays flexible, otherwise pins and collapse
+  // would leave nothing to absorb the space.
+  if (std::all_of(kept.begin(), kept.end(), [](const Node& c) { return c.collapsed; })) {
+    for (Node& c : kept) c.collapsed = false;
+  }
+  if (std::all_of(kept.begin(), kept.end(), [](const Node& c) { return c.pinned || c.collapsed; })) {
+    for (Node& c : kept) c.pinned = false;
   }
   rescaleIfDrifted(kept);
   node.children = std::move(kept);
   return true;
 }
 
+PanelId firstPanelOf(const Node& node) {
+  const Node* current = &node;
+  while (current->kind == Node::Kind::Split && !current->children.empty()) current = &current->children.front();
+  return current->tabs.empty() ? 0 : current->tabs.front();
+}
+
 void normaliseAreas(std::vector<Area>& areas) {
   for (Area& area : areas) {
     if (area.root && !normaliseNode(*area.root)) area.root.reset();
+    if (area.root) {
+      area.root->pinned = false;  // an area root has no parent to be pinned or collapsed in
+      area.root->collapsed = false;
+    }
   }
   std::erase_if(areas, [](const Area& a) { return a.id != kMainAreaId && !a.root; });
 }
 
 namespace {
 
+std::string checkWindowState(const WindowState& w) {
+  if (w.monitor.size() > kMaxNameBytes) return "window monitor name is too long";
+  if (!std::isfinite(w.dpiScale) || w.dpiScale <= 0.0 || w.dpiScale > 64.0) return "window dpi scale is out of range";
+  if (w.hasRect) {
+    const Rect& r = w.rect;
+    const bool finite = std::isfinite(r.x) && std::isfinite(r.y) && std::isfinite(r.w) && std::isfinite(r.h);
+    if (!finite || std::abs(r.x) > kMaxCoordinate || std::abs(r.y) > kMaxCoordinate || r.w <= 0.0 || r.h <= 0.0 ||
+        r.w > kMaxCoordinate || r.h > kMaxCoordinate) {
+      return "window rectangle is not finite or is out of range";
+    }
+  }
+  return {};
+}
+
 // Recursive structural checks; safe because withinLimits() already bounded the depth.
 std::string checkNode(const Node& node, const Axis* parentAxis, const std::unordered_set<PanelId>& known,
                       std::unordered_set<PanelId>& seen) {
   if (!legalWeight(node.weight)) return "node weight is not a finite positive number in range";
+  if (!std::isfinite(node.pinnedSize) || node.pinnedSize < 0.0 || node.pinnedSize > kMaxCoordinate) {
+    return "node pinned size is not a finite number in range";
+  }
   if (node.kind == Node::Kind::Stack) {
     if (!node.children.empty()) return "stack node has children";
     if (node.tabs.empty()) return "stack has no tabs";
@@ -131,6 +175,12 @@ std::string checkNode(const Node& node, const Axis* parentAxis, const std::unord
   if (!node.tabs.empty()) return "split node has tabs";
   if (node.children.size() < 2) return "split has fewer than two children";
   if (parentAxis != nullptr && *parentAxis == node.axis) return "split has the same axis as its parent";
+  if (std::all_of(node.children.begin(), node.children.end(), [](const Node& c) { return c.collapsed; })) {
+    return "split has no visible child";
+  }
+  if (std::all_of(node.children.begin(), node.children.end(), [](const Node& c) { return c.pinned || c.collapsed; })) {
+    return "split has no flexible child";
+  }
   for (const Node& child : node.children) {
     std::string error = checkNode(child, &node.axis, known, seen);
     if (!error.empty()) return error;
@@ -164,8 +214,39 @@ std::string validateAreas(const std::vector<Area>& areas, const std::vector<Pane
       if (!area.root) return "floating area is empty";
     }
     if (area.root) {
+      if (area.root->collapsed || area.root->pinned) return "an area root cannot be collapsed or pinned";
       std::string error = checkNode(*area.root, nullptr, known, seen);
       if (!error.empty()) return error;
+    }
+    if (std::string error = checkWindowState(area.window); !error.empty()) return error;
+  }
+  return {};
+}
+
+std::string validateClosed(const std::vector<ClosedSlot>& closed, const std::vector<Area>& areas,
+                           const std::vector<PanelInfo>& panels) {
+  if (closed.size() > kMaxPanels) return "closed-panel memory is too large";
+  std::unordered_set<PanelId> known;
+  for (const PanelInfo& p : panels) known.insert(p.id);
+  std::unordered_set<PanelId> seen;
+  for (const ClosedSlot& slot : closed) {
+    if (known.count(slot.panel) == 0) return "closed-panel memory names an unknown panel";
+    if (!seen.insert(slot.panel).second) return "closed-panel memory names a panel twice";
+    if (findPanel(areas, slot.panel)) return "closed-panel memory names a docked panel";
+    if (slot.neighbours.size() > kMaxPanels || slot.index > kMaxPanels) return "closed-panel slot is too large";
+    for (PanelId n : slot.neighbours) {
+      if (known.count(n) == 0 || n == slot.panel) return "closed-panel slot references an unknown panel";
+    }
+    if (slot.anchor != 0 && (known.count(slot.anchor) == 0 || slot.anchor == slot.panel)) {
+      return "closed-panel slot anchor is an unknown panel";
+    }
+    if (slot.floating) {
+      const Rect& r = slot.floatRect;
+      const bool finite = std::isfinite(r.x) && std::isfinite(r.y) && std::isfinite(r.w) && std::isfinite(r.h);
+      if (!finite || std::abs(r.x) > kMaxCoordinate || std::abs(r.y) > kMaxCoordinate || r.w < 0.0 || r.h < 0.0 ||
+          r.w > kMaxCoordinate || r.h > kMaxCoordinate) {
+        return "closed-panel slot rectangle is out of range";
+      }
     }
   }
   return {};

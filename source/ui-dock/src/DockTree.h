@@ -36,12 +36,19 @@ void normaliseAreas(std::vector<Area>& areas);
 std::string validateAreas(const std::vector<Area>& areas, const std::vector<PanelInfo>& panels,
                           const DockConfig& config);
 
+// Checks the closed-panel memory against the (valid) areas: every slot names a known panel that is
+// not docked, ids are unique, referenced panels are known and rectangles are finite.
+std::string validateClosed(const std::vector<ClosedSlot>& closed, const std::vector<Area>& areas,
+                           const std::vector<PanelInfo>& panels);
+
 Node* nodeAt(Area& area, const Path& path);
 const Node* nodeAt(const Area& area, const Path& path);
 std::optional<size_t> areaIndex(const std::vector<Area>& areas, uint32_t id);
 std::optional<PanelLocation> findPanel(const std::vector<Area>& areas, PanelId panel);
 // Number of panels in a subtree.
 size_t countPanels(const Node& node);
+// The first tab of the first stack of a subtree (0 for an empty one).
+PanelId firstPanelOf(const Node& node);
 
 // Pixel size of each child of `split` laid out in `bounds`: weights share the length left after
 // the handles (spec 05 rules 18-19), honouring config.minPanelSize when the space allows it.

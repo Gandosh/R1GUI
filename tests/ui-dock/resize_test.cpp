@@ -143,14 +143,19 @@ void resize_scenario_09() {
   expect(layout.handles.empty() && stackOf(layout, 1)->bounds == Rect({0, 0, 1005, 300}), "A fills the area, no handle");
 }
 
-// Scenario 11: 12 tabs in a 480 px strip are 40 px each; tabs never exceed 160 px.
+// Scenario 11: 12 tabs in a 720 px strip are 60 px each; tabs never exceed 160 px. Decision D12:
+// in a narrower strip they keep the 60 px minimum and the strip reports overflow.
 void resize_scenario_11() {
   std::vector<PanelId> ids;
   for (PanelId i = 1; i <= 12; ++i) ids.push_back(i);
   DockLayout dock = build(12, Node::stack(ids));
-  const LayoutResult layout = dock.computeLayout({0, 0, 480, 300});
+  const LayoutResult layout = dock.computeLayout({0, 0, 720, 300});
   expect(layout.stacks[0].tabs.size() == 12, "twelve tabs");
-  for (const TabLayout& t : layout.stacks[0].tabs) expect(near(t.rect.w, 40, 0.001) && t.rect.h == 25, "40x25 each");
+  for (const TabLayout& t : layout.stacks[0].tabs) expect(near(t.rect.w, 60, 0.001) && t.rect.h == 25, "60x25 each");
+  expect(!layout.stacks[0].overflow, "exactly fitting tabs do not overflow");
+  const LayoutResult narrow = dock.computeLayout({0, 0, 480, 300});
+  for (const TabLayout& t : narrow.stacks[0].tabs) expect(near(t.rect.w, 60, 0.001), "tabs keep the 60 px minimum (D12)");
+  expect(narrow.stacks[0].overflow && near(narrow.stacks[0].tabsWidth, 720, 0.001), "the narrow strip overflows");
   DockLayout few = build(2, Node::stack({1, 2}));
   expect(few.computeLayout({0, 0, 1000, 300}).stacks[0].tabs[0].rect.w == 160, "capped at 160 px");
 }
