@@ -17,6 +17,7 @@
 //   id. Titles and menus are sanitised through the model's text limits.
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <span>
 #include <string>
@@ -68,6 +69,9 @@ class MenuBar final : public WidgetObject {
   void closeMenu();
   int openIndex() const { return open_; }
   MenuController& controller() { return *controller_; }
+  // Called with a copy of a title's spec right before its menu opens, so the caller can refresh what
+  // changed since addMenu (enabled, checked and shortcut state of command-driven menus).
+  void setBeforeOpen(std::function<void(int index, MenuSpec&)> hook) { beforeOpen_ = std::move(hook); }
 
   // From the items.
   void itemHovered(int index);
@@ -85,6 +89,7 @@ class MenuBar final : public WidgetObject {
 
   std::vector<Entry> menus_;
   std::unique_ptr<MenuController> controller_;
+  std::function<void(int, MenuSpec&)> beforeOpen_;
   int open_ = -1;
 };
 

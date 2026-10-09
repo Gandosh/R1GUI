@@ -115,6 +115,19 @@ void MenuItemWidget::setChecked(bool checked) {
   requestPaint();
 }
 
+void MenuItemWidget::refresh(const MenuItemSpec& live) {
+  const bool textChanged = spec_.label != live.label || spec_.shortcut != live.shortcut;
+  spec_.label = live.label;
+  spec_.shortcut = live.shortcut;
+  spec_.tooltip = live.tooltip;
+  spec_.checked = live.checked;
+  spec_.enabled = live.enabled;
+  setEnabled(live.enabled);
+  setTooltip(spec_.tooltip.empty() ? std::string() : tooltipWithShortcut(spec_.tooltip, spec_.shortcut));
+  if (textChanged) requestLayout();
+  requestPaint();
+}
+
 double MenuItemWidget::rightCellWidth() const {
   switch (spec_.kind) {
     case MenuItemKind::Submenu: return look_.arrowGlyph ? textWidth(ui(), kArrowGlyph, MenuRowMetrics::kArrowGlyphSize, 400) : MenuRowMetrics::kChevronCell;

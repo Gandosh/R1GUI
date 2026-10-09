@@ -74,8 +74,16 @@ ExecuteResult CommandRouter::execute(std::string_view commandId, ExecuteSource s
   const CommandDef* command = registry_.find(commandId);
   if (command == nullptr) return ExecuteResult::refused("unknown command");
   ExecuteArgs args;
-  args.phase = phase;
   args.source = source;
+  if (command->kind == CommandKind::Momentary && phase == ExecutePhase::Invoke) {
+    // A click has no duration: a momentary command gets its Press and its Release back to back.
+    args.phase = ExecutePhase::Press;
+    ExecuteResult pressed = run(*command, args);
+    args.phase = ExecutePhase::Release;
+    const ExecuteResult released = run(*command, args);
+    return pressed.isHandled() ? released : pressed;
+  }
+  args.phase = phase;
   return run(*command, args);
 }
 

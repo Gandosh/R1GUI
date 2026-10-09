@@ -87,6 +87,7 @@ class CommandRouter {
 
   // Runs a command requested by a menu, toolbar or the API: checks existence and the enabled
   // predicate, applies the re-entrancy guard and returns the command's result. Unknown id: Refused.
+  // A momentary command asked to Invoke gets Press and Release back to back (a click has no duration).
   ExecuteResult execute(std::string_view commandId, ExecuteSource source = ExecuteSource::Api, ExecutePhase phase = ExecutePhase::Invoke);
 
   // Expires a pending sequence whose timeout elapsed; call once per frame / tick.

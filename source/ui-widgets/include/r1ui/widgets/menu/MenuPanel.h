@@ -104,6 +104,11 @@ class MenuPanel final : public WidgetObject {
   // updated spec (other kinds return the unchanged spec).
   MenuItemSpec applyActivationState(int index);
 
+  // Updates the live state of row `index` (label, shortcut, tooltip, enabled, checked; texts are
+  // sanitised) while the menu is open; kind, icon and structure never change. A row that became
+  // disabled loses the highlight. False for a bad index or a row without a widget.
+  bool refreshItem(int index, const MenuItemSpec& live);
+
   // ---- scrolling ----
   double scrollOffset() const { return scroll_; }
   double maxScroll() const;
