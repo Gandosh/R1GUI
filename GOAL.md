@@ -104,18 +104,18 @@ Each widget is compared against its Phase 1 reference screenshots.
 
 ## Phase 5: Docking, commands, customization
 
-- [ ] 5.1 [ui-dock: dock tree, tabs, splits, drop targets](Goal/evidence/P5_S01.md)
-- [ ] 5.2 [ui-dock: floating panels as native windows with rounded corners, drag to second monitor (owner, 2026-10-09)](Goal/evidence/P5_S02.md)
-- [ ] 5.3 [ui-dock: layout serialization, versioned schema, validated load](Goal/evidence/P5_S03.md)
-- [ ] 5.4 [ui-dock: layout save, load and switch at runtime](Goal/evidence/P5_S04.md)
-- [ ] 5.5 [ui-commands: command registry (menu, toolbar, shortcut from one source)](Goal/evidence/P5_S05.md)
-- [ ] 5.6 [ui-commands: shortcut editor and conflict resolution](Goal/evidence/P5_S06.md)
-- [ ] 5.7 [Customizable menus: user creates menus, adds, moves and removes items](Goal/evidence/P5_S07.md)
-- [ ] 5.8 [Customizable toolbars: user places, resizes and removes buttons](Goal/evidence/P5_S08.md)
-- [ ] 5.9 [Customization persistence: user menu and toolbar files, validated load](Goal/evidence/P5_S09.md)
-- [ ] 5.10 [ui-props: property panel generated from declared field metadata](Goal/evidence/P5_S10.md)
-- [ ] 5.11 [Undo grouping and mixed-value handling in property panels](Goal/evidence/P5_S11.md)
-- [ ] 5.12 [Preview: sample editor with rearrangeable panels, floating windows, user-built menus, reloadable layouts](Goal/evidence/P5_S12.md)
+- [x] 5.1 [ui-dock: dock tree, tabs, splits, drop targets](Goal/evidence/P5_S01.md)
+- [x] 5.2 [ui-dock: floating panels as native windows with rounded corners, drag to second monitor (owner, 2026-10-09)](Goal/evidence/P5_S02.md)
+- [x] 5.3 [ui-dock: layout serialization, versioned schema, validated load](Goal/evidence/P5_S03.md)
+- [x] 5.4 [ui-dock: layout save, load and switch at runtime](Goal/evidence/P5_S04.md)
+- [x] 5.5 [ui-commands: command registry (menu, toolbar, shortcut from one source)](Goal/evidence/P5_S05.md)
+- [x] 5.6 [ui-commands: shortcut editor and conflict resolution](Goal/evidence/P5_S06.md)
+- [x] 5.7 [Customizable menus: user creates menus, adds, moves and removes items](Goal/evidence/P5_S07.md)
+- [x] 5.8 [Customizable toolbars: user places, resizes and removes buttons](Goal/evidence/P5_S08.md)
+- [x] 5.9 [Customization persistence: user menu and toolbar files, validated load](Goal/evidence/P5_S09.md)
+- [x] 5.10 [ui-props: property panel generated from declared field metadata](Goal/evidence/P5_S10.md)
+- [x] 5.11 [Undo grouping and mixed-value handling in property panels](Goal/evidence/P5_S11.md)
+- [x] 5.12 [Preview: sample editor with rearrangeable panels, floating windows, user-built menus, reloadable layouts](Goal/evidence/P5_S12.md)
 
 **P5 owner gate: PENDING** — [phase close record](Goal/evidence/P5_close.md)
 
