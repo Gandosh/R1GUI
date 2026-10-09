@@ -452,8 +452,20 @@ size_t TreeView::wholeRowsVisible() const { return std::max<size_t>(1, static_ca
 
 void TreeView::placeBar() {
   const layout::Rect a = absOrigin();
+  if (scrollbarPolicy_ == ScrollbarPolicy::Never) {
+    vbar_.setTrack(0, 0, 0, 0);
+    vbar_.update(0.0, 0.0, 0.0);
+    return;
+  }
   vbar_.setTrack(static_cast<double>(a.x) + a.w - ScrollBar::kGutter, a.y, ScrollBar::kGutter, a.h);
   vbar_.update(static_cast<double>(a.h), contentHeight(), scroll_);
+}
+
+void TreeView::setScrollbarPolicy(ScrollbarPolicy policy) {
+  if (policy == scrollbarPolicy_) return;
+  scrollbarPolicy_ = policy;
+  placeBar();
+  requestPaint();
 }
 
 void TreeView::clampScroll() {

@@ -148,15 +148,26 @@ void RenameEditor::paint(PaintContext& ctx, const core::layout::Rect& field) {
   const render::Rect inner = ctx.toPhysical(innerLeft, field.y + 1.0, innerWidth, field.h - 2.0);
   const float scroll = editor_.ensureCaretVisible(inner.w, 1.0f);
   painter.pushClip(inner);
-  if (const auto sel = editor_.selectionX()) {
-    const bool light = ui.theme().id() == theme::ThemeId::Light;
-    painter.fillRect({inner.x + sel->first - scroll, inner.y, sel->second - sel->first, inner.h}, light ? kSelectionLight : kSelectionDark);
-  }
   const theme::ResolvedStyle& rs = ctx.resolve("tree.rename", 0);
   const render::Color tint = ctx.color(rs.text.color);
   const float baseline = inner.y + ui.text().baselineInBox(size, inner.h);
-  ui.text().draw(painter, editor_.text(), size, rs.text.weight, inner.x - scroll, baseline, tint);
-  if (!editor_.hasSelection()) {
+  const auto drawText = [&](const render::Rect& clip, const render::Color& color) {
+    painter.pushClip(clip);
+    ui.text().draw(painter, editor_.text(), size, rs.text.weight, inner.x - scroll, baseline, color);
+    painter.popClip();
+  };
+  const auto sel = editor_.hasSelection() ? editor_.selectionX() : std::nullopt;
+  if (sel) {
+    // The selected text is drawn in white on the highlight (the browser's HighlightText), the rest as usual.
+    const bool light = ui.theme().id() == theme::ThemeId::Light;
+    const float x0 = std::clamp(inner.x + sel->first - scroll, inner.x, inner.x + inner.w);
+    const float x1 = std::clamp(inner.x + sel->second - scroll, inner.x, inner.x + inner.w);
+    painter.fillRect({x0, inner.y, x1 - x0, inner.h}, light ? kSelectionLight : kSelectionDark);
+    drawText({inner.x, inner.y, x0 - inner.x, inner.h}, tint);
+    drawText({x0, inner.y, x1 - x0, inner.h}, {1.0f, 1.0f, 1.0f, 1.0f});
+    drawText({x1, inner.y, inner.x + inner.w - x1, inner.h}, tint);
+  } else {
+    drawText(inner, tint);
     if (const auto caret = editor_.caretX()) painter.fillRect({inner.x + *caret - scroll, inner.y, ctx.hairline(), inner.h}, tint);
   }
   painter.popClip();

@@ -125,6 +125,9 @@ class TreeView : public WidgetObject {
   TreeSelectionMode selectionMode() const { return mode_; }
   // The height follows the rows (a tree inside a scrolling panel) instead of the style height.
   void setAutoHeight(bool on);
+  // Auto (default) shows the thin scrollbar when the rows overflow the view; Never hides it (a tree inside a
+  // scrolling panel, or a view that only ever shows a window of rows).
+  void setScrollbarPolicy(ScrollbarPolicy policy);
 
   // ---- expansion ----
   bool setExpanded(NodeId id, bool expanded, bool recursive = false);
@@ -278,6 +281,7 @@ class TreeView : public WidgetObject {
   TreeSelectionMode mode_ = TreeSelectionMode::Multi;
   TreeAppearance appearance_ = TreeAppearance::Tree;
   bool autoHeight_ = false;
+  ScrollbarPolicy scrollbarPolicy_ = ScrollbarPolicy::Auto;
   double scroll_ = 0.0;
   ScrollBar vbar_;
   bool barDragging_ = false;

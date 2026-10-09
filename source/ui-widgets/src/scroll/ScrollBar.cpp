@@ -19,8 +19,8 @@ using theme::StyleProperty;
 constexpr theme::StyleRuleEntry kRows[] = {
     {"scroll.thumb", State::kNone, StyleProperty::Background, "color:border"},
     {"scroll.thumb", State::kNone, StyleProperty::Radius, "metric:scrollbarThin.radius"},
-    {"scroll.thumb", State::kHover, StyleProperty::Background, "color:muted@0.5"},
-    {"scroll.thumb", State::kActive, StyleProperty::Background, "color:muted@0.5"},
+    {"scroll.thumb", State::kHover, StyleProperty::Background, "color:muted"},
+    {"scroll.thumb", State::kActive, StyleProperty::Background, "color:muted"},
 };
 
 double finiteOrZero(double v) { return std::isfinite(v) ? std::max(0.0, v) : 0.0; }
@@ -110,10 +110,17 @@ void ScrollBar::paint(PaintContext& ctx) const {
   if (!scrollable()) return;
   const Box t = thumb();
   if (t.w <= 0 || t.h <= 0) return;
-  const uint8_t bits = (dragging_ ? State::kActive : State::kNone) | (hover_ ? State::kHover : State::kNone);
-  const theme::ResolvedStyle& rs = ctx.resolve("scroll.thumb", bits);
+  const bool hot = dragging_ || hover_;
+  const theme::ResolvedStyle& rest = ctx.resolve("scroll.thumb", State::kNone);
   const render::Rect box = ctx.toPhysical(t.x, t.y, t.w, t.h);
-  ctx.painter().fillRoundedRect(box, render::CornerRadii::uniform(ctx.px(rs.radius)), ctx.color(rs.background));
+  render::Color fill = ctx.color(rest.background);
+  if (hot) {
+    // Measured: a hovered or dragged thin thumb is drawn halfway between its idle colour and `muted`
+    // (#606060 in the dark panel, #a1a4aa in the light one).
+    const render::Color target = ctx.color(ctx.resolve("scroll.thumb", dragging_ ? State::kActive : State::kHover).background);
+    fill = {(fill.r + target.r) * 0.5f, (fill.g + target.g) * 0.5f, (fill.b + target.b) * 0.5f, 1.0f};
+  }
+  ctx.painter().fillRoundedRect(box, render::CornerRadii::uniform(ctx.px(rest.radius)), fill);
 }
 
 }  // namespace r1ui::widgets

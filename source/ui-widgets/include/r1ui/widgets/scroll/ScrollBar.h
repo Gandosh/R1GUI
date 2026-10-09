@@ -12,7 +12,7 @@
 //   clamped), the thumb never leaves the track and is at least kMinThumb long (or the whole
 //   track when the track is shorter), pointer calls return the new offset only when it changed.
 // Style rows (registered by styleRows()): scroll.thumb (border colour, radius 3; hover and active
-//   use muted at 50%, which measures as #606060 over the dark panel like the reference).
+//   are drawn halfway to `muted`, which measures as #606060 over the dark panel like the reference).
 #pragma once
 
 #include <optional>

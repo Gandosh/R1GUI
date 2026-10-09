@@ -61,7 +61,8 @@ void TreeView::paint(PaintContext& ctx) {
     const theme::ResolvedStyle& rs = ctx.resolve("tree.row", bits);
     const render::Rect box = ctx.toPhysical(a.x, top, contentW, height);
     if (!renamingRow && rs.background.a > 0) painter.fillRoundedRect(box, render::CornerRadii::uniform(ctx.px(rs.radius)), ctx.color(rs.background));
-    if (focusVisible() && cursor_ == row.id && !renamingRow) ctx.focusRing(box, ctx.px(rs.radius));
+    // Keyboard focus shows through the selection colour; only a cursor row that is not selected needs a ring (spec 01 rule 6).
+    if (focusVisible() && cursor_ == row.id && !renamingRow && !selected) ctx.focusRing(box, ctx.px(rs.radius));
 
     double x = appearance_ == TreeAppearance::List ? 8.0 : static_cast<double>(row.depth) * kIndent;
     if (appearance_ == TreeAppearance::Tree) {
