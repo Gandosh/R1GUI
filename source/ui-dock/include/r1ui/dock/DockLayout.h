@@ -147,7 +147,7 @@ class DockLayout {
   DropZone hitTestDropZone(const LayoutResult& layout, const DragQuery& query) const;
 
   // The "no target" drop for `query`: a floating area the size of the ghost (spec 02 rules 21
-  // and 33). This is also where Escape during a drag lands. Same `layout` precondition.
+  // and 33). This is where a drop on no target lands. Same `layout` precondition.
   DropZone floatZone(const LayoutResult& layout, const DragQuery& query) const;
 
   // Moves `panel` (docked or closed) to `zone`. A stale zone (unknown area or stack, own sole

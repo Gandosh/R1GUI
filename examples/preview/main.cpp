@@ -108,6 +108,7 @@ class Viewer {
     } else {
       content.image = image_;
     }
+    drawModeIndicator(content);
     updateTitle();
     renderer_.drawFrame(window_, content);
   }
@@ -189,6 +190,24 @@ class Viewer {
     hoverIndex_ = hover;
   }
 
+  // Three small squares in the top-right corner, one per mode: the current mode is filled with the
+  // accent colour, the others are outlined. Tab moves to the next square (there is no text yet).
+  void drawModeIndicator(r1ui::render::FrameContent& content) const {
+    constexpr int kSize = 10;
+    constexpr int kSpacing = 16;
+    constexpr int kEdge = 8;
+    const Color accent = *tokens_.color(theme_, "accent");
+    const Color border = *tokens_.color(theme_, "border");
+    const int width = window_.clientWidth();
+    for (int i = 0; i < 3; ++i) {
+      const int x = width - kEdge - (3 - i) * kSpacing + (kSpacing - kSize);
+      const bool current = static_cast<int>(mode_) == i;
+      content.rects.push_back({x - 1, kEdge - 1, kSize + 2, kSize + 2, {255, 255, 255, 255}});
+      content.rects.push_back({x, kEdge, kSize, kSize,
+                               current ? flatten(accent, accent) : flatten(border, border)});
+    }
+  }
+
   void updateTitle() {
     std::string title;
     const char* theme = r1ui::theme::themeName(theme_);
@@ -197,7 +216,7 @@ class Viewer {
         title = std::string(theme) + ": " + tokens_.colorNames()[*hoverIndex_] + " " +
                 r1ui::theme::toHex(*tokens_.colorAt(theme_, *hoverIndex_));
       } else {
-        title = std::string("R1GUI Preview - tokens (") + theme + ")  Tab: screens, T: theme";
+        title = std::string("R1GUI Preview - tokens (") + theme + ")  Tab: next mode, T: theme";
       }
     } else if (mode_ == Mode::Sandbox) {
       title = sandbox_.title();
@@ -217,7 +236,7 @@ class Viewer {
   DockSandbox sandbox_;
   bool quit_ = false;
   std::vector<fs::path> screens_[2];
-  Mode mode_ = Mode::Swatches;
+  Mode mode_ = Mode::Sandbox;  // opens on the newest phase's content; Tab steps through the earlier ones
   ThemeId theme_ = ThemeId::Dark;
   size_t index_ = 0;
   r1ui::render::ImageId image_;

@@ -150,7 +150,7 @@ void docking_scenario_07() {
   const DropZone over = other.hitTestDropZone(otherLayout, queryAt(2, 50, 175));
   expect(over.kind == DropKind::SplitStack, "setup: pointer over a side zone");
   const DropZone esc = other.floatZone(otherLayout, queryAt(2, 50, 175));
-  expect(esc.kind == DropKind::Float && esc.preview == Rect({50, 175, 600, 400}), "Escape lands as a float at the ghost position (spec 02 rule 21)");
+  expect(esc.kind == DropKind::Float && esc.preview == Rect({50, 175, 600, 400}), "a drop with no target lands as a float at the ghost position");
   expect(other.dock(2, esc).ok && other.areas().size() == 2, "and docks as a floating area");
   expect(dock.areas()[1].rect == zone.preview && dock.areas()[1].root->tabs == std::vector<PanelId>({2}), "one tab, ghost rectangle");
   const LayoutResult after = dock.computeLayout(kRegion600);

@@ -2,7 +2,8 @@
 // Owns: implementation of the docking sandbox declared in DockSandbox.h.
 // Invariants: pointer capture lives in the window (it reports Up/CaptureLost on every exit path),
 //   and every path out of a drag state returns to State::Idle, so no drag outlives its button.
-//   Escape during a tab drag drops on no target (spec 02 rule 21), i.e. the tab floats.
+//   Escape during a tab drag cancels it: the layout is unchanged and the tab stays where it was
+//   (owner decision D9, recommendation A).
 #include "DockSandbox.h"
 
 #include <algorithm>
@@ -132,7 +133,7 @@ void DockSandbox::setStatus(std::string text) {
 }
 
 std::string DockSandbox::title() const {
-  return "Docking sandbox | drag tabs/splitters, middle-click closes, Esc floats the drag | S save, L load, R reset, Tab next | " + status_;
+  return "Docking sandbox | drag tabs/splitters, middle-click closes, Esc cancels the drag | S save, L load, R reset, Tab next | " + status_;
 }
 
 std::string DockSandbox::nameOf(dock::PanelId panel) const {
@@ -199,8 +200,9 @@ bool DockSandbox::onKey(uint32_t virtualKey) {
     case keys::kR: resetLayout(); return true;
     case keys::kEscape:
       if (state_ != State::TabDragging) return false;
-      // Dropping on no target: the tab becomes a floating area at the ghost position.
-      finishTabDrag(layout_.floatZone(layout_.computeLayout(mainRect()), {pointer_, panel_, grab_}));
+      // Cancel: nothing was changed while dragging, so leaving the drag restores the original state.
+      state_ = State::Idle;
+      setStatus("drag cancelled, " + nameOf(panel_) + " stays where it was");
       return true;
     default: return false;
   }
