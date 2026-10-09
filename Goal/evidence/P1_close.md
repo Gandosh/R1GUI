@@ -1,6 +1,6 @@
 # Phase 1 close record
 
-**Status:** TECHNICAL PASS; owner gate PENDING   **Date:** 2026-10-09
+**Status:** TECHNICAL PASS; owner gate ACCEPTED (owner, 2026-10-09)   **Date:** 2026-10-09
 Phase 0 owner gate was also still PENDING when Phase 1 started on the owner's instruction to continue.
 
 ## Slices

@@ -38,7 +38,7 @@ Evidence files are created when a slice is worked: `Goal/evidence/P<phase>_S<nn>
 - [x] 1.6 [Pixel-comparison method: diff tool and tolerance defined](Goal/evidence/P1_S06.md)
 - [x] 1.7 [Preview: token and reference-screenshot viewer](Goal/evidence/P1_S07.md)
 
-**P1 owner gate: PENDING** — [phase close record](Goal/evidence/P1_close.md)
+**P1 owner gate: ACCEPTED** (2026-10-09) — [phase close record](Goal/evidence/P1_close.md)
 
 ## Phase 2: Interaction spec
 
