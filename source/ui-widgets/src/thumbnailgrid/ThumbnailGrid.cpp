@@ -108,7 +108,7 @@ void ThumbnailGrid::setModel(const AssetModel* model) {
 void ThumbnailGrid::modelChanged() {
   cancelRename();
   restartFilter();
-  rebuildSelectionAfterModelChange();
+  if (!filterRunning_) rebuildSelectionAfterModelChange();  // a running filter does it when it finishes
   requestPaint();
 }
 
@@ -116,7 +116,7 @@ void ThumbnailGrid::setFilter(std::function<bool(const GridItem&)> filter) {
   filter_ = std::move(filter);
   search_.clear();
   restartFilter();
-  rebuildSelectionAfterModelChange();
+  if (!filterRunning_) rebuildSelectionAfterModelChange();  // a running filter does it when it finishes
   scroll_ = 0.0;
   requestPaint();
 }
@@ -131,7 +131,7 @@ void ThumbnailGrid::setSearchText(std::string text) {
     filter_ = [needle](const GridItem& item) { return thumbs::findInsensitive(item.name, needle) != std::string_view::npos; };
   }
   restartFilter();
-  rebuildSelectionAfterModelChange();
+  if (!filterRunning_) rebuildSelectionAfterModelChange();  // a running filter does it when it finishes
   scroll_ = 0.0;
   requestPaint();
 }

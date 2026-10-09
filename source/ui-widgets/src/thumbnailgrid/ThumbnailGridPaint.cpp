@@ -9,6 +9,7 @@
 // Callers: UiContext paint traversal.
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 #include "r1ui/widgets/runtime/UiContext.h"
 #include "r1ui/widgets/thumbnailgrid/ThumbnailGrid.h"
@@ -82,7 +83,11 @@ void ThumbnailGrid::paintTile(PaintContext& ctx, const thumbs::Metrics& m, size_
     painter.popClip();
   } else {
     const double iconSize = std::clamp(tr.w * 0.4, 12.0, 48.0);
-    ctx.drawIcon(item.icon, iconSize, thumb, ctx.color("muted"));
+    try {
+      ctx.drawIcon(item.icon, iconSize, thumb, ctx.color("muted"));
+    } catch (const std::runtime_error&) {
+      ctx.drawIcon("file", iconSize, thumb, ctx.color("muted"));  // the model named an icon that does not exist
+    }
   }
   // The type strip at the bottom of the thumbnail and the modified marker.
   const float strip = ctx.px(kStripHeight);
