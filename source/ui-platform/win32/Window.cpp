@@ -1,174 +1,133 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: the Win32 implementation of r1ui::platform::Window (class registration, window proc,
-//   per-monitor-v2 DPI awareness, size/mouse/key state, bounded key, click and pointer-event
-//   queues, pointer capture while a button is held, cursor shape).
-// Why: first backend for Windows-first delivery; behind the neutral Window.h interface.
-// Callers: any module via Window.h. Calls: user32/kernel32 only.
-// Lifetime: Impl owns the HWND and destroys it in the Window destructor; the window proc
-//   reaches Impl through GWLP_USERDATA, which is cleared before the HWND is destroyed.
-#include "r1ui/platform/Window.h"
-
-#include <windows.h>
-#include <windowsx.h>
+// Owns: the Win32 implementation of r1ui::platform::Window's lifecycle and public API: class
+//   registration, window creation (native or borderless, tool window, DPI-aware sizing), message
+//   pumping, commands, geometry, chrome layout, event queue access, clipboard delegation.
+// Why: first backend for Windows-first delivery; behind the neutral Window.h interface. Message
+//   handling is in WindowProc.cpp and WindowChrome.cpp.
+// Callers: any module via Window.h. Calls: user32, dwmapi, shell32, shcore.
+// Lifetime: Impl owns the HWND and destroys it in its destructor, so a constructor that throws
+//   after creating the window still cleans up; the window proc reaches Impl through
+//   GWLP_USERDATA, which is cleared before the HWND is destroyed.
+#include <dwmapi.h>
 
 #include <stdexcept>
 #include <utility>
-#include <vector>
 
-#include "r1ui/core/CheckedCast.h"
+#include "ClipboardWin32.h"
+#include "WindowImpl.h"
 
 namespace r1ui::platform {
 
 namespace {
 
 constexpr wchar_t kClassName[] = L"R1GUI.Window";
+constexpr int kMaxWindowDimension = 32768;
+// One pump handles at most this many messages so a message flood cannot starve the caller's frame.
+constexpr int kMaxMessagesPerPump = 4096;
 
-// Converts UTF-8 to UTF-16 with explicit failure instead of silent truncation.
+// Converts UTF-8 to UTF-16 for the OS; invalid text is rejected, never truncated.
 std::wstring widen(const std::string& utf8) {
-  if (utf8.empty()) return {};
-  const int inLen = core::checkedCast<int>(utf8.size());
-  const int needed =
-      MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8.data(), inLen, nullptr, 0);
-  if (needed <= 0) throw std::runtime_error("Window: invalid UTF-8 title");
-  std::wstring out(static_cast<size_t>(needed), L'\0');
-  MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8.data(), inLen, out.data(), needed);
-  return out;
+  const auto utf16 = utf8ToUtf16(utf8);
+  if (!utf16) throw std::invalid_argument("Window: invalid UTF-8 title");
+  return std::wstring(utf16->begin(), utf16->end());
 }
 
-}  // namespace
-
-struct Window::Impl {
-  HWND hwnd = nullptr;
-  int width = 0;
-  int height = 0;
-  bool resized = true;  // first frame always sees a size
-  bool closed = false;
-  bool escape = false;
-  float mouseX = 0.0f;
-  float mouseY = 0.0f;
-  std::vector<KeyEvent> keyQueue;
-  std::vector<MouseClick> clickQueue;
-  std::vector<MouseEvent> mouseQueue;
-  CursorShape cursor = CursorShape::Arrow;
-  int buttonsDown = 0;  // buttons currently held; capture lasts until it reaches zero
-
-  // Appends to a queue, dropping the oldest entry once the bound is reached.
-  template <class T>
-  static void push(std::vector<T>& queue, const T& item) {
-    if (queue.size() >= kMaxQueuedEvents) queue.erase(queue.begin());
-    queue.push_back(item);
-  }
-
-  // Records a pointer event; a move replaces a directly preceding move.
-  void pushMouse(MouseEvent::Type type, MouseButton button, LPARAM lp) {
-    const MouseEvent event{type, button, static_cast<float>(GET_X_LPARAM(lp)), static_cast<float>(GET_Y_LPARAM(lp))};
-    mouseX = event.x;
-    mouseY = event.y;
-    if (type == MouseEvent::Type::Move && !mouseQueue.empty() && mouseQueue.back().type == MouseEvent::Type::Move) {
-      mouseQueue.back() = event;
-      return;
-    }
-    push(mouseQueue, event);
-  }
-
-  void buttonChange(MouseButton button, bool down, LPARAM lp) {
-    if (down) {
-      if (buttonsDown++ == 0) SetCapture(this->hwnd);
-    } else if (buttonsDown > 0 && --buttonsDown == 0) {
-      ReleaseCapture();
-    }
-    pushMouse(down ? MouseEvent::Type::Down : MouseEvent::Type::Up, button, lp);
-    if (down && button == MouseButton::Left) push(clickQueue, MouseClick{mouseX, mouseY});
-  }
-
-  static LRESULT CALLBACK proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
-    auto* self = reinterpret_cast<Impl*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
-    if (self != nullptr) {
-      switch (msg) {
-        case WM_SIZE:
-          self->width = LOWORD(lp);
-          self->height = HIWORD(lp);
-          self->resized = true;
-          return 0;
-        case WM_MOUSEMOVE:
-          self->pushMouse(MouseEvent::Type::Move, MouseButton::Left, lp);
-          return 0;
-        case WM_LBUTTONDOWN: self->buttonChange(MouseButton::Left, true, lp); return 0;
-        case WM_LBUTTONUP: self->buttonChange(MouseButton::Left, false, lp); return 0;
-        case WM_MBUTTONDOWN: self->buttonChange(MouseButton::Middle, true, lp); return 0;
-        case WM_MBUTTONUP: self->buttonChange(MouseButton::Middle, false, lp); return 0;
-        case WM_RBUTTONDOWN: self->buttonChange(MouseButton::Right, true, lp); return 0;
-        case WM_RBUTTONUP: self->buttonChange(MouseButton::Right, false, lp); return 0;
-        case WM_CAPTURECHANGED:
-          if (self->buttonsDown > 0) {  // capture taken by the OS while buttons were held
-            self->buttonsDown = 0;
-            push(self->mouseQueue, MouseEvent{MouseEvent::Type::CaptureLost, MouseButton::Left, self->mouseX, self->mouseY});
-          }
-          return 0;
-        case WM_SETCURSOR:
-          if (LOWORD(lp) == HTCLIENT) {
-            const wchar_t* id = self->cursor == CursorShape::ResizeHorizontal ? IDC_SIZEWE
-                                : self->cursor == CursorShape::ResizeVertical ? IDC_SIZENS
-                                                                              : IDC_ARROW;
-            SetCursor(LoadCursorW(nullptr, id));
-            return TRUE;
-          }
-          break;
-        case WM_KEYDOWN:
-          if (wp == VK_ESCAPE) self->escape = true;
-          if (wp <= 0xFF) push(self->keyQueue, KeyEvent{static_cast<uint32_t>(wp)});
-          return 0;
-        case WM_CLOSE:
-          self->closed = true;
-          return 0;
-        default:
-          break;
-      }
-    }
-    return DefWindowProcW(hwnd, msg, wp, lp);
-  }
-};
-
-Window::Window(const WindowDesc& desc) : impl_(std::make_unique<Impl>()) {
-  // Per-monitor-v2 awareness so sizes are physical pixels and panels can later cross monitors.
-  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
-  const HINSTANCE instance = GetModuleHandleW(nullptr);
+void registerWindowClass(HINSTANCE instance, WNDPROC proc) {
   WNDCLASSEXW wc{};
   wc.cbSize = sizeof(wc);
-  wc.lpfnWndProc = &Impl::proc;
+  wc.style = CS_DBLCLKS;
+  wc.lpfnWndProc = proc;
   wc.hInstance = instance;
   wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
   wc.lpszClassName = kClassName;
   if (RegisterClassExW(&wc) == 0 && GetLastError() != ERROR_CLASS_ALREADY_EXISTS) {
     throw std::runtime_error("Window: RegisterClassEx failed");
   }
-
-  RECT rect{0, 0, desc.width, desc.height};
-  AdjustWindowRectExForDpi(&rect, WS_OVERLAPPEDWINDOW, FALSE, 0, GetDpiForSystem());
-  impl_->hwnd = CreateWindowExW(0, kClassName, widen(desc.title).c_str(), WS_OVERLAPPEDWINDOW,
-                                CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left,
-                                rect.bottom - rect.top, nullptr, nullptr, instance, nullptr);
-  if (impl_->hwnd == nullptr) throw std::runtime_error("Window: CreateWindowEx failed");
-
-  SetWindowLongPtrW(impl_->hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(impl_.get()));
-  RECT client{};
-  GetClientRect(impl_->hwnd, &client);
-  impl_->width = client.right;
-  impl_->height = client.bottom;
-  ShowWindow(impl_->hwnd, SW_SHOW);
 }
 
-Window::~Window() {
-  if (impl_ && impl_->hwnd != nullptr) {
-    SetWindowLongPtrW(impl_->hwnd, GWLP_USERDATA, 0);  // no callbacks into a dying Impl
-    DestroyWindow(impl_->hwnd);
+void validateDesc(const WindowDesc& desc) {
+  const auto bad = [](int v) { return v <= 0 || v > kMaxWindowDimension; };
+  if (bad(desc.width) || bad(desc.height)) throw std::invalid_argument("Window: invalid initial size");
+  if (desc.minSize && (bad(desc.minSize->width) || bad(desc.minSize->height))) {
+    throw std::invalid_argument("Window: invalid minimum size");
   }
 }
 
+}  // namespace
+
+Window::Impl::~Impl() {
+  if (hwnd != nullptr) {
+    SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);  // no callbacks into a dying Impl
+    DestroyWindow(hwnd);
+  }
+}
+
+// ---- Construction ----
+
+Window::Window(const WindowDesc& desc) : impl_(std::make_unique<Impl>()) {
+  validateDesc(desc);
+  const std::wstring title = widen(desc.title);
+
+  // Per-monitor-v2 awareness so sizes are physical pixels and windows can cross monitors. Fails
+  // harmlessly when the process already has an awareness (manifest or an earlier window).
+  SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+  const HINSTANCE instance = GetModuleHandleW(nullptr);
+  registerWindowClass(instance, &Impl::proc);
+
+  Impl& impl = *impl_;
+  impl.borderless = desc.borderless;
+  impl.resizable = desc.resizable;
+  if (desc.minSize) impl.minClientSize = *desc.minSize;
+  impl.minSizeLogical = desc.sizesAreLogical;
+
+  // The monitor the window will open on decides the dpi used to turn logical sizes physical and
+  // to size the native frame.
+  const POINT anchor{desc.position ? desc.position->x : 0, desc.position ? desc.position->y : 0};
+  const UINT openDpi = monitorDpi(MonitorFromPoint(anchor, MONITOR_DEFAULTTOPRIMARY));
+  const float openScale = dpiScaleFromDpi(openDpi);
+  const int clientW = desc.sizesAreLogical ? logicalToPhysical(static_cast<float>(desc.width), openScale) : desc.width;
+  const int clientH = desc.sizesAreLogical ? logicalToPhysical(static_cast<float>(desc.height), openScale) : desc.height;
+  if (clientW <= 0 || clientW > kMaxWindowDimension || clientH <= 0 || clientH > kMaxWindowDimension) {
+    throw std::invalid_argument("Window: scaled size out of range");
+  }
+
+  // Borderless windows keep the full overlapped style: that is what makes Windows provide edge
+  // resize, snapping and the shadow. WM_NCCALCSIZE removes the visible frame.
+  DWORD style = WS_OVERLAPPEDWINDOW;
+  if (!desc.resizable) style &= ~static_cast<DWORD>(WS_THICKFRAME | WS_MAXIMIZEBOX);
+  const DWORD exStyle = desc.toolWindow ? WS_EX_TOOLWINDOW : 0;
+  RECT rect{0, 0, clientW, clientH};
+  if (!desc.borderless) AdjustWindowRectExForDpi(&rect, style, FALSE, exStyle, openDpi);
+
+  impl.hwnd = CreateWindowExW(exStyle, kClassName, title.c_str(), style,
+                              desc.position ? desc.position->x : CW_USEDEFAULT,
+                              desc.position ? desc.position->y : CW_USEDEFAULT, rect.right - rect.left,
+                              rect.bottom - rect.top, nullptr, nullptr, instance, &impl);
+  if (impl.hwnd == nullptr) throw std::runtime_error("Window: CreateWindowEx failed");
+
+  impl.dpi = GetDpiForWindow(impl.hwnd);
+  if (desc.borderless) {
+    // A 1 px frame extension is what gives a frameless window its DWM shadow; failure only
+    // loses the shadow, so the result is not an error. SWP_FRAMECHANGED applies the new frame.
+    const MARGINS margins{0, 0, 1, 0};
+    DwmExtendFrameIntoClientArea(impl.hwnd, &margins);
+    SetWindowPos(impl.hwnd, nullptr, 0, 0, 0, 0,
+                 SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  RECT client{};
+  GetClientRect(impl.hwnd, &client);
+  impl.width = client.right;
+  impl.height = client.bottom;
+  ShowWindow(impl.hwnd, SW_SHOW);
+}
+
+Window::~Window() = default;
+
+// ---- Pumping and simple state ----
+
 bool Window::pumpEvents() {
   MSG msg;
-  while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+  for (int handled = 0; handled < kMaxMessagesPerPump && PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE); ++handled) {
     TranslateMessage(&msg);
     DispatchMessageW(&msg);
   }
@@ -185,13 +144,65 @@ bool Window::consumeResized() {
 float Window::mouseX() const { return impl_->mouseX; }
 float Window::mouseY() const { return impl_->mouseY; }
 bool Window::escapePressed() const { return impl_->escape; }
-std::vector<KeyEvent> Window::takeKeyEvents() { return std::exchange(impl_->keyQueue, {}); }
-std::vector<MouseClick> Window::takeMouseClicks() { return std::exchange(impl_->clickQueue, {}); }
-std::vector<MouseEvent> Window::takeMouseEvents() { return std::exchange(impl_->mouseQueue, {}); }
-void Window::setCursor(CursorShape shape) { impl_->cursor = shape; }
-void Window::setTitle(const std::string& utf8Title) {
-  SetWindowTextW(impl_->hwnd, widen(utf8Title).c_str());
+float Window::dpiScale() const { return dpiScaleFromDpi(impl_->dpi); }
+
+// ---- Geometry and commands ----
+
+Rect Window::windowRect() const {
+  RECT r{};
+  if (GetWindowRect(impl_->hwnd, &r) == FALSE) return {};
+  return {r.left, r.top, r.right - r.left, r.bottom - r.top};
 }
+
+bool Window::setWindowRect(const Rect& rect) {
+  if (rect.empty()) return false;
+  return SetWindowPos(impl_->hwnd, nullptr, rect.x, rect.y, rect.width, rect.height,
+                      SWP_NOZORDER | SWP_NOACTIVATE) != FALSE;
+}
+
+void Window::minimize() { ShowWindow(impl_->hwnd, SW_MINIMIZE); }
+void Window::maximizeToggle() {
+  if (!impl_->resizable) return;
+  ShowWindow(impl_->hwnd, (IsZoomed(impl_->hwnd) != FALSE) ? SW_RESTORE : SW_MAXIMIZE);
+}
+bool Window::isMaximized() const { return IsZoomed(impl_->hwnd) != FALSE; }
+bool Window::isMinimized() const { return IsIconic(impl_->hwnd) != FALSE; }
+void Window::requestClose() { PostMessageW(impl_->hwnd, WM_CLOSE, 0, 0); }
+void Window::setCloseNeedsConfirmation(bool enabled) { impl_->needsConfirm = enabled; }
+void Window::confirmClose() { impl_->closed = true; }
+
+// ---- Chrome ----
+
+bool Window::setChromeLayout(const ChromeLayout& layout) {
+  if (!isValidChromeLayout(layout)) return false;
+  impl_->chrome = layout;
+  return true;
+}
+
+HitZone Window::chromeZoneAt(Point clientPoint) const { return impl_->zoneAt(clientPoint); }
+
+// ---- Events and cursor ----
+
+std::vector<Event> Window::takeEvents() { return impl_->events.drain(); }
+size_t Window::droppedEventCount() const {
+  return impl_->events.dropped() + impl_->keyQueue.dropped() + impl_->clickQueue.dropped() +
+         impl_->mouseQueue.dropped();
+}
+std::vector<KeyEvent> Window::takeKeyEvents() { return impl_->keyQueue.drain(); }
+std::vector<MouseClick> Window::takeMouseClicks() { return impl_->clickQueue.drain(); }
+std::vector<MouseEvent> Window::takeMouseEvents() { return impl_->mouseQueue.drain(); }
+void Window::setCursor(CursorShape shape) { impl_->cursor = shape; }
+
+void Window::setTitle(const std::string& utf8Title) {
+  const std::wstring title = widen(utf8Title);
+  SetWindowTextW(impl_->hwnd, title.c_str());
+}
+
+// ---- Clipboard and native handle ----
+
+ClipboardText Window::getClipboardText() { return readClipboardText(impl_->hwnd); }
+ClipboardStatus Window::setClipboardText(std::string_view utf8) { return writeClipboardText(impl_->hwnd, utf8); }
+
 NativeHandle Window::nativeHandle() const { return {impl_->hwnd, GetModuleHandleW(nullptr)}; }
 
 }  // namespace r1ui::platform
