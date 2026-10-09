@@ -48,24 +48,34 @@ void testSectionGeometry() {
   ui.create<Fixed>(s.content());
   t.layout();
   const layout::Rect r = ui.absRect(s.id());
-  R1_EXPECT(r.w == 258 && r.h == 1 + 26 + 26 + 6);  // measured: separator + header + one field row + bottom padding
+  R1_EXPECT(r.w == 258 && r.h == 35 + 6 + 26 + 8);  // measured: header with a button (1 + 8 + 26) + 6 + one field row + bottom padding
   const layout::Rect h = ui.absRect(s.header());
-  R1_EXPECT(h.h == 26 && h.y == r.y + 1);
+  R1_EXPECT(h.h == 35 && h.y == r.y);
   const layout::Rect b = ui.absRect(add.id());
-  R1_EXPECT(b.w == 26 && b.h == 26 && b.x + b.w == r.x + r.w - 12);  // right edge sits on the 12 px padding
+  R1_EXPECT(b.w == 26 && b.h == 26 && b.x + b.w == r.x + r.w - 12 && b.y == r.y + 9);  // right edge on the 12 px padding, 9 px below the separator
   const layout::Rect c = ui.absRect(s.content());
-  R1_EXPECT(c.w == 258 && c.y == h.y + 26);
+  R1_EXPECT(c.w == 258 && c.y == h.y + 35);
   R1_EXPECT(!s.collapsible() && !s.setCollapsed(true) && !s.collapsed());
   R1_EXPECT(add.tooltipText() == "Add" && add.accessibleName() == "Add");
   R1_EXPECT(s.accessibleName() == "Layout");
   s.setTitle("Position");
   R1_EXPECT(s.title() == "Position" && s.accessibleName() == "Position");
   paintOnce(t);
+  // Regression: the title is as wide as its text even when the text width is fractional ("Appearance"
+  // is 62.4 px at 11 px; a layout that rounded the label down would make paint() shorten it).
+  s.setTitle("Appearance");
+  t.layout();
+  {
+    const layout::Rect titleRect = ui.absRect(ui.tree().firstChild(s.header()));
+    const auto& heading = t.services.resolve("label.heading", 0);
+    const FittedText& fit = t.services.text().fit("Appearance", static_cast<float>(heading.text.fontSize), static_cast<float>(titleRect.w));
+    R1_EXPECT(!fit.truncated);
+  }
 
   PropertySection& flat = ui.create<PropertySection>(ui.root(), "No border", SectionOptions{.topBorder = false});
   flat.style().width = layout::Length::px(258);
   t.layout();
-  R1_EXPECT(ui.absRect(flat.id()).h == 26 + 6);
+  R1_EXPECT(ui.absRect(flat.id()).h == 26 + 8);
 }
 
 void testCollapse() {
@@ -87,7 +97,7 @@ void testCollapse() {
   ui.pointerDown(h.x + 30, h.y + 10);
   ui.pointerUp(h.x + 30, h.y + 10);
   t.layout();
-  R1_EXPECT(s.collapsed() && toggles == 1 && ui.absRect(s.id()).h == 1 + 26 && open == 59);
+  R1_EXPECT(s.collapsed() && toggles == 1 && ui.absRect(s.id()).h == 26 && open == 60);
   ui.pointerDown(h.x + 30, h.y + 10);
   ui.pointerUp(h.x + 30, h.y + 10);
   t.layout();

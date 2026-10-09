@@ -24,8 +24,9 @@ namespace {
 
 constexpr double kHeaderHeight = 26.0;      // docs/spec/widgets.md section 3: section header row
 constexpr double kSideInset = 12.0;         // panel horizontal padding
-constexpr double kContentBottom = 6.0;      // measured: Layout section = 1 + 26 + 26 + 6
+constexpr double kContentBottom = 8.0;      // measured: the Layout section is 60 px = 26 (header, its 1 px border included) + 26 (one row) + 8
 constexpr double kRowGap = 6.0;
+constexpr double kActionHeaderExtra = 8.0;  // measured: add / eye buttons sit 9 px below the separator
 constexpr double kPanelHeaderHeight = 43.0; // 8 + 26 + 8 + 1 px bottom border
 constexpr double kPanelHeaderPadY = 8.0;
 constexpr double kActionSize = 26.0;
@@ -45,8 +46,8 @@ constexpr theme::StyleRuleEntry kRows[] = {
     {"section.action", State::kDisabled, StyleProperty::Opacity, "number:0.5"},
 
     {"section.panelTitle", State::kNone, StyleProperty::Foreground, "color:surface"},
-    {"section.panelTitle", State::kNone, StyleProperty::FontSize, "fontSize:13"},
-    {"section.panelTitle", State::kNone, StyleProperty::LineHeight, "number:19.5"},
+    {"section.panelTitle", State::kNone, StyleProperty::FontSize, "fontSize:xs"},
+    {"section.panelTitle", State::kNone, StyleProperty::LineHeight, "number:16"},
     {"section.panelTitle", State::kNone, StyleProperty::FontWeight, "weight:semibold"},
     {"section.panelTitle", State::kDisabled, StyleProperty::Opacity, "number:0.5"},
 
@@ -153,9 +154,10 @@ void PropertySection::onAttached() {
   layout::Style& s = style();
   s.direction = layout::FlexDirection::Column;
   s.alignItems = layout::Align::Stretch;
-  s.padding[layout::kTop] = options_.topBorder ? 1.0 : 0.0;
 
   SectionHeader& header = ui().create<SectionHeader>(id());
+  // The separator is part of the 26 px header; the title sits one more pixel down (measured: its text box starts 9 px below the separator).
+  header.style().padding[layout::kTop] = options_.topBorder ? 2.0 : 1.0;
   header_ = header.id();
   header.setCollapsible(options_.collapsible);
   header.setOnToggle([this] { toggle(); });
@@ -190,6 +192,17 @@ void PropertySection::setTitle(std::string title) {
 }
 
 ActionButton& PropertySection::addAction(std::string icon, std::string tooltip, std::function<void(ActionButton&)> onActivate) {
+  // A header with trailing buttons is taller: 8 px above the 26 px buttons (measured: Fill and Appearance), and
+  // the content starts 6 px below it.
+  if (core::tree::Widget* h = ui().tree().get(header_)) {
+    h->style.height = layout::Length::px((options_.topBorder ? 1.0 : 0.0) + kActionHeaderExtra + kActionSize);
+    h->style.padding[layout::kTop] = (options_.topBorder ? 1.0 : 0.0) + kActionHeaderExtra;
+    ui().invalidator().requestLayout(header_);
+  }
+  if (core::tree::Widget* c = ui().tree().get(content_)) {
+    c->style.padding[layout::kTop] = kRowGap;
+    ui().invalidator().requestLayout(content_);
+  }
   ActionButton& b = ui().create<ActionButton>(header_, std::move(icon), "section.action");
   b.setSize(kActionSize, kActionSize);
   b.setTooltip(std::move(tooltip));
@@ -262,8 +275,12 @@ void FieldGroup::onAttached() {
   s.alignItems = layout::Align::Stretch;
   s.gapRow = kLabelGap;
   s.minWidth = layout::Length::px(0);
-  labelWidget_ = ui().create<Label>(id(), label_, LabelRole::Caption).id();
-  control_ = ui().create<SectionBox>(id()).id();
+  Label& label = ui().create<Label>(id(), label_, LabelRole::Caption);
+  label.style().flexShrink = 0.0;  // the group is a column: never squeeze the label's height (its width truncates)
+  labelWidget_ = label.id();
+  SectionBox& control = ui().create<SectionBox>(id());
+  control.style().flexShrink = 0.0;
+  control_ = control.id();
 }
 
 void FieldGroup::setLabel(std::string label) {

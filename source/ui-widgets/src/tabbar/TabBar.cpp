@@ -180,7 +180,7 @@ double TabBar::naturalWidth(std::string_view title, bool closable, bool hasIcon)
   const double scale = ui().scale();
   const double text = static_cast<double>(ui().text().measure(title, static_cast<float>(rs.text.fontSize * scale), rs.text.weight)) / scale;
   double w = kPadX + (hasIcon ? kIconSize + kGap : 0.0) + text + (closable ? kGap + kCloseSize : 0.0) + kPadX + kBorder;
-  return std::min(std::ceil(w), kMaxTabWidth);
+  return std::min(std::round(w), kMaxTabWidth);  // whole pixels like the browser's layout (a tab titled "Untitled" is 109 px)
 }
 
 const TabBar::Layout& TabBar::layout() const {
@@ -397,7 +397,7 @@ void TabBar::paint(PaintContext& ctx) {
     const double right = t.closable ? kBorder + kPadX + kCloseSize + kGap : kPadX + kBorder;
     TextOptions o;
     o.padLeft = left;
-    o.padRight = right;
+    o.padRight = right - 1.0;  // the natural width is rounded to a pixel: never shorten a label that was measured to fit
     o.color = text;
     ctx.drawText(t.title, rs.text, box, o);
     if (t.closable) {

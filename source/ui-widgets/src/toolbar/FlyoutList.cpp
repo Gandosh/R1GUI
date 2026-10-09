@@ -21,12 +21,14 @@ using theme::StyleProperty;
 
 namespace {
 
-constexpr double kIconSize = 12.0;
+constexpr double kIconSize = 14.0;
+constexpr double kIconSlot = 14.0;
 
 constexpr theme::StyleRuleEntry kRows[] = {
     {"flyout.item", State::kNone, StyleProperty::Background, "transparent"},
     {"flyout.item", State::kNone, StyleProperty::Foreground, "color:surface"},
     {"flyout.item", State::kNone, StyleProperty::FontSize, "fontSize:xs"},
+    {"flyout.item", State::kNone, StyleProperty::FontWeight, "weight:medium"},
     {"flyout.item", State::kNone, StyleProperty::LineHeight, "number:16"},
     {"flyout.item", State::kNone, StyleProperty::Radius, "radius:md"},
     {"flyout.item", State::kHover, StyleProperty::Background, "color:hover"},
@@ -74,7 +76,7 @@ layout::MeasureResult FlyoutList::measure(const layout::MeasureInput&) {
   for (const FlyoutItem& i : items_) {
     if (i.separator) continue;
     double w = 2.0 * kPadX;
-    if (anyIcon) w += kIconSize + kGap;
+    if (anyIcon) w += kIconSlot + kGap;
     w += static_cast<double>(ui().text().measure(i.label, static_cast<float>(item.text.fontSize * scale), item.text.weight)) / scale;
     if (!i.shortcut.empty()) w += kGap + static_cast<double>(ui().text().measure(i.shortcut, static_cast<float>(hint.text.fontSize * scale), hint.text.weight)) / scale;
     width = std::max(width, w);
@@ -102,10 +104,10 @@ void FlyoutList::paint(PaintContext& ctx) {
     const render::Color tint = ctx.color(rs.text.color);
     double x = kPadX;
     if (anyIcon) {
-      const render::Rect iconBox = ctx.toPhysical(me.x + x, top, kIconSize, kRowHeight);
+      const render::Rect iconBox = ctx.toPhysical(me.x + x, top, kIconSlot, kRowHeight);
       if (!it.icon.empty()) ctx.drawIcon(it.icon, kIconSize, iconBox, tint);
-      else if (it.checked) ctx.drawIcon("check", kIconSize, iconBox, tint);
-      x += kIconSize + kGap;
+      else if (it.checked) ctx.drawIcon("check", 12.0, iconBox, tint);
+      x += kIconSlot + kGap;
     }
     const theme::ResolvedStyle& hint = ctx.resolve("flyout.shortcut", 0);
     float hintWidth = 0.0f;
@@ -213,6 +215,9 @@ OverlayHandle openFlyout(UiContext& ui, std::vector<FlyoutItem> items, std::func
   const OverlayHandle handle = ui.overlays().open(o);
   if (!handle.valid()) return {};
   FlyoutList& list = ui.create<FlyoutList>(handle.host, std::move(items), std::move(onPick));
+  // The surface's padding does not include its 1 px border (borders have no layout effect), so the list adds it.
+  list.style().margin[layout::kLeft] = list.style().margin[layout::kRight] = layout::Length::px(1);
+  list.style().margin[layout::kTop] = list.style().margin[layout::kBottom] = layout::Length::px(1);
   const OverlayId overlay = handle.id;
   UiContext* context = &ui;
   list.setCloseHook([context, overlay] { context->overlays().close(overlay); });

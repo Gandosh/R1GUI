@@ -71,6 +71,9 @@ class ToolbarButton : public WidgetObject {
   void setToolId(std::string id) { id_ = std::move(id); }
   bool active() const { return hasState(StateFlag::kSelected); }
   void setActive(bool on) { setSelected(on); }
+  // A small status dot at the top right corner of the icon (measured: 6.5 px, `muted`, ringed by the bar's colour).
+  void setBadge(bool on);
+  bool badge() const { return badge_; }
   void setOnActivate(std::function<void(ToolbarButton&)> callback) { onActivate_ = std::move(callback); }
   // Runs the callback as a click would (enabled buttons only).
   bool activate();
@@ -81,6 +84,7 @@ class ToolbarButton : public WidgetObject {
   std::string icon_;
   ToolbarButtonKind kind_;
   bool keyPressed_ = false;
+  bool badge_ = false;
   std::function<void(ToolbarButton&)> onActivate_;
 };
 

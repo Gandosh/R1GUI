@@ -93,6 +93,22 @@ void ToolbarButton::paint(PaintContext& ctx) {
   if (bg.a > 0.0f) ctx.painter().fillRoundedRect(box, render::CornerRadii::uniform(ctx.px(rs.radius)), bg);
   const render::Color tint = ctx.animatedColor(1, ctx.color(rs.text.color));
   if (!icon_.empty()) ctx.drawIcon(icon_, kIconSize, box, tint);
+  if (badge_) {
+    // Measured: a 6.5 px dot centred 26 px from the left and 6.5 px from the top, with a 1 px ring in the bar's colour.
+    const layout::Rect r = ctx.rect();
+    const auto dot = [&](double radius, const render::Color& color) {
+      const double cx = r.x + 26.0, cy = r.y + 6.5;
+      ctx.painter().fillRoundedRect(ctx.toPhysical(cx - radius, cy - radius, 2 * radius, 2 * radius), render::CornerRadii::uniform(ctx.px(radius)), color);
+    };
+    dot(3.25 + 1.0, ctx.color("panel"));
+    dot(3.25, ctx.color("muted"));
+  }
+}
+
+void ToolbarButton::setBadge(bool on) {
+  if (on == badge_) return;
+  badge_ = on;
+  requestPaint();
 }
 
 void ToolbarButton::paintOver(PaintContext& ctx) {

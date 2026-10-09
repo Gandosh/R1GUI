@@ -33,6 +33,11 @@ struct RegionSpec {
   std::string tag;  // artifact name; defaults to the reference name
   std::vector<VisualSpec::Ignore> ignore;
   bool luminance = false;
+  // Pixels not at least 0.4 px inside this rounded rectangle (image coordinates, radius in px) are ignored: the
+  // page colour and shadow around a floating surface are not part of the widget (w == 0 disables it).
+  struct RoundedClip {
+    double x = 0, y = 0, w = 0, h = 0, radius = 0;
+  } clip;
 };
 
 inline bool expectMatchesRegion(const BuildFn& build, const RegionSpec& spec, const char* file, int line) {
@@ -75,6 +80,18 @@ inline bool expectMatchesRegion(const BuildFn& build, const RegionSpec& spec, co
   for (const VisualSpec::Ignore& ig : spec.ignore) {
     for (int py = std::max(0, ig.y); py < std::min(ig.y + ig.h, spec.h); ++py) {
       for (int px = std::max(0, ig.x); px < std::min(ig.x + ig.w, spec.w); ++px) {
+        const size_t i = (static_cast<size_t>(py) * ref.width + static_cast<size_t>(px)) * 4;
+        std::copy_n(candidate.rgba.begin() + static_cast<std::ptrdiff_t>(i), 4, ref.rgba.begin() + static_cast<std::ptrdiff_t>(i));
+      }
+    }
+  }
+  if (spec.clip.w > 0.0 && spec.clip.h > 0.0) {
+    const double cx = spec.clip.x + spec.clip.w * 0.5, cy = spec.clip.y + spec.clip.h * 0.5;
+    const double hx = spec.clip.w * 0.5 - spec.clip.radius, hy = spec.clip.h * 0.5 - spec.clip.radius;
+    for (int py = 0; py < spec.h; ++py) {
+      for (int px = 0; px < spec.w; ++px) {
+        const double dx = std::max(std::abs(px + 0.5 - cx) - hx, 0.0), dy = std::max(std::abs(py + 0.5 - cy) - hy, 0.0);
+        if (std::sqrt(dx * dx + dy * dy) - spec.clip.radius <= -0.4) continue;
         const size_t i = (static_cast<size_t>(py) * ref.width + static_cast<size_t>(px)) * 4;
         std::copy_n(candidate.rgba.begin() + static_cast<std::ptrdiff_t>(i), 4, ref.rgba.begin() + static_cast<std::ptrdiff_t>(i));
       }

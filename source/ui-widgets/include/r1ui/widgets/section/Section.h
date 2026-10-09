@@ -1,7 +1,9 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the property-panel anatomy of docs/spec/widgets.md section 3: PropertySection (26 px header
 //   row with an 11 px semibold title, trailing 26 px action buttons, optional collapse, content
-//   padded 12 px at the sides, separated from the previous section by a 1 px border), PanelHeader
+//   padded 12 px at the sides, separated from the previous section by a 1 px border that belongs to
+//   the 26 px header: header + one 26 px row + 8 px bottom padding = 60 px, as measured; a header with
+//   action buttons is 8 px taller and its content starts 6 px lower), PanelHeader
 //   (43 px selection header: 14 px icon, 13 px semibold truncated title, trailing action buttons,
 //   1 px bottom border), FieldGroup (11 px muted label, 4 px gap, control area) and FieldGrid (rows
 //   of two equal columns, optionally followed by a 26 px rail, gap 6).
