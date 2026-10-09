@@ -108,14 +108,14 @@ A tab drag starts in the window whose strip was pressed: that platform window ha
 |---|---|---|
 | `window_table_test` | fast | ids, stacking, deferred destruction order with a fake window layer |
 | `native_coords_gpu_test` | gpu (pure) | coordinate conversion for several layouts and scales, limits, drop-target stacking |
-| `native_backend_conformance_gpu_test` | gpu | the whole `BackendConformance.h` suite over real windows, including the optional clauses (user move, raise, close, OS destruction, pointer tracking outside every window), plus window styles, owner, corner attribute, coordinates against the OS, Alt+F4, user maximize, hidden window keeps the capture, destruction from an own handler, minimize, bringing a window back, stacking against the OS z-order |
+| `native_backend_conformance_gpu_test` | gpu | the whole `BackendConformance.h` suite over real windows, including the optional clauses (user move, raise, close, OS destruction, pointer tracking outside every window), plus window styles, owner, corner attribute, coordinates against the OS, Alt+F4, user maximize, hidden window keeps the capture, destruction from an own handler, minimize, bringing a window back, stacking against the OS z-order, hostile input (invalid UTF-8 titles, non-finite and absurd rectangles, unknown ids), 40 create/destroy cycles with the process's USER and GDI object counts unchanged |
 | `native_dock_gpu_test` | gpu | DockHost on the native backend: tab out of the main window, back, between two floating windows, OS move/resize/close/destroy, minimize, idle CPU |
 | `native_render_gpu_test` | gpu | the frame rendered offscreen in both themes; a real floating window captured with PrintWindow |
 | `platform_additions_gpu_test` | gpu | the platform additions of section 8 |
 | `native_harness_gpu_test` | gpu | smoke; `--interactive` is the manual harness |
 | `native_drive.ps1` | manual | the real-desktop drive with injected OS input |
 
-The tests that need a desktop print `SKIPPED: <reason>` and exit 0 when the session has no monitor or window creation fails; they never inject real input and destroy every window they create. The GPU tests pick the RTX 4080 by name (`R1UI_GPU` or the default "RTX 4080") and refuse a 3090.
+Every native rig checks on teardown that the Vulkan validation layer (active in Debug trees) reported nothing. The tests that need a desktop print `SKIPPED: <reason>` and exit 0 when the session has no monitor or window creation fails; they never inject real input and destroy every window they create. The GPU tests pick the RTX 4080 by name (`R1UI_GPU` or the default "RTX 4080") and refuse a 3090.
 
 Manual run: `native_harness_gpu_test.exe --interactive --seconds 120` (R1UI_GPU set to the 4080): drag a tab out of the main window, drop it on empty desktop space, drag it back, between floating windows, move/resize with the title bar and edges, close with the X, minimize the main window, drag a window to the second monitor. The script `native_drive.ps1 -Exe <harness> -OutDir <dir>` does all of this with real mouse input and writes `drive.log` and captures.
 
