@@ -100,7 +100,7 @@ Each widget is compared against its Phase 1 reference screenshots.
 - [x] 4.16 [Widgets pass visual comparison and match the Phase 2 specs](Goal/evidence/P4_S16.md)
 - [x] 4.17 [Preview: widget gallery with every widget and state](Goal/evidence/P4_S17.md)
 
-**P4 owner gate: PENDING** — [phase close record](Goal/evidence/P4_close.md)
+**P4 owner gate: ACCEPTED** (2026-10-10) — [phase close record](Goal/evidence/P4_close.md)
 
 ## Phase 5: Docking, commands, customization
 
