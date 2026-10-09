@@ -128,7 +128,8 @@ void SectionHeader::paintOver(PaintContext& ctx) {
 }
 
 void SectionHeader::onClick(Event& e) {
-  if (!collapsible_ || e.button != Button::Left || !onToggle_) return;
+  // A click a child already used (a header action button) must not also toggle the section.
+  if (!collapsible_ || e.button != Button::Left || !onToggle_ || e.handled) return;
   e.markHandled();
   onToggle_();
 }
