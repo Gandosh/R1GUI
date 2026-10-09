@@ -25,6 +25,15 @@ namespace r1ui::render {
 
 enum class PresentMode { Fifo, Mailbox, Immediate };
 
+// Where the CPU time of the last completed endFrame() went, in milliseconds: waiting for the GPU
+// and the presentation engine (frame slot fence plus image acquire), recording and submitting the
+// command buffer, and the present call itself.
+struct FrameTimings {
+  double waitMs = 0.0;
+  double recordSubmitMs = 0.0;
+  double presentMs = 0.0;
+};
+
 struct WindowTargetOptions {
   PresentMode presentMode = PresentMode::Fifo;
 };
@@ -46,6 +55,7 @@ class WindowTarget final : public RenderTarget {
   PresentMode presentMode() const;
   // Number of swapchains built so far (1 after construction).
   uint32_t swapchainGeneration() const;
+  FrameTimings lastFrameTimings() const;
 
  private:
   struct Impl;

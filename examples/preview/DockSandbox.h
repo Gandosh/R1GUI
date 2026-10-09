@@ -2,14 +2,15 @@
 // Owns: preview mode 3, the docking sandbox: an interactive demonstration of the docking specs
 //   (02, 04, 05, 08) on top of the headless ui-dock model. It owns the pointer state machine
 //   (tab press/drag/drop, splitter drag, middle-click close), layout save/load/reset to a file,
-//   and the drawing of the dock as solid rectangles.
+//   and the drawing of the dock through the Painter.
 // Why: the owner needs something to click through; all dock decisions stay in ui-dock, this file
 //   only translates events into model calls and model geometry into rectangles.
 // Callers: examples/preview main.cpp (Viewer), which forwards key and pointer events while the
 //   mode is active. Calls: r1ui::dock::DockLayout, r1ui::theme::Tokens, r1ui::platform::Window.
-// Rendering limits: the renderer has no text and no alpha, so tabs are coloured rectangles (the
-//   front tab brighter and taller), the ghost is an opaque tab-sized swatch, and the drop preview
-//   is a four-rectangle outline. Names and results are shown in the window title.
+// Look: tabs are coloured rectangles (the front tab brighter and taller) labelled with the panel
+//   name, the ghost is an opaque tab-sized swatch, the drop preview is a four-rectangle outline.
+//   Results are shown in a status line at the bottom of the area and in the window title. Sizes are
+//   physical pixels without display scaling, as in the earlier preview.
 // Failure behavior: a failed model call or an unreadable layout file only changes the status
 //   text; the current layout is never replaced by invalid data.
 #pragma once
@@ -19,8 +20,9 @@
 #include <vector>
 
 #include "r1ui/dock/DockLayout.h"
+#include "TextEngine.h"
 #include "r1ui/platform/Window.h"
-#include "r1ui/render/Renderer.h"
+#include "r1ui/render/Painter.h"
 #include "r1ui/theme/Tokens.h"
 
 class DockSandbox {
@@ -32,9 +34,12 @@ class DockSandbox {
   // (Escape is used only while a tab drag is active).
   bool onKey(uint32_t virtualKey);
   void onMouse(const r1ui::platform::MouseEvent& event);
-  // Appends the dock drawing for the current window size.
-  void draw(r1ui::render::FrameContent& content, r1ui::theme::ThemeId theme);
+  // The area (physical pixels, window coordinates) the dock and its status line occupy.
+  void setBounds(const r1ui::render::Rect& bounds) { bounds_ = bounds; }
+  // Draws the dock and the status line into the bounds.
+  void draw(r1ui::render::Painter& painter, preview::TextEngine& text, r1ui::theme::ThemeId theme);
   std::string title() const;
+  const std::string& status() const { return status_; }
   bool dragActive() const { return state_ == State::TabDragging; }
 
  private:
@@ -55,6 +60,7 @@ class DockSandbox {
   std::filesystem::path file_;
   r1ui::dock::DockLayout layout_;
   std::string status_;
+  r1ui::render::Rect bounds_;
 
   State state_ = State::Idle;
   r1ui::dock::PanelId panel_ = 0;     // tab being pressed / dragged / middle-clicked

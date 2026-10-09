@@ -20,10 +20,20 @@ namespace {
 namespace dock = r1ui::dock;
 using r1ui::platform::MouseButton;
 using r1ui::platform::MouseEvent;
-using r1ui::render::Rgba8;
+using r1ui::render::Painter;
 using r1ui::theme::ThemeId;
 
+struct Rgba8 {
+  uint8_t r = 0;
+  uint8_t g = 0;
+  uint8_t b = 0;
+  uint8_t a = 255;
+};
+
 constexpr double kMargin = 8.0;
+constexpr double kStatusHeight = 24.0;
+constexpr float kLabelPixels = 11.0f;
+constexpr float kStatusPixels = 12.0f;
 constexpr size_t kMaxLayoutFileBytes = size_t{4} * 1024 * 1024;
 constexpr size_t kMaxStatusChars = 140;
 
@@ -76,18 +86,38 @@ constexpr Rgba8 kWhite{255, 255, 255, 255};
 constexpr Rgba8 kBlack{0, 0, 0, 255};
 constexpr Rgba8 kPreviewOrange{255, 192, 128, 255};  // spec 02 rule 19 tint, drawn opaque
 
-r1ui::render::FillRect fill(const dock::Rect& r, Rgba8 color) {
-  return {r1ui::core::checkedCast<int>(std::lround(r.x)), r1ui::core::checkedCast<int>(std::lround(r.y)),
-          r1ui::core::checkedCast<int>(std::lround(std::max(0.0, r.w))), r1ui::core::checkedCast<int>(std::lround(std::max(0.0, r.h))), color};
+// Rectangle edges are rounded to whole pixels (the dock's look has always been pixel exact).
+r1ui::render::Rect snapped(const dock::Rect& r) {
+  const double x0 = std::round(r.x);
+  const double y0 = std::round(r.y);
+  const double x1 = std::round(r.x + std::max(0.0, r.w));
+  const double y1 = std::round(r.y + std::max(0.0, r.h));
+  return {static_cast<float>(x0), static_cast<float>(y0), static_cast<float>(x1 - x0), static_cast<float>(y1 - y0)};
 }
 
+r1ui::render::Color paintColor(Rgba8 c) { return r1ui::render::Color::fromRgba8(c.r, c.g, c.b, c.a); }
+
+void paintFill(Painter& painter, const dock::Rect& r, Rgba8 color) { painter.fillRect(snapped(r), paintColor(color)); }
+
 // Four thin rectangles forming an outline just inside `r`.
-void outline(std::vector<r1ui::render::FillRect>& out, const dock::Rect& r, double thickness, Rgba8 color) {
+void paintOutline(Painter& painter, const dock::Rect& r, double thickness, Rgba8 color) {
   const double t = std::min({thickness, r.w / 2.0, r.h / 2.0});
-  out.push_back(fill({r.x, r.y, r.w, t}, color));
-  out.push_back(fill({r.x, r.y + r.h - t, r.w, t}, color));
-  out.push_back(fill({r.x, r.y + t, t, r.h - 2 * t}, color));
-  out.push_back(fill({r.x + r.w - t, r.y + t, t, r.h - 2 * t}, color));
+  paintFill(painter, {r.x, r.y, r.w, t}, color);
+  paintFill(painter, {r.x, r.y + r.h - t, r.w, t}, color);
+  paintFill(painter, {r.x, r.y + t, t, r.h - 2 * t}, color);
+  paintFill(painter, {r.x + r.w - t, r.y + t, t, r.h - 2 * t}, color);
+}
+
+// Panel-name label centred vertically in `tabRect`, clipped to it; light text on dark tabs and
+// dark text on light ones.
+void paintLabel(Painter& painter, preview::TextEngine& text, const std::string& label, const dock::Rect& tabRect, Rgba8 background) {
+  const double luminance = 0.299 * background.r + 0.587 * background.g + 0.114 * background.b;
+  const Rgba8 ink = luminance > 140.0 ? Rgba8{16, 16, 16, 255} : Rgba8{255, 255, 255, 255};
+  const r1ui::render::Rect box = snapped(tabRect);
+  const float baseline = box.y + text.baselineInBox(kLabelPixels, box.h);
+  painter.pushClip(box);
+  text.draw(painter, label, kLabelPixels, 400, box.x + 6.0f, baseline, paintColor(ink));
+  painter.popClip();
 }
 
 double centreAlong(const dock::Rect& r, dock::Axis axis) { return axis == dock::Axis::Row ? r.x + r.w / 2.0 : r.y + r.h / 2.0; }
@@ -124,7 +154,9 @@ DockSandbox::DockSandbox(r1ui::platform::Window& window, const r1ui::theme::Toke
 }
 
 dock::Rect DockSandbox::mainRect() const {
-  return {kMargin, kMargin, std::max(0, window_.clientWidth()) - 2 * kMargin, std::max(0, window_.clientHeight()) - 2 * kMargin};
+  const double width = std::max(0.0, static_cast<double>(bounds_.w) - 2 * kMargin);
+  const double height = std::max(0.0, static_cast<double>(bounds_.h) - 2 * kMargin - kStatusHeight);
+  return {static_cast<double>(bounds_.x) + kMargin, static_cast<double>(bounds_.y) + kMargin, width, height};
 }
 
 void DockSandbox::setStatus(std::string text) {
@@ -321,14 +353,13 @@ void DockSandbox::onMouse(const MouseEvent& event) {
 
 // ---- Drawing ----------------------------------------------------------------------------
 
-void DockSandbox::draw(r1ui::render::FrameContent& content, ThemeId theme) {
+void DockSandbox::draw(Painter& painter, preview::TextEngine& text, ThemeId theme) {
   const auto color = [&](const char* token) { return toRgba(*tokens_.color(theme, token)); };
   const Rgba8 canvas = color("canvas");
   const Rgba8 stripColor = color("panel-secondary");
   const bool dragging = state_ == State::TabDragging;
   const dock::LayoutResult layout = layout_.computeLayout(mainRect());
   const auto panelColor = [&](dock::PanelId id) { return color(kPanels[id - 1].colorToken); };
-  auto& rects = content.rects;
 
   // Two passes: the main area (stacks, then its handles) first, floating areas (stacks, then their
   // handles) after, so a floating area always covers whatever lies under it. A handle belongs to a
@@ -340,50 +371,57 @@ void DockSandbox::draw(r1ui::render::FrameContent& content, ThemeId theme) {
     return false;
   };
   for (const bool floatingPass : {false, true}) {
-  for (const dock::AreaLayout& area : layout.areas) {
-    if (area.floating != floatingPass) continue;
-    if (area.floating) {
-      rects.push_back(fill({area.bounds.x - 3, area.bounds.y - 3, area.bounds.w + 6, area.bounds.h + 6}, color("warning-action")));
-      rects.push_back(fill(area.bounds, canvas));
+    for (const dock::AreaLayout& area : layout.areas) {
+      if (area.floating != floatingPass) continue;
+      if (area.floating) {
+        paintFill(painter, {area.bounds.x - 3, area.bounds.y - 3, area.bounds.w + 6, area.bounds.h + 6}, color("warning-action"));
+        paintFill(painter, area.bounds, canvas);
+      }
+      for (const dock::StackLayout& stack : layout.stacks) {
+        if (stack.area != area.id) continue;
+        paintFill(painter, stack.strip, stripColor);
+        // While a tab is dragged out it is not part of the strip; the neighbour shows instead.
+        size_t front = 0;
+        for (size_t i = 0; i < stack.tabs.size(); ++i) {
+          if (stack.tabs[i].active) front = i;
+        }
+        if (dragging && stack.tabs[front].panel == panel_) {
+          front = front + 1 < stack.tabs.size() ? front + 1 : (front > 0 ? front - 1 : front);
+        }
+        const bool bodyEmpty = dragging && stack.tabs.size() == 1 && stack.tabs[0].panel == panel_;
+        if (!bodyEmpty) paintFill(painter, stack.body, mix(panelColor(stack.tabs[front].panel), canvas, 0.45));
+        for (size_t i = 0; i < stack.tabs.size(); ++i) {
+          const dock::TabLayout& tab = stack.tabs[i];
+          if (dragging && tab.panel == panel_) continue;
+          const bool isFront = i == front;
+          const double drop = isFront ? 0.0 : 4.0;  // inactive tabs are shorter
+          const Rgba8 base = panelColor(tab.panel);
+          const dock::Rect face{tab.rect.x + 1, tab.rect.y + drop, std::max(0.0, tab.rect.w - 2), tab.rect.h - drop};
+          const Rgba8 faceColor = isFront ? mix(base, kWhite, 0.3) : mix(base, kBlack, 0.35);
+          paintFill(painter, face, faceColor);
+          paintLabel(painter, text, nameOf(tab.panel), face, faceColor);
+        }
+      }
     }
-    for (const dock::StackLayout& stack : layout.stacks) {
-      if (stack.area != area.id) continue;
-      rects.push_back(fill(stack.strip, stripColor));
-      // While a tab is dragged out it is not part of the strip; the neighbour shows instead.
-      size_t front = 0;
-      for (size_t i = 0; i < stack.tabs.size(); ++i) {
-        if (stack.tabs[i].active) front = i;
-      }
-      if (dragging && stack.tabs[front].panel == panel_) {
-        front = front + 1 < stack.tabs.size() ? front + 1 : (front > 0 ? front - 1 : front);
-      }
-      const bool bodyEmpty = dragging && stack.tabs.size() == 1 && stack.tabs[0].panel == panel_;
-      if (!bodyEmpty) rects.push_back(fill(stack.body, mix(panelColor(stack.tabs[front].panel), canvas, 0.45)));
-      for (size_t i = 0; i < stack.tabs.size(); ++i) {
-        const dock::TabLayout& tab = stack.tabs[i];
-        if (dragging && tab.panel == panel_) continue;
-        const bool isFront = i == front;
-        const double drop = isFront ? 0.0 : 4.0;  // inactive tabs are shorter
-        const Rgba8 base = panelColor(tab.panel);
-        rects.push_back(fill({tab.rect.x + 1, tab.rect.y + drop, std::max(0.0, tab.rect.w - 2), tab.rect.h - drop},
-                             isFront ? mix(base, kWhite, 0.3) : mix(base, kBlack, 0.35)));
-      }
-    }
-  }
 
-  for (const dock::HandleLayout& h : layout.handles) {
-    if (insideFloating(h.rect) != floatingPass) continue;
-    const bool lit = (state_ == State::SplitterDragging && h.handle == handle_) || (state_ == State::Idle && hoverHandle_ && h.rect.contains(pointer_));
-    rects.push_back(fill(h.rect, lit ? color("panel-focus") : color("border")));
-  }
+    for (const dock::HandleLayout& h : layout.handles) {
+      if (insideFloating(h.rect) != floatingPass) continue;
+      const bool lit = (state_ == State::SplitterDragging && h.handle == handle_) || (state_ == State::Idle && hoverHandle_ && h.rect.contains(pointer_));
+      paintFill(painter, h.rect, lit ? color("panel-focus") : color("border"));
+    }
   }
 
   if (dragging) {
-    outline(rects, zone_.preview, 3.0, kPreviewOrange);
+    paintOutline(painter, zone_.preview, 3.0, kPreviewOrange);
     const double width = std::min(layout_.config().maxTabWidth, 120.0);
     const dock::Rect ghost{pointer_.x - grab_.x, pointer_.y - grab_.y, width, layout_.config().tabStripHeight};
-    rects.push_back(fill({ghost.x - 2, ghost.y - 2, ghost.w + 4, ghost.h + 4}, kWhite));
-    rects.push_back(fill(ghost, panelColor(panel_)));
+    paintFill(painter, {ghost.x - 2, ghost.y - 2, ghost.w + 4, ghost.h + 4}, kWhite);
+    paintFill(painter, ghost, panelColor(panel_));
+    paintLabel(painter, text, nameOf(panel_), ghost, panelColor(panel_));
   }
-  content.clear = {canvas.r / 255.0f, canvas.g / 255.0f, canvas.b / 255.0f};
+
+  const dock::Rect main = mainRect();
+  const float statusTop = static_cast<float>(main.y + main.h + kMargin);
+  text.draw(painter, status_, kStatusPixels, 400, static_cast<float>(main.x),
+            statusTop + text.baselineInBox(kStatusPixels, static_cast<float>(kStatusHeight)), paintColor(color("muted")));
 }

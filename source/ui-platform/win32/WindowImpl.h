@@ -45,6 +45,9 @@ struct Window::Impl {
   CodePointAssembler chars;
   ChromeLayout chrome;
   HitZone chromePressed = HitZone::Client;  // chrome button pressed and awaiting release
+  std::function<void()> live;               // see Window::setLiveCallback
+  bool inSizeMove = false;                  // the OS move/size loop is running
+  bool inLive = false;                      // live callback active (never re-entered)
 
   BoundedQueue<KeyEvent> keyQueue{kMaxQueuedEvents};
   BoundedQueue<MouseClick> clickQueue{kMaxQueuedEvents};
@@ -71,6 +74,7 @@ struct Window::Impl {
   bool pointerOverWindow() const;
   Point screenToClient(LPARAM screenPoint) const;
   Size clientSize() const;
+  void runLive();
 
   // WindowChrome.cpp: frame, min size, hit-testing and chrome buttons.
   bool handleFrame(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result);
@@ -78,6 +82,9 @@ struct Window::Impl {
   void finishChromePress(HitZone pressed, Point clientPoint);
   void runChromeCommand(HitZone zone);
 };
+
+// System cursor resource for a shape (WindowProc.cpp).
+const wchar_t* cursorResource(CursorShape shape);
 
 // Dpi of a monitor (effective, per-monitor); kBaseDpi if the query fails.
 UINT monitorDpi(HMONITOR monitor);

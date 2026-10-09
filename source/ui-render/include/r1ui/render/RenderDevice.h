@@ -70,6 +70,14 @@ struct GpuInfo {
   bool usable = false;           // graphics queue that can present, Vulkan 1.2 timeline semaphores
 };
 
+// Device-local GPU memory used by this process (VK_EXT_memory_budget). `available` is false when
+// the GPU lacks the extension; the byte counts are then 0.
+struct GpuMemoryUsage {
+  bool available = false;
+  uint64_t deviceLocalUsageBytes = 0;   // allocated by this process in device-local heaps
+  uint64_t deviceLocalBudgetBytes = 0;  // what the OS lets this process use
+};
+
 class RenderDevice {
  public:
   explicit RenderDevice(const DeviceOptions& options = {});
@@ -86,6 +94,7 @@ class RenderDevice {
   // stderr as "[vulkan] ..."). Always 0 when validation is not active.
   uint32_t validationMessageCount() const;
   bool lost() const;
+  GpuMemoryUsage memoryUsage() const;
 
   // Blocks until the GPU is idle, then runs all deferred destruction.
   void waitIdle();

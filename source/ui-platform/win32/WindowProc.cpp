@@ -19,6 +19,8 @@ namespace r1ui::platform {
 namespace {
 
 constexpr UINT kMaxWheelDeltaUnits = 120;  // one notch
+constexpr UINT_PTR kLiveTimerId = 1;       // drives the live callback during the OS move/size loop
+constexpr UINT kLiveTimerMs = 16;
 
 Modifiers currentModifiers() {
   const auto down = [](int vk) { return (GetKeyState(vk) & 0x8000) != 0; };
@@ -147,6 +149,20 @@ Point Window::Impl::screenToClient(LPARAM screenPoint) const {
 
 Size Window::Impl::clientSize() const { return {width, height}; }
 
+// ---- Live callback during the OS move/size loop ----
+
+// Runs the application's live callback once, never nested; its exceptions stop here because the
+// caller is the window procedure.
+void Window::Impl::runLive() {
+  if (!live || inLive) return;
+  inLive = true;
+  try {
+    live();
+  } catch (...) {
+  }
+  inLive = false;
+}
+
 // ---- Size, position, DPI, focus, close ----
 
 bool Window::Impl::handleState(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result) {
@@ -161,8 +177,21 @@ bool Window::Impl::handleState(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result) 
       Event e = makeEvent(EventType::Resized);
       e.rect = {0, 0, width, height};
       pushEvent(e);
+      if (inSizeMove) runLive();
       return true;
     }
+    case WM_ENTERSIZEMOVE:
+      inSizeMove = true;
+      SetTimer(hwnd, kLiveTimerId, kLiveTimerMs, nullptr);
+      return true;
+    case WM_EXITSIZEMOVE:
+      inSizeMove = false;
+      KillTimer(hwnd, kLiveTimerId);
+      return true;
+    case WM_TIMER:
+      if (wp != kLiveTimerId) return false;
+      runLive();
+      return true;
     case WM_MOVE: {
       RECT r{};
       if (GetWindowRect(hwnd, &r) == FALSE) return true;
@@ -241,8 +270,6 @@ bool Window::Impl::handleKeyboard(UINT msg, WPARAM wp, LPARAM lp, LRESULT& resul
 
 // ---- Pointer input, capture, cursor ----
 
-namespace {
-
 const wchar_t* cursorResource(CursorShape shape) {
   switch (shape) {
     case CursorShape::Arrow: return IDC_ARROW;
@@ -258,8 +285,6 @@ const wchar_t* cursorResource(CursorShape shape) {
   }
   return IDC_ARROW;
 }
-
-}  // namespace
 
 bool Window::Impl::handlePointer(UINT msg, WPARAM wp, LPARAM lp, LRESULT& result) {
   result = 0;

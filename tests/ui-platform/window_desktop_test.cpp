@@ -379,6 +379,43 @@ void focusSizeDpiAndClose() {
   expect(!w.pumpEvents(), "confirmed close ends the pump");
 }
 
+// waitForEvents sleeps until a message arrives; the live callback runs during the OS move/size
+// loop (simulated with its enter/exit messages), on size changes and on the timer, never after
+// the loop ended, and an exception inside it does not escape the window procedure.
+void waitAndLiveCallback() {
+  Window w(borderlessDesc());
+  settle(w);
+  while (w.waitForEvents(0)) pumpAll(w);  // drain whatever the OS queued at startup
+  const DWORD t0 = GetTickCount();
+  expect(!w.waitForEvents(60) && GetTickCount() - t0 >= 40, "an idle wait times out instead of returning at once");
+  post(w, WM_NULL, 0, 0);
+  expect(w.waitForEvents(2000), "a posted message wakes the wait");
+  pumpAll(w);
+
+  int calls = 0;
+  w.setLiveCallback([&] {
+    ++calls;
+    throw std::runtime_error("must not escape the window procedure");
+  });
+  send(w, WM_ENTERSIZEMOVE, 0, 0);
+  expect(w.setWindowRect({100, 100, 500, 400}) && calls >= 1, "a size change inside the OS loop calls the callback");
+  const int afterSize = calls;
+  const DWORD start = GetTickCount();
+  while (calls < afterSize + 2 && GetTickCount() - start < 1000) {
+    w.waitForEvents(50);
+    w.pumpEvents();
+  }
+  expect(calls >= afterSize + 2, "the timer keeps calling the callback while the loop runs");
+  send(w, WM_EXITSIZEMOVE, 0, 0);
+  const int afterExit = calls;
+  expect(w.setWindowRect({120, 120, 520, 420}) && calls == afterExit, "no callback after the loop ended");
+  w.setLiveCallback({});
+  send(w, WM_ENTERSIZEMOVE, 0, 0);
+  w.setWindowRect({140, 140, 540, 440});
+  send(w, WM_EXITSIZEMOVE, 0, 0);
+  expect(calls == afterExit, "a removed callback is not called");
+}
+
 void queuesAreBoundedUnderFlood() {
   Window w(borderlessDesc());
   settle(w);
@@ -527,6 +564,7 @@ int main() {
   runCase("keyboard_and_characters", keyboardAndCharacters);
   runCase("pointer_and_wheel", pointerAndWheel);
   runCase("focus_size_dpi_close", focusSizeDpiAndClose);
+  runCase("wait_and_live_callback", waitAndLiveCallback);
   runCase("queues_bounded", queuesAreBoundedUnderFlood);
   runCase("several_windows", severalWindowsOneThread);
   runCase("cursors", cursorsFollowTheShape);

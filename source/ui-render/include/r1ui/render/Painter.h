@@ -129,7 +129,9 @@ class Painter {
   // Straight segment with butt caps; coordinates are pixel-space (a 1 px horizontal line on row
   // y is drawn at y + 0.5).
   void line(float x0, float y0, float x1, float y1, float width, const Color& color);
-  // Draws `uv` (u0, v0, u1, v1 in 0..1) of the texture into `dst`, multiplied by `tint`.
+  // Draws the part of the texture given by `uv` into `dst`, multiplied by `tint`. `uv` is a
+  // rectangle in 0..1 texture space: x, y = (u0, v0) of the top-left corner, w, h = extent (u1 - u0,
+  // v1 - v0), not the opposite corner.
   void drawTexture(const TextureRef& texture, const Rect& dst, const Rect& uv,
                    const Color& tint = {1.0f, 1.0f, 1.0f, 1.0f});
 

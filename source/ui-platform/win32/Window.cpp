@@ -134,6 +134,12 @@ bool Window::pumpEvents() {
   return !impl_->closed;
 }
 
+bool Window::waitForEvents(unsigned timeoutMs) {
+  return MsgWaitForMultipleObjectsEx(0, nullptr, timeoutMs, QS_ALLINPUT, MWMO_INPUTAVAILABLE) == WAIT_OBJECT_0;
+}
+
+void Window::setLiveCallback(std::function<void()> callback) { impl_->live = std::move(callback); }
+
 int Window::clientWidth() const { return impl_->width; }
 int Window::clientHeight() const { return impl_->height; }
 bool Window::consumeResized() {
@@ -191,7 +197,15 @@ size_t Window::droppedEventCount() const {
 std::vector<KeyEvent> Window::takeKeyEvents() { return impl_->keyQueue.drain(); }
 std::vector<MouseClick> Window::takeMouseClicks() { return impl_->clickQueue.drain(); }
 std::vector<MouseEvent> Window::takeMouseEvents() { return impl_->mouseQueue.drain(); }
-void Window::setCursor(CursorShape shape) { impl_->cursor = shape; }
+// The OS only asks for the cursor (WM_SETCURSOR) when the mouse moves, so a shape that changes while
+// the pointer rests over the client area (a widget appearing under it) is applied here at once.
+void Window::setCursor(CursorShape shape) {
+  impl_->cursor = shape;
+  POINT p{};
+  if (GetCursorPos(&p) == FALSE || WindowFromPoint(p) != impl_->hwnd) return;
+  if (SendMessageW(impl_->hwnd, WM_NCHITTEST, 0, MAKELPARAM(p.x, p.y)) != HTCLIENT) return;
+  SetCursor(LoadCursorW(nullptr, cursorResource(shape)));
+}
 
 void Window::setTitle(const std::string& utf8Title) {
   const std::wstring title = widen(utf8Title);

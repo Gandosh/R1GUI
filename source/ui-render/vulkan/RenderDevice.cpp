@@ -40,6 +40,16 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBits
   return VK_FALSE;
 }
 
+// True when the physical device offers the named device extension.
+bool deviceSupportsExtension(VkPhysicalDevice device, const char* name) {
+  uint32_t count = 0;
+  if (vkEnumerateDeviceExtensionProperties(device, nullptr, &count, nullptr) != VK_SUCCESS) return false;
+  std::vector<VkExtensionProperties> extensions(count);
+  if (vkEnumerateDeviceExtensionProperties(device, nullptr, &count, extensions.data()) != VK_SUCCESS) return false;
+  return std::any_of(extensions.begin(), extensions.end(),
+                     [name](const VkExtensionProperties& e) { return std::strcmp(e.extensionName, name) == 0; });
+}
+
 std::string lower(std::string text) {
   std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return text;
@@ -238,15 +248,17 @@ void RenderDevice::Impl::init(const DeviceOptions& options) {
     queueInfo.queueFamilyIndex = queueFamily;
     queueInfo.queueCount = 1;
     queueInfo.pQueuePriorities = &priority;
-    const char* extension = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+    std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    memoryBudget = deviceSupportsExtension(physical, VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+    if (memoryBudget) deviceExtensions.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
     VkPhysicalDeviceVulkan12Features features12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES};
     features12.timelineSemaphore = VK_TRUE;
     VkDeviceCreateInfo deviceInfo{VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
     deviceInfo.pNext = &features12;
     deviceInfo.queueCreateInfoCount = 1;
     deviceInfo.pQueueCreateInfos = &queueInfo;
-    deviceInfo.enabledExtensionCount = 1;
-    deviceInfo.ppEnabledExtensionNames = &extension;
+    deviceInfo.enabledExtensionCount = core::checkedCast<uint32_t>(deviceExtensions.size());
+    deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
     vk(vkCreateDevice(physical, &deviceInfo, nullptr, &device), "vkCreateDevice");
     vkGetDeviceQueue(device, queueFamily, 0, &queue);
     vkGetPhysicalDeviceMemoryProperties(physical, &memory);
@@ -378,6 +390,22 @@ const GpuInfo& RenderDevice::gpu() const { return impl_->info; }
 bool RenderDevice::validationActive() const { return impl_->validation; }
 uint32_t RenderDevice::validationMessageCount() const { return impl_->validationMessages; }
 bool RenderDevice::lost() const { return impl_->lost; }
+
+GpuMemoryUsage RenderDevice::memoryUsage() const {
+  GpuMemoryUsage usage;
+  if (!impl_->memoryBudget) return usage;
+  VkPhysicalDeviceMemoryBudgetPropertiesEXT budget{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT};
+  VkPhysicalDeviceMemoryProperties2 properties{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2};
+  properties.pNext = &budget;
+  vkGetPhysicalDeviceMemoryProperties2(impl_->physical, &properties);
+  usage.available = true;
+  for (uint32_t i = 0; i < properties.memoryProperties.memoryHeapCount; ++i) {
+    if ((properties.memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) == 0) continue;
+    usage.deviceLocalUsageBytes += budget.heapUsage[i];
+    usage.deviceLocalBudgetBytes += budget.heapBudget[i];
+  }
+  return usage;
+}
 
 void RenderDevice::waitIdle() {
   impl_->requireUsable();

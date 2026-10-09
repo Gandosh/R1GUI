@@ -12,6 +12,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -102,6 +103,7 @@ struct NativeHandle {
 
 inline constexpr size_t kMaxQueuedEvents = 256;
 inline constexpr size_t kMaxQueuedWindowEvents = 1024;  // unified queue (takeEvents)
+inline constexpr unsigned kWaitForever = 0xFFFFFFFFu;   // waitForEvents: no timeout
 
 class Window {
  public:
@@ -116,6 +118,17 @@ class Window {
   // Processes pending OS messages for the whole thread (bounded per call so a message flood
   // cannot stall the caller). Returns false once this window has been closed.
   bool pumpEvents();
+
+  // Sleeps until the thread has a message to process or `timeoutMs` elapsed (kWaitForever = no
+  // limit); returns true when a message is waiting. Lets an event-driven UI use no CPU while idle.
+  bool waitForEvents(unsigned timeoutMs);
+
+  // While Windows runs its own move/size loop, pumpEvents() does not return (the loop lives
+  // inside DispatchMessage). The callback is invoked from the window procedure on every size
+  // change and on a ~60 Hz timer during that loop so the application can keep rendering. It runs
+  // on the UI thread inside the OS loop: it must not pump messages and must not throw (an
+  // exception is swallowed). Never re-entered. Pass an empty function to remove it.
+  void setLiveCallback(std::function<void()> callback);
 
   int clientWidth() const;   // physical pixels; 0 when minimized
   int clientHeight() const;  // physical pixels; 0 when minimized

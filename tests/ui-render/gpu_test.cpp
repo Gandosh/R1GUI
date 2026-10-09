@@ -461,6 +461,29 @@ void windowLifecycle() {
   expect(device().validationMessageCount() == before, "no validation messages during 400+ swapchain builds");
 }
 
+// Per-frame CPU timings of a window target add up to something positive, and the memory budget
+// extension reports growing device-local usage when a large texture is created.
+void timingsAndMemory() {
+  platform::Window window({.title = "r1ui render test timings", .width = 320, .height = 200});
+  window.pumpEvents();
+  WindowTarget target(device(), window);
+  expect(target.beginFrame(kBlack), "begin");
+  target.painter().fillRect({0, 0, 40, 40}, kWhite);
+  expect(target.endFrame(), "end");
+  const FrameTimings t = target.lastFrameTimings();
+  expect(t.waitMs >= 0.0 && t.recordSubmitMs > 0.0 && t.presentMs >= 0.0, "timings are measured");
+  const GpuMemoryUsage before = device().memoryUsage();
+  if (!before.available) {
+    std::printf("memory budget extension unavailable on this GPU\n");
+    return;
+  }
+  expect(before.deviceLocalBudgetBytes >= before.deviceLocalUsageBytes && before.deviceLocalUsageBytes > 0, "budget exceeds usage");
+  Texture big(device(), 4096, 4096, TextureFormat::Rgba8Srgb);
+  device().flushUploads();
+  const GpuMemoryUsage after = device().memoryUsage();
+  expect(after.deviceLocalUsageBytes >= before.deviceLocalUsageBytes + (uint64_t{32} << 20), "a 64 MiB texture raises the reported usage");
+}
+
 void multiWindow() {
   platform::Window first({.title = "r1ui render test A", .width = 300, .height = 180});
   platform::Window second({.title = "r1ui render test B", .width = 220, .height = 260});
@@ -525,7 +548,8 @@ int main(int argc, char** argv) {
        {"border_width", borderWidth},         {"shadow_blur", shadowBlur},         {"clip_correctness", clipCorrectness},
        {"alpha_blend", alphaBlend},           {"textured_quad", texturedQuad},     {"texture_lifetime", textureLifetime},
        {"batching_stats", batchingStats},     {"hostile_inputs", hostileInputs},   {"panel_reference", panelReference},
-       {"window_lifecycle", windowLifecycle}, {"multi_window", multiWindow},       {"frame_cost", frameCost}},
+       {"window_lifecycle", windowLifecycle}, {"multi_window", multiWindow},       {"frame_cost", frameCost},
+       {"timings_and_memory", timingsAndMemory}},
       argc, argv);
   if (deviceSlot()) {
     const RenderDevice& d = *deviceSlot();

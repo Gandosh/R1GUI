@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <stdexcept>
 #include <vector>
 
@@ -52,6 +53,7 @@ struct WindowTarget::Impl {
   bool recording = false;
   uint32_t generation = 0;
   Color clear;
+  FrameTimings timings;
 
   void init() {
     const platform::NativeHandle handle = window.nativeHandle();
@@ -234,6 +236,7 @@ uint32_t WindowTarget::height() const { return impl_->extent.height; }
 void WindowTarget::invalidate() { impl_->stale = true; }
 PresentMode WindowTarget::presentMode() const { return impl_->effectiveMode; }
 uint32_t WindowTarget::swapchainGeneration() const { return impl_->generation; }
+FrameTimings WindowTarget::lastFrameTimings() const { return impl_->timings; }
 
 bool WindowTarget::beginFrame(const Color& clear) {
   Impl& s = *impl_;
@@ -258,6 +261,11 @@ bool WindowTarget::endFrame() {
   s.recording = false;
   painter_.end();
   s.dev.requireUsable();
+  using Clock = std::chrono::steady_clock;
+  const auto millis = [](Clock::time_point from, Clock::time_point to) {
+    return std::chrono::duration<double, std::milli>(to - from).count();
+  };
+  const Clock::time_point start = Clock::now();
   const std::vector<VkDescriptorSet> sets = detail::resolveTextures(s.dev, painter_.list());
 
   detail::FrameSlot& slot = s.slots->at(s.frame);
@@ -274,6 +282,7 @@ bool WindowTarget::endFrame() {
   } else {
     s.dev.vk(acquired, "vkAcquireNextImageKHR");
   }
+  const Clock::time_point acquiredAt = Clock::now();
 
   try {
     detail::FrameTarget target;
@@ -288,6 +297,7 @@ bool WindowTarget::endFrame() {
     throw;
   }
 
+  const Clock::time_point recordedAt = Clock::now();
   VkPresentInfoKHR present{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
   present.waitSemaphoreCount = 1;
   present.pWaitSemaphores = &s.renderFinished[imageIndex];
@@ -301,6 +311,8 @@ bool WindowTarget::endFrame() {
     s.dev.vk(presented, "vkQueuePresentKHR");
   }
   s.frame = (s.frame + 1) % kFramesInFlight;
+  const Clock::time_point end = Clock::now();
+  s.timings = {millis(start, acquiredAt), millis(acquiredAt, recordedAt), millis(recordedAt, end)};
   return true;
 }
 

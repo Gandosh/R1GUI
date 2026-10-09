@@ -104,6 +104,7 @@ struct RenderDevice::Impl {
   bool validation = false;
   uint32_t validationMessages = 0;
   bool lost = false;
+  bool memoryBudget = false;  // VK_EXT_memory_budget enabled (RenderDevice::memoryUsage)
   VkCommandPool pool = VK_NULL_HANDLE;
   VkSemaphore timeline = VK_NULL_HANDLE;
   uint64_t submitted = 0;

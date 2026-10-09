@@ -14,7 +14,7 @@ if(TARGET ui-render)
   foreach(case
       device_selection exact_fill rounded_aa border_width shadow_blur clip_correctness alpha_blend
       textured_quad texture_lifetime batching_stats hostile_inputs panel_reference
-      window_lifecycle multi_window frame_cost)
+      window_lifecycle multi_window frame_cost timings_and_memory)
     add_test(NAME ui-render.gpu.${case} COMMAND ui-render-gpu-test ${case})
     set_tests_properties(ui-render.gpu.${case} PROPERTIES LABELS "gpu" TIMEOUT 300)
   endforeach()
