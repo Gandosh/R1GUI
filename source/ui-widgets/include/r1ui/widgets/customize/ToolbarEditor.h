@@ -101,7 +101,6 @@ class ToolbarEditStrip final : public WidgetObject, public DragTarget {
     core::layout::RectD line;
   };
 
-  bool vertical() const { return vertical_; }
   core::layout::RectD cellRect(const Cell& c) const;
   core::layout::RectD eyeRect(const Cell& c) const;
   Hit hitAt(double x, double y) const;
@@ -139,7 +138,6 @@ class ToolbarEditor final : public WidgetObject {
   ToolbarEditStrip& strip() const;
   core::tree::WidgetId sizeControl() const { return size_; }
   core::tree::WidgetId gapControl() const { return gap_; }
-  core::tree::WidgetId stripWidget() const { return strip_; }
   const std::string& toolbarId() const { return toolbarId_; }
   // The gap presets of the gap control, in px.
   static const std::vector<double>& gapPresets();
@@ -153,7 +151,6 @@ class ToolbarEditor final : public WidgetObject {
   core::tree::WidgetId strip_;
   core::tree::WidgetId size_;
   core::tree::WidgetId gap_;
-  core::tree::WidgetId title_;
 };
 
 }  // namespace r1ui::widgets

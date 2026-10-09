@@ -106,7 +106,6 @@ void FreeFormCanvas::onPointerDown(Event& e) {
     return;
   }
   const int hit = hitButton(lx, ly);
-  additive_ = additive;
   collapseOnRelease_ = false;
   pressedId_.clear();
   if (hit >= 0) {

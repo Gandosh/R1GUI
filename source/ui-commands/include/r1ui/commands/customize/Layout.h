@@ -57,7 +57,6 @@ enum class Kind : uint8_t {
 const char* kindName(Kind kind);
 // Parses a name produced by kindName for a node kind; false for anything else (containers included).
 bool parseNodeKind(std::string_view name, Kind& kind);
-bool isContainerKind(Kind kind);
 // True when a parent of kind `parent` may hold a child of kind `child`.
 bool canContain(Kind parent, Kind child);
 

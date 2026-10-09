@@ -174,7 +174,6 @@ class MenuEditor final : public WidgetObject, public DragTarget {
   std::string tip_;
   Hit hover_;
   std::string armedId_;
-  bool armedHandle_ = false;
   bool dragging_ = false;
   Hit pressed_;
   core::tree::WidgetId rename_;

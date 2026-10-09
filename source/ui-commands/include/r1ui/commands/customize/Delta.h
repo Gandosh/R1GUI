@@ -90,10 +90,6 @@ struct Delta {
   bool empty() const {
     return edits.empty() && moves.empty() && added.empty() && userToolbars.empty() && userPanels.empty() && toolbarEdits.empty() && panelEdits.empty();
   }
-  // Entries that count against kMaxNodes when loading.
-  size_t entryCount() const {
-    return edits.size() + moves.size() + added.size() + userToolbars.size() + userPanels.size() + toolbarEdits.size() + panelEdits.size();
-  }
   friend bool operator==(const Delta&, const Delta&) = default;
 };
 
@@ -118,8 +114,6 @@ struct ReportEntry {
   std::string id;      // the node concerned
   std::string detail;
 };
-
-const char* reportCodeName(ReportEntry::Code code);
 
 struct Report {
   std::vector<ReportEntry> entries;

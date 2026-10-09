@@ -1,11 +1,10 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the small helpers the customize widgets share: text width, drawing an icon that may not exist,
-//   the drag grip, the eye and lock glyph names, point-in-rectangle tests and the command lookups
-//   (label, icon, shortcut text) the edit displays and the palette present.
+//   the drag grip, point-in-rectangle tests and the icon lookup of a command the edit displays present.
 // Why: the edit displays are custom-painted rows and cells; they all draw the same glyphs the same
 //   way, and a command's icon name is only checked for form by the registry (a missing file throws at
 //   paint), so one place falls back to a neutral icon instead of letting a paint pass fail.
-// Callers: MenuEditor, ToolbarEditStrip, FreeFormPanel, CommandPalette, CustomizableToolbar.
+// Callers: MenuEditor, ToolbarEditStrip, FreeFormPanel and its canvas, CommandPalette.
 #pragma once
 
 #include <algorithm>
@@ -50,11 +49,6 @@ inline void drawGrip(PaintContext& ctx, const core::layout::RectD& box, const re
       ctx.painter().fillRoundedRect(ctx.toPhysical(x0 + c * (dot + gap), y0 + r * (dot + gap), dot, dot), render::CornerRadii::uniform(ctx.px(1.0)), color);
     }
   }
-}
-
-inline std::string commandLabelOf(const CommandServices& services, const std::string& commandId) {
-  const commands::CommandDef* def = services.registry.find(commandId);
-  return def != nullptr ? def->label : commandId;
 }
 
 inline std::string commandIconOf(const CommandServices& services, const std::string& commandId) {

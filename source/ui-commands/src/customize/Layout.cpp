@@ -41,8 +41,6 @@ bool parseNodeKind(std::string_view name, Kind& kind) {
   return false;
 }
 
-bool isContainerKind(Kind kind) { return kind == Kind::MenuBar || kind == Kind::Toolbar || kind == Kind::Panel; }
-
 bool canContain(Kind parent, Kind child) {
   switch (parent) {
     case Kind::MenuBar: return child == Kind::Menu;

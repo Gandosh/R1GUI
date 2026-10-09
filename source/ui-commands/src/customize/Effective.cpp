@@ -37,22 +37,6 @@ bool parseSide(std::string_view name, Side& side) {
   return false;
 }
 
-const char* reportCodeName(ReportEntry::Code code) {
-  switch (code) {
-    case ReportEntry::Code::MissingCommand: return "missing-command";
-    case ReportEntry::Code::MissingNode: return "missing-node";
-    case ReportEntry::Code::MissingParent: return "missing-parent";
-    case ReportEntry::Code::MissingAnchor: return "missing-anchor";
-    case ReportEntry::Code::IllegalParent: return "illegal-parent";
-    case ReportEntry::Code::Cycle: return "cycle";
-    case ReportEntry::Code::Locked: return "locked";
-    case ReportEntry::Code::DuplicateId: return "duplicate-id";
-    case ReportEntry::Code::Invalid: return "invalid";
-    case ReportEntry::Code::Limit: return "limit";
-  }
-  return "?";
-}
-
 size_t Report::count(ReportEntry::Code code) const {
   return static_cast<size_t>(std::count_if(entries.begin(), entries.end(), [code](const ReportEntry& e) { return e.code == code; }));
 }

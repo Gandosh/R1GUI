@@ -265,7 +265,6 @@ void ToolbarEditor::onAttached() {
   header.style().flexShrink = 0.0;
   const cz::ToolbarLayout* t = cz::findToolbar(controller_.model().editView().layout, toolbarId_);
   Label& title = ui().create<Label>(header.id(), t != nullptr && !t->title.empty() ? t->title : toolbarId_, LabelRole::Heading);
-  title_ = title.id();
   title.style().flexShrink = 0.0;
   ui().create<Label>(header.id(), "Size", LabelRole::Muted).style().flexShrink = 0.0;
   Segmented& size = ui().create<Segmented>(header.id(), SegmentedSize::Sm);

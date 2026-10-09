@@ -171,7 +171,6 @@ class FreeFormCanvas final : public WidgetObject, public DragTarget {
   std::string pressedId_;
   bool collapseOnRelease_ = false;
   bool moved_ = false;
-  bool additive_ = false;
   double startX_ = 0.0, startY_ = 0.0;
   std::map<std::string, core::layout::RectD> original_;
   std::map<std::string, core::layout::RectD> preview_;
