@@ -23,11 +23,11 @@
 namespace preview {
 
 // Tab cycles through these in order; the title bar shows one square per entry.
-enum class Mode : uint8_t { Gallery, Widgets, Swatches, Screens, Sandbox };
-inline constexpr int kModeCount = 5;
+enum class Mode : uint8_t { Editor, Gallery, Widgets, Swatches, Screens, Sandbox };
+inline constexpr int kModeCount = 6;
 const char* modeName(Mode mode);
-// True for the two modes that are the real widget library in a UiContext (the others draw directly).
-inline bool isWidgetMode(Mode mode) { return mode == Mode::Gallery || mode == Mode::Widgets; }
+// True for the modes that are the real widget library in a UiContext (the others draw directly).
+inline bool isWidgetMode(Mode mode) { return mode == Mode::Editor || mode == Mode::Gallery || mode == Mode::Widgets; }
 
 enum class NodeKind : uint8_t {
   Box,         // background/border from `style`, optional separator lines

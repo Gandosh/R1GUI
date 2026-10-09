@@ -11,8 +11,12 @@
 #include "ComposedUtil.h"
 #include "PreviewParts.h"
 #include "r1ui/widgets/button/GalleryButtons.h"
+#include "r1ui/widgets/commands/GalleryCommands.h"
+#include "r1ui/widgets/customize/GalleryCustomize.h"
+#include "r1ui/widgets/dock/GalleryDock.h"
 #include "r1ui/widgets/label/Label.h"
 #include "r1ui/widgets/menu/GalleryOverlays.h"
+#include "r1ui/widgets/props/GalleryProps.h"
 #include "r1ui/widgets/scroll/ScrollArea.h"
 #include "r1ui/widgets/section/GalleryContainers.h"
 #include "r1ui/widgets/textinput/GalleryFields.h"
@@ -27,16 +31,17 @@ using r1ui::core::tree::WidgetId;
 
 namespace {
 
-constexpr const char* kPageNames[GalleryApp::kPageCount] = {"Buttons", "Fields", "Containers", "Overlays", "Editors"};
-constexpr const char* kPageIcons[GalleryApp::kPageCount] = {"square", "text-cursor-input", "layout-panel-top", "layers", "palette"};
+constexpr const char* kPageNames[GalleryApp::kPageCount] = {"Buttons", "Fields", "Containers", "Overlays", "Editors", "Docking", "Commands", "Properties", "Customize"};
+constexpr const char* kPageIcons[GalleryApp::kPageCount] = {"square", "text-cursor-input", "layout-panel-top", "layers", "palette", "panel-left", "settings2", "sliders-horizontal", "pencil"};
 constexpr double kListWidth = 200.0;
 
-// The editors page has no page container of its own: a padded column, children kept at their size.
-void buildEditorsPage(UiContext& ui, WidgetId parent) {
+// Pages without a container of their own: a padded column, children kept at their size.
+template <class Builder>
+void buildPaddedPage(UiContext& ui, WidgetId parent, Builder build) {
   SectionBox& page = build::flex(ui, parent, false, 16);
   build::pad(page.style(), 16, 16, 16, 16);
   page.style().alignItems = layout::Align::Start;
-  buildGalleryEditors(ui, page.id());
+  build(ui, page.id());
 }
 
 void buildPage(UiContext& ui, WidgetId parent, size_t index) {
@@ -45,7 +50,11 @@ void buildPage(UiContext& ui, WidgetId parent, size_t index) {
     case 1: buildGalleryFields(ui, parent); break;
     case 2: buildGalleryContainers(ui, parent); break;
     case 3: buildGalleryOverlays(ui, parent); break;
-    default: buildEditorsPage(ui, parent); break;
+    case 4: buildPaddedPage(ui, parent, buildGalleryEditors); break;
+    case 5: buildPaddedPage(ui, parent, buildGalleryDock); break;
+    case 6: buildPaddedPage(ui, parent, buildGalleryCommands); break;
+    case 7: buildPaddedPage(ui, parent, buildGalleryProps); break;
+    default: buildPaddedPage(ui, parent, buildGalleryCustomize); break;
   }
 }
 

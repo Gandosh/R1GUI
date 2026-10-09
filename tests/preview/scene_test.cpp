@@ -76,7 +76,7 @@ int main() {
   expect(body.x == 0.0f && body.y == 32.0f && body.w == 1440.0f && body.h == 868.0f, "bodyRect is physical pixels below the bar");
 
   // ---- Mode indicator: five squares, exactly the current mode selected ----------------------------
-  expect(preview::kModeCount == 5, "five modes");
+  expect(preview::kModeCount == 6, "six modes");
   for (int mode = 0; mode < preview::kModeCount; ++mode) {
     scene.setMode(static_cast<preview::Mode>(mode));
     int selected = 0;

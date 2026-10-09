@@ -62,7 +62,7 @@ Pure tests with several layouts (one monitor, 150 %, this machine's 3440x1440 + 
 
 **OS move/size loop.** While Windows runs its own loop (title-bar drag, edge resize) `pumpEvents` does not return. Every window calls the live callback on size changes and a ~60 Hz timer; AppLoop's `liveStep` does the same work as a step minus pumping, minus freeing windows (the OS still uses the one that called) and never nests (`busy_`, `inLive_`). Errors thrown there are stored and rethrown by the next `step`.
 
-Recipe for an application (PreviewApp today has a single-window loop; this is what the integrator wires):
+Recipe for an application (`PreviewApp` wires exactly this since slice 5.12, see `docs/dev/preview.md`):
 
 ```cpp
 platform::Window main(desc);                       // the main window

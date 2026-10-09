@@ -3,7 +3,7 @@
 //   with the advanced toggle on top, then a ScrollArea of collapsible PropertySections (one per
 //   category, with a reset-category action) holding one PropertyRowView per visible property; plus
 //   buildPropertyCategory(), the function that creates one such section (also used by visual tests), and
-//   UiClock, the props::Clock that reads the widget context's frame clock.
+//   PropsUiClock, the props::Clock that reads the widget context's frame clock.
 // Why: spec 09 rules 1-9, 52-64: the panel follows the selection, filters live on every keystroke,
 //   keeps category collapse and search state in a PanelState owned by the host, refreshes within one
 //   display refresh when values change anywhere (a timer of zero delay coalesces any number of change
@@ -41,9 +41,9 @@ class TextInput;
 class ScrollArea;
 
 // Reads UiContext::now(), so history grouping follows the same clock the widgets animate on.
-class UiClock final : public props::Clock {
+class PropsUiClock final : public props::Clock {
  public:
-  explicit UiClock(const UiContext& ui) : ui_(&ui) {}
+  explicit PropsUiClock(const UiContext& ui) : ui_(&ui) {}
   int64_t nowMs() const override;
 
  private:

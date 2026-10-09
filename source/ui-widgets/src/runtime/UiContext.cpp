@@ -51,6 +51,25 @@ UiContext::UiContext(Services& services, UiContextOptions options)
 }
 
 UiContext::~UiContext() {
+  // Every widget still in the tree gets its onDetached before anything is freed: widgets register with
+  // objects that outlive the context (models, registries, notifiers) and unregister in onDetached; a
+  // native window's context is destroyed with the window while those objects live on, and without this
+  // pass their callbacks would point into freed widgets (found by the preview's Editor screen). Children
+  // first and the latest created first, like destroy() does inside a subtree (a widget created after
+  // another may depend on it); a hook that throws cannot stop the teardown.
+  try {
+    overlays_.closeAll();  // popups and dialogs report their results while their owners still exist
+  } catch (...) {
+  }
+  std::vector<WidgetId> top;
+  for (WidgetId c = tree_.firstChild(root_); c.valid(); c = tree_.nextSibling(c)) top.push_back(c);
+  for (auto it = top.rbegin(); it != top.rend(); ++it) {
+    const WidgetId id = *it;
+    try {
+      destroy(id);
+    } catch (...) {
+    }
+  }
   // Handlers are non-owning pointers inside the nodes: clear them before the objects go so nothing
   // can dispatch into a half-destroyed widget.
   tree_.forEachDescendant(

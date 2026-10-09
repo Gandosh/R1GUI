@@ -136,7 +136,7 @@ class Scene final : public r1ui::core::layout::MeasureProvider {
   WidgetId modeText_;
   std::array<WidgetId, kModeCount> squares_;
 
-  Mode mode_ = Mode::Gallery;
+  Mode mode_ = Mode::Editor;
   float scale_ = 1.0f;
   int viewportWidth_ = 0;
   int viewportHeight_ = 0;

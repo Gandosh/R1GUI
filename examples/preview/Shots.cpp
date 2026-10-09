@@ -16,10 +16,12 @@
 #include "ComposedApp.h"
 #include "ComposedUtil.h"
 #include "GalleryApp.h"
+#include "editor/EditorApp.h"
 #include "Scene.h"
 #include "Toolkit.h"
 #include "r1ui/render/OffscreenTarget.h"
 #include "r1ui/render/RenderDevice.h"
+#include "r1ui/widgets/dock/InWindowFloatingBackend.h"
 #include "r1ui/widgets/image/Png.h"
 #include "r1ui/widgets/runtime/Services.h"
 #include "r1ui/widgets/runtime/UiContext.h"
@@ -112,6 +114,34 @@ void renderShots(const std::filesystem::path& directory, r1ui::theme::ThemeId th
     auto ui = r.context(content);
     GalleryApp gallery(*ui, content, page);
     r.write(*ui, directory / ("gallery_" + lower(GalleryApp::pageName(page)) + "_" + name + ".png"));
+  }
+
+  // The Editor screen over the in-window backend (a native window cannot be rendered offscreen) with its
+  // own throwaway data folder: the arrangement, customize mode, the shortcut editor and a floating panel.
+  r.setMode(Mode::Editor);
+  {
+    auto ui = r.context(content);
+    r1ui::widgets::InWindowFloatingBackend backend(*ui, ui->root());
+    editor::EditorHost host;
+    host.dataRoot = directory / ("editor-data-" + name);
+    std::error_code ignored;
+    std::filesystem::remove_all(host.dataRoot, ignored);
+    host.setDarkTheme = [&](bool dark) { r.services.theme().set(dark ? r1ui::theme::ThemeId::Dark : r1ui::theme::ThemeId::Light); };
+    host.isDark = [&] { return r.services.theme().id() == r1ui::theme::ThemeId::Dark; };
+    host.quit = [] {};
+    editor::EditorApp app(*ui, content, backend, std::move(host));
+    const auto shot = [&](const char* tag) {
+      app.update();
+      r.write(*ui, directory / (std::string("editor_") + tag + name + ".png"));
+    };
+    shot("");
+    app.run("edit.customize");
+    shot("customize_");
+    app.run("edit.customize");
+    app.run("edit.shortcuts");
+    shot("shortcuts_");
+    app.dock().floatPanel(editor::panel::kCurves);
+    shot("floating_");
   }
 }
 

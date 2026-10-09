@@ -29,6 +29,13 @@ struct CommandFixture {
   explicit CommandFixture(int width = 600, int height = 500)
       : t(width, height), clock(t.ui), router(registry, keymap, clock), sync(t.ui, services()) {}
 
+  // The widgets built from the services go first: the context detaches them when it dies, and they talk to
+  // the registry then (the registry is destroyed before the context).
+  ~CommandFixture() {
+    t.ui.overlays().closeAll();
+    t.ui.tree().forEachChild(t.ui.root(), [&](r1ui::core::tree::WidgetId child) { t.ui.destroy(child); });
+  }
+
   CommandServices services() { return {registry, overrides, keymap, router}; }
 
   // Declares a command; runs[id] counts executions, enabled[id] and checked[id] steer the predicates.
