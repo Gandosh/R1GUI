@@ -10,3 +10,5 @@ tools/build/*.local.cmd
 # Read-only reference checkouts and throwaway artifacts (never build inputs)
 /reference/
 /scratch/
+__pycache__/
+*.pyc
