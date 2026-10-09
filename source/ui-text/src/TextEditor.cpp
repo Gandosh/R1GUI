@@ -321,8 +321,7 @@ bool TextEditor::copy() {
   const TextRange sel = s.selection();
   const std::string selected = s.text.substr(sel.begin, sel.end - sel.begin);
   s.history.breakGroup();
-  s.clipboard.write(selected);
-  return true;
+  return s.clipboard.write(selected);
 }
 
 bool TextEditor::cut() {

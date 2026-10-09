@@ -47,7 +47,7 @@ inline constexpr double kTitleBarHeight = 32.0;
 inline constexpr double kPanelWidth = 258.0;
 
 struct SceneHost {
-  std::function<void(std::string_view)> writeClipboard;
+  std::function<bool(std::string_view)> writeClipboard;  // true when the text reached the clipboard
   std::function<std::optional<std::string>()> readClipboard;
 };
 

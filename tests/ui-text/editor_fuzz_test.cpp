@@ -73,7 +73,10 @@ void runFuzz(std::uint32_t seed, std::size_t maxBytes, FontLibrary& lib) {
   Rng rng(seed);
   std::string board;
   ClipboardCallbacks cb;
-  cb.write = [&](std::string_view s) { board.assign(s); };
+  cb.write = [&](std::string_view s) {
+    board.assign(s);
+    return true;
+  };
   cb.read = [&]() -> std::optional<std::string> {
     if (board.empty()) return std::nullopt;
     return board;
