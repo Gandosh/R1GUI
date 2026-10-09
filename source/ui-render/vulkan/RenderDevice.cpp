@@ -12,6 +12,7 @@
 #include <vulkan/vulkan_win32.h>
 
 #include <algorithm>
+#include <fstream>
 #include <array>
 #include <cctype>
 #include <cstdio>
@@ -141,13 +142,28 @@ std::string describe(const std::vector<Candidate>& candidates) {
   return text;
 }
 
-// Picks the GPU: explicit option, then R1UI_GPU, then best usable.
+// Reads the per-user GPU preference: the first line of %LOCALAPPDATA%/R1GUI/gpu.txt (a GPU name
+// fragment or an index). Empty when the file is missing or unreadable. A machine whose best GPU is
+// reserved for other work keeps its choice here so that every launch honours it, not only launches
+// that carry the environment variable.
+std::string readUserGpuPreference() {
+  const std::string base = readEnv("LOCALAPPDATA");
+  if (base.empty()) return {};
+  std::ifstream file(base + "/R1GUI/gpu.txt");
+  std::string line;
+  if (!file || !std::getline(file, line)) return {};
+  while (!line.empty() && (line.back() == '' || line.back() == ' ' || line.back() == '	')) line.pop_back();
+  return line.size() < 256 ? line : std::string();
+}
+
+// Picks the GPU: explicit option, then R1UI_GPU, then the per-user preference file, then best usable.
 const Candidate& choose(const std::vector<Candidate>& candidates, const DeviceOptions& options) {
   if (candidates.empty()) throw std::runtime_error("No Vulkan physical device found");
   int index = options.gpuIndex;
   std::string name = options.gpuName;
   if (index < 0 && name.empty()) {
-    const std::string env = readEnv("R1UI_GPU");
+    std::string env = readEnv("R1UI_GPU");
+    if (env.empty()) env = readUserGpuPreference();
     if (!env.empty()) {
       if (std::all_of(env.begin(), env.end(), [](unsigned char c) { return std::isdigit(c) != 0; }) && env.size() < 6) {
         index = std::stoi(env);

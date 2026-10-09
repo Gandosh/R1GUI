@@ -339,7 +339,7 @@ int runBench(const std::filesystem::path& outputDirectory) {
   md << "# Phase 3 performance baseline (slice 3.11)\n\n"
      << "Recorded by `r1gui-preview --bench <dir>`; numbers are a baseline for later regression checks on this machine, not a budget.\n\n"
      << "## Machine\n\n"
-     << "- GPU: " << gpu.name << " (" << (gpu.deviceLocalBytes >> 20) << " MiB device-local), selected with `R1UI_GPU=\"RTX 3090\"`\n"
+     << "- GPU: " << gpu.name << " (" << (gpu.deviceLocalBytes >> 20) << " MiB device-local), selected through `R1UI_GPU` or the per-user GPU preference file\n"
      << "- CPU: " << cpuModel << " (" << si.dwNumberOfProcessors << " logical processors), RAM " << (ms.ullTotalPhys >> 20) << " MiB\n"
      << "- OS: " << windows << "\n- Build: " << build << ", validation layer " << (app.device().validationActive() ? "on" : "off")
      << ", FIFO presentation (vsync), borderless window, client " << clientW << "x" << clientH << " physical pixels\n\n"

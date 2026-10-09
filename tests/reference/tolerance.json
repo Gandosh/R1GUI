@@ -1,10 +1,10 @@
 {
-  "_note": "PROVISIONAL tolerances for tools/spec/imgdiff.py. channelTolerance is the largest allowed per-channel difference (0-255) before a pixel counts as failing; maxFailingFraction is the allowed share of failing pixels. Calibrate against real toolkit output in Phase 4.",
-  "default": { "channelTolerance": 8, "maxFailingFraction": 0.002 },
+  "_note": "Pixel-comparison tolerances for tools/spec/imgdiff.py and the widget visual harness, calibrated in Phase 4 (slice 4.16) from 300 comparisons and accepted by the owner on 2026-10-09; see docs/spec/tolerance_proposal.md for the data and the visible differences that remain (about 1 px text and icon position offsets). channelTolerance is the largest allowed per-channel difference (0-255) before a pixel counts as failing; maxFailingFraction is the allowed share of failing pixels.",
+  "default": { "channelTolerance": 8, "maxFailingFraction": 0.005 },
   "profiles": {
     "flat": { "channelTolerance": 2, "maxFailingFraction": 0.0 },
-    "text": { "channelTolerance": 48, "maxFailingFraction": 0.03 },
-    "icons": { "channelTolerance": 32, "maxFailingFraction": 0.02 },
-    "screen": { "channelTolerance": 32, "maxFailingFraction": 0.03 }
+    "text": { "channelTolerance": 72, "maxFailingFraction": 0.06 },
+    "icons": { "channelTolerance": 24, "maxFailingFraction": 0.06 },
+    "screen": { "channelTolerance": 16, "maxFailingFraction": 0.04 }
   }
 }
