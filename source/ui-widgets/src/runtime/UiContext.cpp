@@ -216,7 +216,8 @@ FrameInfo UiContext::frame() {
     }
     const bool placed = overlays_.afterLayout();
     const bool moved = tooltips_.afterLayout();
-    if (!placed && !moved) break;
+    // A layout callback may have changed the layout again (a scroll area adding its scrollbar gutter).
+    if (!placed && !moved && !invalidator_.layoutPending()) break;
   }
   overlays_.enforceFocusTrap();
   return info;

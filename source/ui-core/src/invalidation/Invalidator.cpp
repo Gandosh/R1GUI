@@ -211,12 +211,17 @@ void Invalidator::setVisible(WidgetId widget, bool visible) {
 
 // ---- frame ----
 
-bool Invalidator::needsFrame() const {
-  if (!damage_.empty()) return true;
+bool Invalidator::layoutPending() const {
   for (const WidgetId id : pendingLayout_) {
     const Widget* w = tree_.get(id);
     if (w != nullptr && w->layoutDirty) return true;
   }
+  return false;
+}
+
+bool Invalidator::needsFrame() const {
+  if (!damage_.empty()) return true;
+  if (layoutPending()) return true;
   for (const WidgetId id : animating_) {
     if (tree_.alive(id)) return true;
   }
