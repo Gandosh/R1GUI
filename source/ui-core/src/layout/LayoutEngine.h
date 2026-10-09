@@ -8,6 +8,7 @@
 //   as locked (the caller holds a MutationLock) so Widget pointers stay valid within a call.
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -27,6 +28,34 @@ namespace r1ui::core::layout::detail {
 struct Size {
   double w = 0.0;
   double h = 0.0;
+};
+
+// Pass-scoped second level of the measure cache: the (node, constraint) results that the tiny
+// per-node cache had to drop during one layout call. The per-node cache keeps results across
+// incremental passes and is all a flat tree ever needs; this table makes a node that is asked more
+// than a few distinct questions (nested content-sized containers produce many) compute each answer
+// once per pass instead of once per ask, which is what keeps such nests linear. Entries are valid
+// for the whole pass because styles and the host's measure results do not change while the tree
+// is locked. Bounded: past kMaxEntries a dropped result is simply forgotten (slower, never wrong).
+class MeasureMemo {
+ public:
+  static constexpr size_t kMaxEntries = size_t{1} << 18;
+
+  const Size* find(tree::WidgetId id, const SizeConstraint& c) const;
+  void insert(tree::WidgetId id, const SizeConstraint& c, const Size& result);
+
+ private:
+  struct Slot {
+    tree::WidgetId id;  // invalid id = empty slot
+    SizeConstraint key;
+    Size result;
+  };
+
+  static size_t hashOf(tree::WidgetId id, const SizeConstraint& c);
+  void grow();
+
+  std::vector<Slot> slots_;  // size is zero or a power of two, at most half full
+  size_t count_ = 0;
 };
 
 class Engine {
@@ -55,6 +84,7 @@ class Engine {
   LayoutStats& stats_;
   uint32_t epoch_;
   uint32_t pass_;
+  MeasureMemo memo_;
 };
 
 // Rounds exact rectangles to pixels for the subtree below `id` (see FlexLayout.h policy).

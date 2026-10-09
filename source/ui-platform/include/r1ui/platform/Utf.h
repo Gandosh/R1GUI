@@ -15,6 +15,9 @@
 namespace r1ui::platform {
 
 bool isValidUtf8(std::string_view utf8);
+// Copy of `text` in which every byte that is not part of a well-formed sequence is replaced by
+// U+FFFD, so display-only strings (window titles) never fail on bad input.
+std::string replaceInvalidUtf8(std::string_view text);
 std::optional<std::u16string> utf8ToUtf16(std::string_view utf8);
 std::optional<std::string> utf16ToUtf8(std::u16string_view utf16);
 

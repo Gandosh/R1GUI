@@ -11,7 +11,11 @@
 //   ~1/8 of the entries; if that frees nothing (everything was used in the current frame) the
 //   lookup reports AtlasFull and the caller flushes the frame and retries after beginFrame().
 // Frame rule: entries looked up since the last beginFrame() are pinned and never evicted, so a
-//   quad list built during one frame always points at valid atlas pixels.
+//   quad list built during one frame always points at valid atlas pixels. A frame here is a CPU
+//   convention (beginFrame to the next beginFrame), not tied to GPU submission: it is only safe
+//   when one frame is recorded and submitted before the next begins. Interleaving two targets
+//   (begin A, begin B, end B, end A) on one atlas can let B evict glyphs that A's quad list still
+//   uses, because the device uploads the overwrite with whichever frame ends first.
 // Padding: every glyph is stored with a 1 px zeroed border so bilinear sampling never bleeds in
 //   neighbours; the reported rectangle and UVs cover the ink only.
 // Threading: UI thread only; not synchronized.

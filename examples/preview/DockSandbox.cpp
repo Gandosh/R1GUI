@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <stdexcept>
@@ -36,6 +37,13 @@ constexpr float kLabelPixels = 11.0f;
 constexpr float kStatusPixels = 12.0f;
 constexpr size_t kMaxLayoutFileBytes = size_t{4} * 1024 * 1024;
 constexpr size_t kMaxStatusChars = 140;
+
+// File names and paths reach the window title, which must be UTF-8: path::string() is in the ANSI
+// code page on Windows, so a non-ASCII user name would produce invalid UTF-8.
+std::string utf8Of(const std::filesystem::path& path) {
+  const std::u8string text = path.u8string();
+  return std::string(text.begin(), text.end());
+}
 
 // ---- Panels -----------------------------------------------------------------------------
 
@@ -160,7 +168,11 @@ dock::Rect DockSandbox::mainRect() const {
 }
 
 void DockSandbox::setStatus(std::string text) {
-  if (text.size() > kMaxStatusChars) text.resize(kMaxStatusChars);
+  if (text.size() > kMaxStatusChars) {
+    size_t cut = kMaxStatusChars;
+    while (cut > 0 && (static_cast<unsigned char>(text[cut]) & 0xC0u) == 0x80u) --cut;  // keep whole characters
+    text.resize(cut);
+  }
   status_ = std::move(text);
 }
 
@@ -190,28 +202,36 @@ void DockSandbox::saveLayout() {
     out.write(json.data(), r1ui::core::checkedCast<std::streamsize>(json.size()));
     out.flush();
     if (!out) {
-      setStatus("Save failed: cannot write " + temp.string());
+      setStatus("Save failed: cannot write " + utf8Of(temp));
       return;
     }
   }
   std::error_code error;
   std::filesystem::rename(temp, file_, error);
-  setStatus(error ? "Save failed: " + error.message() : "saved " + file_.filename().string() + " (" + std::to_string(json.size()) + " bytes)");
+  setStatus(error ? "Save failed: error " + std::to_string(error.value()) : "saved " + utf8Of(file_.filename()) + " (" + std::to_string(json.size()) + " bytes)");
 }
 
 void DockSandbox::loadLayout() {
   std::error_code error;
   const auto size = std::filesystem::file_size(file_, error);
   if (error) {
-    setStatus("Load failed: no readable " + file_.filename().string());
+    setStatus("Load failed: no readable " + utf8Of(file_.filename()));
     return;
   }
   if (size > kMaxLayoutFileBytes) {
     setStatus("Load failed: file is too large");
     return;
   }
+  // The size check above can be stale by now (the file may have grown): read at most the cap plus
+  // one byte and treat more as too large.
   std::ifstream in(file_, std::ios::binary);
-  const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+  std::string text(kMaxLayoutFileBytes + 1, '\0');
+  in.read(text.data(), r1ui::core::checkedCast<std::streamsize>(text.size()));
+  text.resize(r1ui::core::checkedCast<size_t>(in.gcount()));
+  if (text.size() > kMaxLayoutFileBytes) {
+    setStatus("Load failed: file is too large");
+    return;
+  }
   dock::LoadResult loaded = dock::DockLayout::fromJson(text, panelInfos());
   if (!loaded.ok()) {
     setStatus("Load failed (layout kept): " + loaded.error);
@@ -219,7 +239,7 @@ void DockSandbox::loadLayout() {
   }
   layout_ = std::move(*loaded.layout);
   state_ = State::Idle;
-  setStatus("loaded " + file_.filename().string() + (loaded.droppedPanels > 0 ? " (" + std::to_string(loaded.droppedPanels) + " unknown panels dropped)" : ""));
+  setStatus("loaded " + utf8Of(file_.filename()) + (loaded.droppedPanels > 0 ? " (" + std::to_string(loaded.droppedPanels) + " unknown panels dropped)" : ""));
 }
 
 // ---- Input ------------------------------------------------------------------------------

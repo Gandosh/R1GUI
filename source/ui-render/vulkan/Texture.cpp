@@ -1,19 +1,18 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: implementation of Texture.h: validation, GPU image and descriptor creation, registration
-//   with the device, staging of pixel data and deferred destruction.
+//   with the device, queueing of pixel writes (staged by the device's upload queue) and deferred
+//   destruction.
 // Callers: ui-text, Renderer facade, tests. Calls: RenderDevice::Impl (DeviceImpl.h).
 // Invariants: a texture's first queued upload is a whole-image clear or whole-image copy; the
 //   device registry entry exists exactly as long as the Texture object; the GPU objects are
 //   handed to the deferred queue (not destroyed inline) because the last frame may sample them.
 #include "r1ui/render/Texture.h"
 
-#include <cstring>
 #include <memory>
 #include <stdexcept>
 #include <string>
 
 #include "DeviceImpl.h"
-#include "r1ui/core/CheckedCast.h"
 
 namespace r1ui::render {
 
@@ -25,6 +24,29 @@ uint32_t bytesPerPixel(TextureFormat format) { return format == TextureFormat::R
 
 VkFormat vkFormat(TextureFormat format) {
   return format == TextureFormat::R8Coverage ? VK_FORMAT_R8_UNORM : VK_FORMAT_R8G8B8A8_UNORM;
+}
+
+// Allocates the texture's descriptor set. Retired textures keep their sets until the GPU is done
+// with them, so a loader that creates and destroys textures faster than frames complete can find
+// the pool full while fewer than kMaxTextures textures are alive: reclaim finished sets, then wait
+// for the GPU and reclaim again, and only report "too many live textures" if that still fails.
+detail::PooledSet allocateSetReclaiming(RenderDevice::Impl& dev, VkImageView view) {
+  try {
+    return detail::PooledSet(*dev.pipelines, view);
+  } catch (const detail::PoolExhausted&) {
+  }
+  dev.collect();
+  try {
+    return detail::PooledSet(*dev.pipelines, view);
+  } catch (const detail::PoolExhausted&) {
+  }
+  dev.waitSerial(dev.submitted);
+  dev.collect();
+  try {
+    return detail::PooledSet(*dev.pipelines, view);
+  } catch (const detail::PoolExhausted&) {
+    throw std::invalid_argument("Texture: too many live textures");
+  }
 }
 
 }  // namespace
@@ -63,7 +85,7 @@ Texture::Texture(RenderDevice& device, uint32_t width, uint32_t height, TextureF
   state->format = format;
   state->gpu.image = detail::GpuImage(dev.device, dev.memory, width, height, vkFormat(format),
                                       VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, true);
-  state->gpu.set = detail::PooledSet(*dev.pipelines, state->gpu.image.view());
+  state->gpu.set = allocateSetReclaiming(dev, state->gpu.image.view());
 
   detail::PendingUpload upload;
   upload.textureId = state->id;
@@ -72,17 +94,13 @@ Texture::Texture(RenderDevice& device, uint32_t width, uint32_t height, TextureF
   } else {
     upload.w = width;
     upload.h = height;
-    upload.bytes = bytes;
-    upload.staging = detail::GpuBuffer(dev.device, dev.memory, bytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
-    std::memcpy(upload.staging.mapped(), pixels.data(), core::checkedCast<size_t>(bytes));
   }
   // Everything that can fail has succeeded: register and queue (the state is owned from here on).
   ++dev.nextTextureId;
   dev.textures.emplace(state->id, state.get());
   impl_->device = &dev;
   impl_->state = std::move(state);
-  dev.enqueueUpload(std::move(upload));
+  dev.enqueueUpload(std::move(upload), pixels);
 }
 
 Texture::~Texture() = default;
@@ -107,11 +125,7 @@ void Texture::update(uint32_t x, uint32_t y, uint32_t w, uint32_t h, std::span<c
   upload.y = y;
   upload.w = w;
   upload.h = h;
-  upload.bytes = bytes;
-  upload.staging = detail::GpuBuffer(dev.device, dev.memory, bytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, true);
-  std::memcpy(upload.staging.mapped(), pixels.data(), core::checkedCast<size_t>(bytes));
-  dev.enqueueUpload(std::move(upload));
+  dev.enqueueUpload(std::move(upload), pixels);
 }
 
 uint32_t Texture::width() const { return impl_->state->width; }

@@ -76,6 +76,7 @@ Window::Window(const WindowDesc& desc) : impl_(std::make_unique<Impl>()) {
 
   Impl& impl = *impl_;
   impl.borderless = desc.borderless;
+  impl.altTapOpensSystemMenu = desc.altTapOpensSystemMenu;
   impl.resizable = desc.resizable;
   if (desc.minSize) impl.minClientSize = *desc.minSize;
   impl.minSizeLogical = desc.sizesAreLogical;
@@ -197,8 +198,7 @@ HitZone Window::chromeZoneAt(Point clientPoint) const { return impl_->zoneAt(cli
 
 std::vector<Event> Window::takeEvents() { return impl_->events.drain(); }
 size_t Window::droppedEventCount() const {
-  return impl_->events.dropped() + impl_->keyQueue.dropped() + impl_->clickQueue.dropped() +
-         impl_->mouseQueue.dropped();
+  return impl_->events.dropped();
 }
 std::vector<KeyEvent> Window::takeKeyEvents() { return impl_->keyQueue.drain(); }
 std::vector<MouseClick> Window::takeMouseClicks() { return impl_->clickQueue.drain(); }
@@ -213,9 +213,11 @@ void Window::setCursor(CursorShape shape) {
   SetCursor(LoadCursorW(nullptr, cursorResource(shape)));
 }
 
-void Window::setTitle(const std::string& utf8Title) {
-  const std::wstring title = widen(utf8Title);
+bool Window::setTitle(const std::string& utf8Title) {
+  const bool valid = isValidUtf8(utf8Title);
+  const std::wstring title = widen(valid ? utf8Title : replaceInvalidUtf8(utf8Title));
   SetWindowTextW(impl_->hwnd, title.c_str());
+  return valid;
 }
 
 // ---- Clipboard and native handle ----

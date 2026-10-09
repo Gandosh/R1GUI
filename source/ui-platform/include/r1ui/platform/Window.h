@@ -93,6 +93,11 @@ struct WindowDesc {
   // When true, width, height and minSize are logical pixels (1.0 = 96 dpi) and are scaled by the
   // dpi of the monitor the window opens on. Default false: physical pixels.
   bool sizesAreLogical = false;
+  // Borderless windows only. By default pressing and releasing Alt (or F10) on its own is swallowed
+  // instead of entering the OS system-menu mode, which would eat the next key and hide focus
+  // visuals; design tools use Alt as a modifier constantly. Alt+Space (window menu) and Alt+F4
+  // keep working. Set true to restore the OS behaviour. Native-frame windows always keep it.
+  bool altTapOpensSystemMenu = false;
 };
 
 // Opaque OS handles for the renderer's surface creation; meaning is backend-defined.
@@ -127,7 +132,8 @@ class Window {
   // inside DispatchMessage). The callback is invoked from the window procedure on every size
   // change and on a ~60 Hz timer during that loop so the application can keep rendering. It runs
   // on the UI thread inside the OS loop: it must not pump messages and must not throw (an
-  // exception is swallowed). Never re-entered. Pass an empty function to remove it.
+  // exception is swallowed). Never re-entered. Pass an empty function to remove it. The callback
+  // must not destroy this Window (the window procedure still uses it after the callback returns).
   void setLiveCallback(std::function<void()> callback);
 
   int clientWidth() const;   // physical pixels; 0 when minimized
@@ -166,10 +172,13 @@ class Window {
 
   // ---- Input ----
   // Hands over and clears all events since the last call in arrival order. The queue holds at
-  // most kMaxQueuedWindowEvents; older events are dropped beyond that (see droppedEventCount).
-  // Consecutive MouseMove events are coalesced into the latest.
+  // most kMaxQueuedWindowEvents ordinary events. When the application stops draining, moves,
+  // wheel and auto-repeat are dropped first, then other presses and characters; releases, focus,
+  // capture, size, DPI and close events are never dropped for room (the queue may grow past its
+  // bound for those, see BoundedQueue.h). Consecutive MouseMove events are coalesced into the latest.
   std::vector<Event> takeEvents();
-  // Events discarded because a queue overflowed (all queues together), since creation.
+  // Events discarded because the unified queue overflowed, since creation. The legacy per-kind
+  // queues below drop their oldest entries silently and are not counted here.
   size_t droppedEventCount() const;
 
   // Legacy per-kind queues, kept working. Each holds at most kMaxQueuedEvents.
@@ -182,7 +191,9 @@ class Window {
 
   // Cursor shown over the client area until changed again.
   void setCursor(CursorShape shape);
-  void setTitle(const std::string& utf8Title);
+  // Never throws for bad text: invalid UTF-8 sequences are shown as U+FFFD and false is returned.
+  // (The WindowDesc title is validated strictly at construction, where a caller can still react.)
+  bool setTitle(const std::string& utf8Title);
 
   // ---- Clipboard (UTF-8 text) ----
   // Never throws for contention: a clipboard locked by another process is retried briefly and

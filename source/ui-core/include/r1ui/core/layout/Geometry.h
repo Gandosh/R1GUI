@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 
 namespace r1ui::core::layout {
 
@@ -47,8 +48,10 @@ inline Rect intersect(const Rect& a, const Rect& b) {
   const int64_t r = std::min(a.right(), b.right());
   const int64_t btm = std::min(a.bottom(), b.bottom());
   if (r <= l || btm <= t) return Rect{};
-  return Rect{static_cast<int32_t>(l), static_cast<int32_t>(t), static_cast<int32_t>(r - l),
-              static_cast<int32_t>(btm - t)};
+  // The extent can exceed int32 for rectangles near the +-1e9 limits: saturate instead of wrapping.
+  constexpr int64_t kMaxExtent32 = std::numeric_limits<int32_t>::max();
+  return Rect{static_cast<int32_t>(l), static_cast<int32_t>(t), static_cast<int32_t>(std::min(r - l, kMaxExtent32)),
+              static_cast<int32_t>(std::min(btm - t, kMaxExtent32))};
 }
 
 // Smallest rectangle containing both; an empty input contributes nothing.
@@ -59,8 +62,10 @@ inline Rect unite(const Rect& a, const Rect& b) {
   const int64_t t = std::min<int64_t>(a.y, b.y);
   const int64_t r = std::max(a.right(), b.right());
   const int64_t btm = std::max(a.bottom(), b.bottom());
-  return Rect{static_cast<int32_t>(l), static_cast<int32_t>(t), static_cast<int32_t>(r - l),
-              static_cast<int32_t>(btm - t)};
+  // The extent can exceed int32 for rectangles near the +-1e9 limits: saturate instead of wrapping.
+  constexpr int64_t kMaxExtent32 = std::numeric_limits<int32_t>::max();
+  return Rect{static_cast<int32_t>(l), static_cast<int32_t>(t), static_cast<int32_t>(std::min(r - l, kMaxExtent32)),
+              static_cast<int32_t>(std::min(btm - t, kMaxExtent32))};
 }
 
 // True when b lies completely inside a (an empty b is contained in anything).

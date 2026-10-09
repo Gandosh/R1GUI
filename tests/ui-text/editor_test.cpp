@@ -285,7 +285,10 @@ void testUndo() {
   // Clipboard operations are their own steps.
   std::string board;
   ClipboardCallbacks cb;
-  cb.write = [&](std::string_view s) { board.assign(s); };
+  cb.write = [&](std::string_view s) {
+    board.assign(s);
+    return true;
+  };
   cb.read = [&]() { return std::optional<std::string>(board); };
   e.setClipboard(cb);
   e.setText("one two");
@@ -319,7 +322,10 @@ void testClipboard() {
   expect(!e.copy() && !e.cut() && !e.paste(), "no callbacks: clipboard calls report false");
   std::string board;
   ClipboardCallbacks cb;
-  cb.write = [&](std::string_view s) { board.assign(s); };
+  cb.write = [&](std::string_view s) {
+    board.assign(s);
+    return true;
+  };
   cb.read = [&]() -> std::optional<std::string> { return std::nullopt; };
   e.setClipboard(cb);
   expect(e.copy() && board == "abc" && e.text() == "abc", "copy leaves the text");
@@ -329,6 +335,25 @@ void testClipboard() {
   cb.read = [&]() { return std::optional<std::string>("X\nY"); };
   e.setClipboard(cb);
   expect(e.paste() && e.text() == "aXYbc", "pasted newlines are dropped");
+
+  // A clipboard that refuses the write (held by another process): copy and cut report the failure
+  // and cut keeps the selected text.
+  bool accept = false;
+  std::string refused = "unchanged";
+  ClipboardCallbacks busy;
+  busy.write = [&](std::string_view s) {
+    if (accept) refused.assign(s);
+    return accept;
+  };
+  TextEditor f;
+  f.setText("keep me");
+  f.setClipboard(busy);
+  f.selectAll();
+  expect(!f.copy(), "copy reports a refused clipboard write");
+  expect(!f.cut() && f.text() == "keep me" && refused == "unchanged", "cut keeps the text when the write fails");
+  accept = true;
+  expect(f.cut() && f.text().empty() && refused == "keep me", "cut deletes once the clipboard accepts the text");
+  expect(f.undo() && f.text() == "keep me", "and the cut is one undo step");
 
   EditorConfig ro;
   ro.readOnly = true;

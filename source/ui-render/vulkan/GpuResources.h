@@ -10,6 +10,8 @@
 //   into its deferred-destruction queue (RenderDevice.h) or by waiting for idle.
 // Allocation count: one vkAllocateMemory per resource; the resource count is bounded by the
 //   frame rings, texture limit and targets, far below maxMemoryAllocationCount (4096 minimum).
+//   Texture writes are the exception to "one per resource": they are staged in shared 1 MiB
+//   chunks (UploadQueue.cpp), never one allocation per write.
 // Failure behavior: constructors throw std::runtime_error after releasing anything partly made.
 #pragma once
 

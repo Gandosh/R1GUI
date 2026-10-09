@@ -71,9 +71,10 @@ enum class Motion { Left, Right, WordLeft, WordRight, LineStart, LineEnd };
 enum class InsertSource { Typing, Paste };
 
 // The owner connects these to the OS clipboard; the editor has no OS dependency. Either may be
-// empty (then copy/cut/paste report false).
+// empty (then copy/cut/paste report false). `write` returns whether the text reached the clipboard;
+// copy() and cut() report false when it did not, and cut() then leaves the selection untouched.
 struct ClipboardCallbacks {
-  std::function<void(std::string_view utf8)> write;
+  std::function<bool(std::string_view utf8)> write;
   std::function<std::optional<std::string>()> read;
 };
 

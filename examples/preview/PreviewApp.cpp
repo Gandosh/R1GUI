@@ -81,7 +81,9 @@ PreviewApp::PreviewApp(const AppOptions& options) : started_(Clock::now()), path
   icons_ = std::make_unique<IconSet>(*textures_, std::vector<std::filesystem::path>{paths_.icons(), paths_.customIcons()});
 
   SceneHost host;
-  host.writeClipboard = [this](std::string_view text) { window_->setClipboardText(text); };
+  host.writeClipboard = [this](std::string_view text) {
+    return window_->setClipboardText(text) == platform::ClipboardStatus::Ok;
+  };
   host.readClipboard = [this]() -> std::optional<std::string> {
     platform::ClipboardText clip = window_->getClipboardText();
     if (clip.status != platform::ClipboardStatus::Ok) return std::nullopt;
@@ -275,7 +277,10 @@ bool PreviewApp::frame(FrameTimes* times) {
   const LayoutResult layoutResult = scene_->layout();
   if (layoutResult.ran) window_->setChromeLayout(scene_->chromeLayout());
   const auto t1 = Clock::now();
-  if (!target_->beginFrame(canvasColor(*scene_))) return false;
+  if (!target_->beginFrame(canvasColor(*scene_))) {
+    redraw_ = true;  // layout already consumed this frame's damage: draw again once the target is ready
+    return false;
+  }
   scene_->paint(target_->painter());
   paintMode(target_->painter());
   text_->uploadAtlas();
@@ -286,8 +291,8 @@ bool PreviewApp::frame(FrameTimes* times) {
   if (presented) {
     redraw_ = atlasOverflowed;
     if (framesPresented_++ == 0) startupMs_ = millis(started_, t3);
-  } else if (atlasOverflowed) {
-    redraw_ = true;
+  } else {
+    redraw_ = true;  // not presented (swapchain out of date): the damage is gone, so draw again
   }
   if (times != nullptr) {
     const r1ui::render::FrameTimings gpu = target_->lastFrameTimings();

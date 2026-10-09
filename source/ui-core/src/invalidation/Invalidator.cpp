@@ -62,8 +62,14 @@ void Invalidator::queueLayoutRoot(WidgetId id) { pendingLayout_.push_back(id); }
 
 void Invalidator::requestLayout(WidgetId widget) {
   Widget* w = tree_.get(widget);
-  if (w == nullptr || w->layoutDirty) return;  // already dirty: its chain is already queued
+  if (w == nullptr) return;
+  const bool wasDirty = w->layoutDirty;
   w->layoutDirty = true;
+  // The widget's own bit is not proof that its ancestors are marked and a boundary is queued: it
+  // may have been dirtied under a different parent (reparent) or as the stop of a descendant's
+  // request. So the climb always starts at the parent; it ends cheaply at the first dirty ancestor,
+  // whose own chain is queued by the same rule.
+  bool marked = !wasDirty;
   WidgetId last = widget;
   // The widget's own size inputs changed, so its parent is always affected; climb from there
   // until a relayout boundary absorbs the change.
@@ -72,12 +78,13 @@ void Invalidator::requestLayout(WidgetId widget) {
     if (c->layoutDirty) return;
     c->layoutDirty = true;
     last = cur;
+    marked = true;
     if (layout::isRelayoutBoundary(tree_, cur)) {
       queueLayoutRoot(cur);
       return;
     }
   }
-  queueLayoutRoot(last);  // reached the root
+  if (marked) queueLayoutRoot(last);  // reached the root (an already queued dirty root is not queued twice)
 }
 
 void Invalidator::requestFullLayout() {
@@ -128,11 +135,14 @@ void Invalidator::requestPaint(WidgetId widget, std::optional<Rect> localRect) {
 }
 
 void Invalidator::requestAnimation(WidgetId widget) {
-  if (!tree_.alive(widget)) return;
-  if (std::find(animating_.begin(), animating_.end(), widget) == animating_.end()) animating_.push_back(widget);
+  Widget* w = tree_.get(widget);
+  if (w == nullptr || w->animating) return;  // the flag makes a repeated request O(1)
+  w->animating = true;
+  animating_.push_back(widget);
 }
 
 void Invalidator::cancelAnimation(WidgetId widget) {
+  if (Widget* w = tree_.get(widget)) w->animating = false;
   animating_.erase(std::remove(animating_.begin(), animating_.end(), widget), animating_.end());
 }
 
@@ -231,24 +241,33 @@ FrameResult Invalidator::runFrame(layout::MeasureProvider* provider) {
     std::stable_sort(work.begin(), work.end(),
                      [&](WidgetId a, WidgetId b) { return tree_.depth(a) < tree_.depth(b); });
     std::vector<layout::RectChange> changes;
-    for (const WidgetId id : work) {
+    for (size_t i = 0; i < work.size(); ++i) {
+      const WidgetId id = work[i];
       const Widget* w = tree_.get(id);
       if (!w->layoutDirty) continue;  // already re-laid out by an ancestor's pass
-      if (!tree_.parent(id).valid()) {
-        RootInfo* info = findRoot(id);
-        if (info == nullptr) {
-          roots_.push_back(RootInfo{id, w->exact.w, w->exact.h, w->layoutState.commitEpoch == 0});
-          info = &roots_.back();
-        }
-        if (info->full || w->layoutState.commitEpoch == 0) {
-          accumulate(out.layoutStats, layout::layoutTree(tree_, id, layout::LayoutInput{info->width, info->height},
-                                                         provider, &changes));
-          info->full = false;
+      // A throwing MeasureProvider must not lose the roots that did not get their pass: they go
+      // back to the queue (their dirty bits are still set) and the exception reaches the caller.
+      try {
+        if (!tree_.parent(id).valid()) {
+          RootInfo* info = findRoot(id);
+          if (info == nullptr) {
+            roots_.push_back(RootInfo{id, w->exact.w, w->exact.h, w->layoutState.commitEpoch == 0});
+            info = &roots_.back();
+          }
+          if (info->full || w->layoutState.commitEpoch == 0) {
+            accumulate(out.layoutStats, layout::layoutTree(tree_, id, layout::LayoutInput{info->width, info->height},
+                                                           provider, &changes));
+            info->full = false;
+          } else {
+            layout::layoutSubtree(tree_, id, provider, out.layoutStats, &changes);
+          }
         } else {
           layout::layoutSubtree(tree_, id, provider, out.layoutStats, &changes);
         }
-      } else {
-        layout::layoutSubtree(tree_, id, provider, out.layoutStats, &changes);
+      } catch (...) {
+        pendingLayout_.insert(pendingLayout_.begin(), work.begin() + static_cast<std::ptrdiff_t>(i), work.end());
+        addChanges(changes);
+        throw;
       }
       out.layoutRan = true;
     }

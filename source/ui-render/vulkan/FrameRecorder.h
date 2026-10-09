@@ -9,7 +9,7 @@
 // Ring buffers: one pair (sdf instances, textured instances) per slot, host visible and mapped,
 //   written linearly from offset 0 every frame. A slot's buffers are only touched after the
 //   timeline reached the slot's serial, so the GPU is done with the previous contents. Buffers
-//   grow in powers of two up to kMaxInstancesPerFrame, so memory is bounded by
+//   grow in powers of two on demand up to kMaxInstancesPerFrame, so memory is bounded by
 //   2 slots * kMaxInstancesPerFrame * (sizeof(SdfInstance) + sizeof(TexInstance)) per target.
 #pragma once
 

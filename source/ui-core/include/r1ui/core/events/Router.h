@@ -13,7 +13,9 @@
 //   dropped (no event can be delivered to it), a hidden / disabled one is released with
 //   CaptureLost / FocusOut. After each handler call ids are re-checked, so a handler may
 //   destroy anything, including the widget it runs on. Nested dispatch deeper than
-//   kMaxDispatchDepth is dropped.
+//   kMaxDispatchDepth is dropped; that includes boundary events (Leave, FocusOut, CaptureLost),
+//   whose router state (hover chain, focus) has already moved on, so a handler that re-enters
+//   the router that many levels deep never sees its own boundary events.
 // Pointer rules:
 //  * Target = the capturing widget if there is one, else the topmost hit (hitTest).
 //  * Hover is the chain root..leaf of the widget under the pointer (the capturer while
@@ -31,8 +33,9 @@
 //  * DragStart is sent once per press to the press target (bubbling) when the pointer is
 //    strictly more than dragThreshold px from the press point (spec 08 rule 1: exactly the
 //    threshold is not a drag). A handler marks it handled to accept the drag, which suppresses
-//    the Click. cancelPointerInteraction() (e.g. Escape during a drag) forgets the press and
-//    releases capture without a click.
+//    the Click. cancelPointerInteraction() (e.g. Escape during a drag, capture or focus lost to
+//    another window) forgets the press, releases capture and clears the held-button state
+//    without a click; a release that arrives later for a cancelled button is ignored.
 //  * A left press that nobody handled focuses the innermost focusable widget at or above the
 //    target (without focus indication), unless a handler already moved focus (spec 01 rules
 //    1-3); pressing a non-focusable area keeps the previous focus (rule 8).
@@ -154,6 +157,9 @@ class Router {
 
   std::vector<tree::WidgetId> hoverChain_;  // root..leaf of the hovered widgets
   uint64_t hoverVersion_ = 0;               // tree structure version the chain was built at
+  // Capacity kept between hover changes so a pointer move that crosses widgets allocates nothing.
+  std::vector<tree::WidgetId> hoverSpareA_;
+  std::vector<tree::WidgetId> hoverSpareB_;
   tree::WidgetId capture_;
   uint32_t buttons_ = 0;
   Press press_;

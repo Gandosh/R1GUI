@@ -62,7 +62,10 @@ int main() {
   preview::IconSet icons(textures, {assets + "/icons/lucide", assets + "/icons/custom"});
   std::string clipboard;
   preview::SceneHost host;
-  host.writeClipboard = [&](std::string_view s) { clipboard = std::string(s); };
+  host.writeClipboard = [&](std::string_view s) {
+    clipboard = std::string(s);
+    return true;
+  };
   host.readClipboard = [&]() -> std::optional<std::string> { return clipboard; };
   preview::Scene scene(tokens, text, icons, host);
   scene.setViewport(1440, 900, 1.0f);

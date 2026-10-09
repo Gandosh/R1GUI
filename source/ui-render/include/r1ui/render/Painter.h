@@ -16,13 +16,13 @@
 //   counted in PaintStats::rejected. Empty or fully clipped draws are skipped and counted in
 //   PaintStats::culled. API misuse (unbalanced stacks, invalid texture, drawing outside a
 //   begin()/end() pair) throws std::logic_error / std::invalid_argument. Exceeding the instance
-//   limit throws PaintLimitError; nothing is dropped silently.
+//   limit never throws: further instances are dropped and counted in PaintStats::dropped, so one
+//   huge frame (a very long text view) degrades instead of ending the application.
 // Draw order: later calls paint over earlier ones. For a CSS shadow list the caller issues the
 //   shadows from last to first so the first listed shadow ends up on top, as in browsers.
 #pragma once
 
 #include <cstdint>
-#include <stdexcept>
 #include <vector>
 
 #include "r1ui/render/ClipStack.h"
@@ -30,15 +30,11 @@
 
 namespace r1ui::render {
 
-// Hard cap on instances (shapes plus textured quads) in one frame. Memory for the GPU ring
-// buffers is bounded by this: 65536 * (96 + 64) bytes per frame in flight at the very most.
-inline constexpr uint32_t kMaxInstancesPerFrame = 65536;
-
-// Thrown when a frame would exceed the instance limit; the frame's earlier draws stay valid.
-class PaintLimitError : public std::runtime_error {
- public:
-  using std::runtime_error::runtime_error;
-};
+// Cap on instances (shapes plus textured quads, one per glyph) in one frame: a screen full of
+// small text needs well over 65536 glyph quads. The GPU ring buffers and the CPU lists grow on
+// demand, so a normal frame stays small; this bound only limits the worst case to
+// 2^20 * (96 + 64) bytes = 160 MiB per frame slot. Instances past it are dropped and counted.
+inline constexpr uint32_t kMaxInstancesPerFrame = 1u << 20;
 
 struct Color {
   float r = 0.0f;
@@ -104,6 +100,7 @@ struct PaintStats {
   uint32_t texInstances = 0;
   uint32_t culled = 0;          // empty, fully clipped or invisible draws that were skipped
   uint32_t rejected = 0;        // draws skipped because an argument was NaN or infinite
+  uint32_t dropped = 0;         // draws skipped because the frame reached its instance limit
 };
 
 class Painter {
@@ -139,7 +136,8 @@ class Painter {
   void pushClip(const Rect& rect);
   void popClip();
   // Opacity stack: pushes multiply into every following colour alpha. Value is clamped to 0..1;
-  // NaN counts as 0 (draw nothing).
+  // NaN counts as 0 (draw nothing). The multiplication is per primitive, not per group: children
+  // that overlap inside a faded group show through each other (there is no offscreen group layer).
   void pushOpacity(float opacity);
   void popOpacity();
 
@@ -148,9 +146,10 @@ class Painter {
 
  private:
   void requireActive(const char* call) const;
-  // Reserves a slot in the right instance array and in a (possibly extended) batch.
+  // Reserves a slot in the right instance array and in a (possibly extended) batch; nullptr (and
+  // `dropped_` counted) when the frame is full.
   template <class Instance>
-  Instance& append(BatchKind kind, const IRect& scissor, uint64_t textureId);
+  Instance* append(BatchKind kind, const IRect& scissor, uint64_t textureId);
   bool visible(const Rect& bounds, IRect* scissor);
 
   PaintList list_;
@@ -159,6 +158,7 @@ class Painter {
   uint32_t maxInstances_;
   uint32_t culled_ = 0;
   uint32_t rejected_ = 0;
+  uint32_t dropped_ = 0;
   bool active_ = false;
 };
 

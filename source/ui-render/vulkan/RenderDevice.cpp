@@ -290,7 +290,10 @@ void RenderDevice::Impl::init(const DeviceOptions& options) {
 RenderDevice::Impl::~Impl() {
   if (device != VK_NULL_HANDLE) {
     vkDeviceWaitIdle(device);
-    deferred.clear();
+    pending.clear();  // staging chunks and recycled chunks hold buffers: free them while the device lives
+    activeChunks.clear();
+    deferred.clear();  // may recycle chunks into freeChunks
+    freeChunks.clear();
     pipelines.reset();
     if (timeline != VK_NULL_HANDLE) vkDestroySemaphore(device, timeline, nullptr);
     if (pool != VK_NULL_HANDLE) vkDestroyCommandPool(device, pool, nullptr);
@@ -390,6 +393,7 @@ const GpuInfo& RenderDevice::gpu() const { return impl_->info; }
 bool RenderDevice::validationActive() const { return impl_->validation; }
 uint32_t RenderDevice::validationMessageCount() const { return impl_->validationMessages; }
 bool RenderDevice::lost() const { return impl_->lost; }
+uint64_t RenderDevice::staleTextureDraws() const { return impl_->staleTextureDraws; }
 
 GpuMemoryUsage RenderDevice::memoryUsage() const {
   GpuMemoryUsage usage;
@@ -405,6 +409,11 @@ GpuMemoryUsage RenderDevice::memoryUsage() const {
     usage.deviceLocalBudgetBytes += budget.heapBudget[i];
   }
   return usage;
+}
+
+void RenderDevice::injectFault(FaultSite site, uint32_t afterPasses) {
+  impl_->faultSite = site;
+  impl_->faultPasses = afterPasses;
 }
 
 void RenderDevice::waitIdle() {

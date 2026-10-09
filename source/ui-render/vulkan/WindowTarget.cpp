@@ -9,7 +9,9 @@
 // Image acquisition happens in endFrame, right before recording, so an abandoned frame (begin
 //   without end, or an exception while drawing) holds no swapchain image.
 // Failure behavior: if recording/submitting fails after an image was acquired, the acquire
-//   semaphore is replaced and the swapchain marked stale, so the next frame starts clean.
+//   semaphore is replaced and the swapchain marked stale, so the next frame starts clean. A swapchain
+//   whose per-image objects could not all be built is discarded whole and the target stays stale, so
+//   the next beginFrame retries; a half-built chain is never used.
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_win32.h>
 
@@ -78,15 +80,33 @@ struct WindowTarget::Impl {
   uint32_t windowWidth() const { return core::checkedCast<uint32_t>(std::max(window.clientWidth(), 0)); }
   uint32_t windowHeight() const { return core::checkedCast<uint32_t>(std::max(window.clientHeight(), 0)); }
 
+  // The per-image objects of one swapchain, built as a unit.
+  struct ChainResources {
+    std::vector<VkImage> images;
+    std::vector<VkImageView> views;
+    std::vector<VkFramebuffer> framebuffers;
+    std::vector<VkSemaphore> renderFinished;
+
+    // Frees what exists; the GPU must not be using it (a chain that was never drawn to).
+    void destroy(VkDevice device) {
+      for (VkFramebuffer f : framebuffers) vkDestroyFramebuffer(device, f, nullptr);
+      for (VkImageView v : views) vkDestroyImageView(device, v, nullptr);
+      for (VkSemaphore s : renderFinished) vkDestroySemaphore(device, s, nullptr);
+      framebuffers.clear();
+      views.clear();
+      renderFinished.clear();
+      images.clear();
+    }
+  };
+
   // Frees views, framebuffers and per-image semaphores; the GPU must be idle.
   void destroyChainResources() {
-    for (VkFramebuffer f : framebuffers) vkDestroyFramebuffer(dev.device, f, nullptr);
-    for (VkImageView v : views) vkDestroyImageView(dev.device, v, nullptr);
-    for (VkSemaphore s : renderFinished) vkDestroySemaphore(dev.device, s, nullptr);
-    framebuffers.clear();
-    views.clear();
-    renderFinished.clear();
+    ChainResources current{std::move(images), std::move(views), std::move(framebuffers), std::move(renderFinished)};
+    current.destroy(dev.device);
     images.clear();
+    views.clear();
+    framebuffers.clear();
+    renderFinished.clear();
   }
 
   void destroyAll() {
@@ -166,6 +186,56 @@ struct WindowTarget::Impl {
     VkSwapchainKHR created = VK_NULL_HANDLE;
     dev.vk(vkCreateSwapchainKHR(dev.device, &info, nullptr, &created), "vkCreateSwapchainKHR");
 
+    // Build everything that depends on the new chain into locals first and commit it in one step:
+    // a failure part way (out of memory) must not leave `framebuffers` or `renderFinished` shorter
+    // than the image count, because endFrame indexes them by acquired image.
+    ChainResources chain;
+    try {
+      uint32_t count = 0;
+      dev.vk(vkGetSwapchainImagesKHR(dev.device, created, &count, nullptr), "vkGetSwapchainImagesKHR");
+      chain.images.resize(count);
+      dev.vk(vkGetSwapchainImagesKHR(dev.device, created, &count, chain.images.data()), "vkGetSwapchainImagesKHR");
+      for (VkImage image : chain.images) {
+        VkImageViewCreateInfo viewInfo{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
+        viewInfo.image = image;
+        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.format = detail::kTargetFormat;
+        viewInfo.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+        VkImageView view = VK_NULL_HANDLE;
+        dev.vk(vkCreateImageView(dev.device, &viewInfo, nullptr, &view), "vkCreateImageView");
+        chain.views.push_back(view);
+
+        dev.faultPoint(FaultSite::SwapchainObject);
+        VkFramebufferCreateInfo fbInfo{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
+        fbInfo.renderPass = dev.pipelines->swapchainPass();
+        fbInfo.attachmentCount = 1;
+        fbInfo.pAttachments = &view;
+        fbInfo.width = newExtent.width;
+        fbInfo.height = newExtent.height;
+        fbInfo.layers = 1;
+        VkFramebuffer fb = VK_NULL_HANDLE;
+        dev.vk(vkCreateFramebuffer(dev.device, &fbInfo, nullptr, &fb), "vkCreateFramebuffer");
+        chain.framebuffers.push_back(fb);
+
+        VkSemaphoreCreateInfo semInfo{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+        VkSemaphore sem = VK_NULL_HANDLE;
+        dev.vk(vkCreateSemaphore(dev.device, &semInfo, nullptr, &sem), "vkCreateSemaphore");
+        chain.renderFinished.push_back(sem);
+      }
+    } catch (...) {
+      // Creating a swapchain with `oldSwapchain` retired the old one, so it cannot be used again
+      // either: release both now, and the next beginFrame builds a chain from nothing instead of
+      // drawing into a half-built or retired one.
+      chain.destroy(dev.device);
+      vkDestroySwapchainKHR(dev.device, created, nullptr);
+      vkDeviceWaitIdle(dev.device);
+      destroyChainResources();
+      if (swapchain != VK_NULL_HANDLE) vkDestroySwapchainKHR(dev.device, swapchain, nullptr);
+      swapchain = VK_NULL_HANDLE;
+      stale = true;
+      throw;
+    }
+
     // Everything that referenced the old chain must be idle before it is destroyed. A resize
     // therefore stalls the GPU once (documented in WindowTarget.h).
     dev.vk(vkDeviceWaitIdle(dev.device), "vkDeviceWaitIdle");
@@ -176,39 +246,12 @@ struct WindowTarget::Impl {
     requestedWidth = w;
     requestedHeight = h;
     effectiveMode = mode;
+    images = std::move(chain.images);
+    views = std::move(chain.views);
+    framebuffers = std::move(chain.framebuffers);
+    renderFinished = std::move(chain.renderFinished);
     stale = false;
     ++generation;
-
-    uint32_t count = 0;
-    dev.vk(vkGetSwapchainImagesKHR(dev.device, swapchain, &count, nullptr), "vkGetSwapchainImagesKHR");
-    images.resize(count);
-    dev.vk(vkGetSwapchainImagesKHR(dev.device, swapchain, &count, images.data()), "vkGetSwapchainImagesKHR");
-    for (VkImage image : images) {
-      VkImageViewCreateInfo viewInfo{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
-      viewInfo.image = image;
-      viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-      viewInfo.format = detail::kTargetFormat;
-      viewInfo.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-      VkImageView view = VK_NULL_HANDLE;
-      dev.vk(vkCreateImageView(dev.device, &viewInfo, nullptr, &view), "vkCreateImageView");
-      views.push_back(view);
-
-      VkFramebufferCreateInfo fbInfo{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
-      fbInfo.renderPass = dev.pipelines->swapchainPass();
-      fbInfo.attachmentCount = 1;
-      fbInfo.pAttachments = &view;
-      fbInfo.width = extent.width;
-      fbInfo.height = extent.height;
-      fbInfo.layers = 1;
-      VkFramebuffer fb = VK_NULL_HANDLE;
-      dev.vk(vkCreateFramebuffer(dev.device, &fbInfo, nullptr, &fb), "vkCreateFramebuffer");
-      framebuffers.push_back(fb);
-
-      VkSemaphoreCreateInfo semInfo{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
-      VkSemaphore sem = VK_NULL_HANDLE;
-      dev.vk(vkCreateSemaphore(dev.device, &semInfo, nullptr, &sem), "vkCreateSemaphore");
-      renderFinished.push_back(sem);
-    }
     return true;
   }
 
@@ -220,7 +263,18 @@ struct WindowTarget::Impl {
     vkDestroySemaphore(dev.device, imageAvailable[frame], nullptr);
     imageAvailable[frame] = VK_NULL_HANDLE;
     VkSemaphoreCreateInfo semInfo{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
-    vkCreateSemaphore(dev.device, &semInfo, nullptr, &imageAvailable[frame]);
+    if (vkCreateSemaphore(dev.device, &semInfo, nullptr, &imageAvailable[frame]) != VK_SUCCESS) {
+      imageAvailable[frame] = VK_NULL_HANDLE;  // beginFrame creates it again before it is used
+    }
+  }
+
+  // Makes sure every frame slot has its acquire semaphore (one may be missing after a failed frame
+  // could not replace it).
+  void ensureAcquireSemaphores() {
+    VkSemaphoreCreateInfo semInfo{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+    for (VkSemaphore& s : imageAvailable) {
+      if (s == VK_NULL_HANDLE) dev.vk(vkCreateSemaphore(dev.device, &semInfo, nullptr, &s), "vkCreateSemaphore");
+    }
   }
 };
 
@@ -243,6 +297,7 @@ bool WindowTarget::beginFrame(const Color& clear) {
   s.dev.requireUsable();
   s.dev.collect();
   s.recording = false;
+  s.ensureAcquireSemaphores();
   const uint32_t w = s.windowWidth();
   const uint32_t h = s.windowHeight();
   if (w == 0 || h == 0) return false;

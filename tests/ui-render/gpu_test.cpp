@@ -12,6 +12,7 @@
 #include <chrono>
 #include <cstdio>
 #include <limits>
+#include <memory>
 #include <span>
 #include <stdexcept>
 
@@ -305,13 +306,20 @@ void textureLifetime() {
   }
   expect(target.readPixels().size() == 32u * 32u * 4u, "readback after the loop");
 
-  // Destroyed between draw and endFrame: that frame is rejected, the target stays usable.
+  // Destroyed between draw and endFrame: only that draw is skipped (and counted); everything else
+  // in the frame is drawn and the target stays usable.
   auto doomed = std::make_unique<Texture>(device(), 4, 4, TextureFormat::R8Coverage);
+  const uint64_t staleBefore = device().staleTextureDraws();
   expect(target.beginFrame(kBlack), "begin");
-  target.painter().drawTexture(doomed->ref(), {0, 0, 4, 4}, {0, 0, 1, 1});
+  target.painter().fillRect({0, 0, 4, 4}, rgb8(40, 50, 60));
+  target.painter().drawTexture(doomed->ref(), {8, 8, 4, 4}, {0, 0, 1, 1});
+  target.painter().fillRect({16, 0, 4, 4}, rgb8(70, 80, 90));
   doomed.reset();
-  expect(throws([&] { target.endFrame(); }), "endFrame rejects a destroyed texture");
-  expect(target.beginFrame(rgb8(1, 2, 3)), "begin after a rejected frame");
+  expect(target.endFrame(), "endFrame survives a destroyed texture");
+  expect(device().staleTextureDraws() == staleBefore + 1, "the skipped draw is counted");
+  const std::vector<uint8_t> after = target.readPixels();
+  expect(after[0] == 40 && after[4 * 16] == 70, "the other draws of that frame are rendered");
+  expect(target.beginFrame(rgb8(1, 2, 3)), "begin after a frame with a destroyed texture");
   target.painter().fillRect({0, 0, 4, 4}, rgb8(9, 9, 9));
   expect(target.endFrame(), "end");
   expect(target.readPixels()[0] == 9, "the target renders normally afterwards");
@@ -324,6 +332,171 @@ void textureLifetime() {
   Texture c(device(), 2, 2, TextureFormat::R8Coverage);
   c = std::move(b);
   expect(c.width() == 4, "move construction and assignment keep the texture");
+}
+
+void manyGlyphQuads() {
+  // 200 000 glyph quads in one frame (a long text view) used to exceed the 65 536-instance cap and
+  // end the application. They must render, with the right pixels, through grown ring buffers.
+  std::vector<uint8_t> coverage(16, 255);
+  Texture glyph(device(), 4, 4, TextureFormat::R8Coverage, coverage);
+  OffscreenTarget target(device(), 512, 512);
+  for (int frame = 0; frame < 3; ++frame) {  // repeated: the grown buffers are reused by the next frames of the slot
+    expect(target.beginFrame(kBlack), "begin");
+    Painter& p = target.painter();
+    for (uint32_t i = 0; i < 200000; ++i) {
+      const float x = static_cast<float>((i % 128) * 4);
+      const float y = static_cast<float>(((i / 128) % 128) * 4);
+      p.drawTexture(glyph.ref(), {x, y, 4, 4}, {0, 0, 1, 1}, rgb8(255, 255, 255));
+    }
+    p.fillRect({500, 500, 4, 4}, rgb8(10, 20, 30));  // after the glyphs: draw order is kept
+    expect(p.stats().texInstances == 200000 && p.stats().dropped == 0, "all glyph quads are recorded");
+    expect(target.endFrame(), "end");
+    const std::vector<uint8_t> px = target.readPixels();
+    const auto at = [&](uint32_t x, uint32_t y) { return &px[4 * (size_t{y} * 512 + x)]; };
+    expect(at(1, 1)[0] == 255 && at(100, 300)[1] == 255 && at(511, 511)[2] == 255, "the white quads cover the target");
+    expect(at(501, 501)[0] == 10 && at(501, 501)[1] == 20 && at(501, 501)[2] == 30, "a later draw lands on top of the glyphs");
+  }
+}
+
+// ---- failure handling ------------------------------------------------------------------------
+
+// A frame that fails after the texture writes were taken (here: right before the submission) must
+// not lose them, and must not leave a texture believing its first write already ran.
+void failedFrameKeepsUploads() {
+  const uint32_t before = device().validationMessageCount();
+  const std::vector<uint8_t> texels = {255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255};
+  Texture image(device(), 2, 2, TextureFormat::Rgba8Srgb, texels);
+  OffscreenTarget target(device(), 16, 16);
+  expect(target.beginFrame(kBlack), "begin");
+  target.painter().drawTexture(image.ref(), {0, 0, 2, 2}, {0, 0, 1, 1});
+  device().injectFault(FaultSite::BeforeSubmit);
+  expect(throws([&] { target.endFrame(); }), "the injected failure surfaces from endFrame");
+  expect(target.beginFrame(kBlack), "begin after the failed frame");
+  target.painter().drawTexture(image.ref(), {0, 0, 2, 2}, {0, 0, 1, 1});
+  expect(target.endFrame(), "end after the failed frame");
+  std::vector<uint8_t> px = target.readPixels();
+  const auto at = [&](uint32_t x, uint32_t y) { return &px[4 * (size_t{y} * 16 + x)]; };
+  expect(at(0, 0)[0] == 255 && at(0, 0)[1] == 0 && at(1, 0)[1] == 255 && at(0, 1)[2] == 255,
+         "the texture writes taken by the failed frame were restored and ran with the next frame");
+
+  // The same for a partial update queued behind the creation write, and for a texture whose
+  // creation write already ran (so the retry must transition from the shader-read layout).
+  const std::vector<uint8_t> white(4, 255);
+  Texture coverage(device(), 4, 4, TextureFormat::R8Coverage, std::vector<uint8_t>(16, 0));
+  expect(target.beginFrame(kBlack), "begin");
+  target.painter().drawTexture(coverage.ref(), {8, 8, 4, 4}, {0, 0, 1, 1});
+  expect(target.endFrame(), "creation write executed");
+  coverage.update(1, 1, 2, 2, white);
+  expect(target.beginFrame(kBlack), "begin");
+  target.painter().drawTexture(coverage.ref(), {8, 8, 4, 4}, {0, 0, 1, 1});
+  device().injectFault(FaultSite::BeforeSubmit);
+  expect(throws([&] { target.endFrame(); }), "second injected failure");
+  expect(target.beginFrame(kBlack), "begin");
+  target.painter().drawTexture(coverage.ref(), {8, 8, 4, 4}, {0, 0, 1, 1});
+  expect(target.endFrame(), "end");
+  px = target.readPixels();
+  expect(at(9, 9)[0] == 255 && at(10, 10)[0] == 255 && at(8, 8)[0] == 0, "the partial update survived the failed frame");
+  device().waitIdle();
+  expect(device().validationMessageCount() == before, "no validation messages (layouts stayed consistent)");
+}
+
+// A failed allocation of a frame slot's instance buffer leaves an empty buffer with capacity 0, so
+// the next frame allocates again instead of writing through a null mapping.
+void ringRegrowFailure() {
+  const uint32_t before = device().validationMessageCount();
+  OffscreenTarget target(device(), 64, 64);
+  const auto draw = [&](uint32_t count) {
+    expect(target.beginFrame(kBlack), "begin");
+    for (uint32_t i = 0; i < count; ++i) target.painter().fillRect({0, 0, 64, 64}, kWhite);
+    return target.endFrame();
+  };
+  expect(draw(10), "small frame");
+  device().injectFault(FaultSite::RingBuffer);
+  expect(throws([&] { draw(5000); }), "growing the ring buffer failed");
+  // Both frame slots alternate; several frames must recover and render.
+  for (int i = 0; i < 4; ++i) expect(draw(5000), "a following large frame renders");
+  expect(target.readPixels()[0] == 255, "and shows the content");
+  device().waitIdle();
+  expect(device().validationMessageCount() == before, "no validation messages");
+}
+
+// The swapchain is rebuilt from scratch after a failure part way: no half-built chain is used.
+void swapchainBuildFailure() {
+  platform::Window window({.title = "r1ui render test fault", .width = 320, .height = 200});
+  window.pumpEvents();
+  const uint32_t before = device().validationMessageCount();
+  WindowTarget target(device(), window);
+  expect(target.beginFrame(kBlack), "first frame");
+  target.painter().fillRect({0, 0, 40, 40}, kWhite);
+  expect(target.endFrame(), "first frame ends");
+  for (uint32_t after : {0u, 1u, 2u}) {
+    target.invalidate();
+    device().injectFault(FaultSite::SwapchainObject, after);
+    expect(throws([&] { target.beginFrame(kBlack); }), "building the new swapchain failed");
+    // The target must not draw into the half-built chain: the next begin rebuilds it.
+    expect(target.beginFrame(kBlack), "the next beginFrame retries and succeeds");
+    target.painter().fillRect({0, 0, 50, 50}, rgb8(10, 200, 10));
+    expect(target.endFrame(), "and the frame presents");
+  }
+  expect(target.width() == static_cast<uint32_t>(window.clientWidth()), "the swapchain matches the window");
+  device().waitIdle();
+  expect(device().validationMessageCount() == before, "no validation messages (nothing leaked, nothing half-built)");
+}
+
+// Textures created and destroyed faster than frames complete keep their descriptor sets until the
+// GPU is done; the pool must still serve every live texture up to the documented limit, and the
+// limit is reported with the documented exception type.
+void descriptorPoolChurn() {
+  const uint32_t before = device().validationMessageCount();
+  for (int i = 0; i < 3 * static_cast<int>(kMaxTextures); ++i) {
+    Texture churn(device(), 4, 4, TextureFormat::R8Coverage);  // created and destroyed with no frame in between
+  }
+  std::vector<std::unique_ptr<Texture>> live;
+  bool failed = false;
+  try {
+    for (uint32_t i = 0; i < kMaxTextures; ++i) live.push_back(std::make_unique<Texture>(device(), 4, 4, TextureFormat::R8Coverage));
+  } catch (const std::exception& e) {
+    failed = true;
+    std::fprintf(stderr, "unexpected failure at texture %zu: %s\n", live.size(), e.what());
+  }
+  expect(!failed && live.size() == kMaxTextures, "kMaxTextures live textures fit after heavy churn");
+  bool invalid = false;
+  bool other = false;
+  try {
+    Texture one_too_many(device(), 4, 4, TextureFormat::R8Coverage);
+  } catch (const std::invalid_argument&) {
+    invalid = true;
+  } catch (...) {
+    other = true;
+  }
+  expect(invalid && !other, "one texture too many is std::invalid_argument, as documented");
+  live.clear();
+  device().waitIdle();
+  expect(device().validationMessageCount() == before, "no validation messages");
+}
+
+// Thousands of small writes (a glyph atlas filling up) share staging blocks instead of one GPU
+// allocation each: before this took about 0.3 ms per update (1.5 s for 5000).
+void manySmallUpdates() {
+  const uint32_t before = device().validationMessageCount();
+  Texture atlas(device(), 1024, 1024, TextureFormat::R8Coverage);
+  OffscreenTarget target(device(), 1024, 8);
+  device().flushUploads();
+  using Clock = std::chrono::steady_clock;
+  const std::vector<uint8_t> tile(8 * 8, 200);
+  const auto t0 = Clock::now();
+  constexpr uint32_t kUpdates = 5000;
+  for (uint32_t i = 0; i < kUpdates; ++i) atlas.update((i % 128) * 8, (i / 128) % 128 * 8, 8, 8, tile);
+  expect(target.beginFrame(kBlack), "begin");
+  target.painter().drawTexture(atlas.ref(), {0, 0, 1024, 8}, {0, 0, 1, 8.0f / 1024.0f}, kWhite);
+  expect(target.endFrame(), "end");
+  const double ms = std::chrono::duration<double, std::milli>(Clock::now() - t0).count();
+  std::printf("%u 8x8 atlas updates + one frame: %.1f ms\n", kUpdates, ms);
+  expect(ms < 400.0, "5000 small updates stay fast (was 1500 ms with one allocation per update)");
+  const std::vector<uint8_t> px = target.readPixels();
+  expect(px[4 * (3 * 1024 + 9)] == 200 && px[4 * (3 * 1024 + 9) + 1] == 200, "the updates landed in the texture");
+  device().waitIdle();
+  expect(device().validationMessageCount() == before, "no validation messages");
 }
 
 void batchingStats() {
@@ -374,13 +547,8 @@ void hostileInputs() {
 
   OffscreenTarget target(device(), 16, 16);
   expect(target.beginFrame(kBlack), "begin");
-  bool limited = false;
-  try {
-    for (uint32_t i = 0; i <= kMaxInstancesPerFrame; ++i) target.painter().fillRect({0, 0, 1, 1}, kWhite);
-  } catch (const PaintLimitError&) {
-    limited = true;
-  }
-  expect(limited, "more instances than the documented maximum is a clear error");
+  for (uint32_t i = 0; i < kMaxInstancesPerFrame + 10; ++i) target.painter().fillRect({0, 0, 1, 1}, kWhite);
+  expect(target.painter().stats().dropped == 10, "draws beyond the documented maximum are counted, not thrown");
   expect(target.endFrame() && target.readPixels()[0] == 255, "the frame with the maximum number of instances still renders");
 
   expect(throws([&] { OffscreenTarget t(device(), 0, 8); }), "zero-sized offscreen target is rejected");
@@ -547,6 +715,9 @@ int main(int argc, char** argv) {
       {{"device_selection", deviceSelection}, {"exact_fill", exactFill},           {"rounded_aa", roundedAa},
        {"border_width", borderWidth},         {"shadow_blur", shadowBlur},         {"clip_correctness", clipCorrectness},
        {"alpha_blend", alphaBlend},           {"textured_quad", texturedQuad},     {"texture_lifetime", textureLifetime},
+       {"many_glyph_quads", manyGlyphQuads}, {"failed_frame_keeps_uploads", failedFrameKeepsUploads},
+       {"ring_regrow_failure", ringRegrowFailure}, {"swapchain_build_failure", swapchainBuildFailure},
+       {"descriptor_pool_churn", descriptorPoolChurn}, {"many_small_updates", manySmallUpdates},
        {"batching_stats", batchingStats},     {"hostile_inputs", hostileInputs},   {"panel_reference", panelReference},
        {"window_lifecycle", windowLifecycle}, {"multi_window", multiWindow},       {"frame_cost", frameCost},
        {"timings_and_memory", timingsAndMemory}},

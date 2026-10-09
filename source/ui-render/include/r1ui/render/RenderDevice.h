@@ -78,6 +78,14 @@ struct GpuMemoryUsage {
   uint64_t deviceLocalBudgetBytes = 0;  // what the OS lets this process use
 };
 
+// Points in the frame path where a test can make the next pass throw, to prove that the failure
+// handling keeps the device and targets usable (see RenderDevice::injectFault).
+enum class FaultSite {
+  SwapchainObject,  // while building the per-image views / framebuffers of a new swapchain
+  RingBuffer,       // while growing a frame slot's instance buffer
+  BeforeSubmit      // after a frame was recorded, right before it is submitted
+};
+
 class RenderDevice {
  public:
   explicit RenderDevice(const DeviceOptions& options = {});
@@ -95,6 +103,9 @@ class RenderDevice {
   uint32_t validationMessageCount() const;
   bool lost() const;
   GpuMemoryUsage memoryUsage() const;
+  // Draw batches skipped so far because their Texture was destroyed before the frame ended. The
+  // rest of such a frame is drawn normally.
+  uint64_t staleTextureDraws() const;
 
   // Blocks until the GPU is idle, then runs all deferred destruction.
   void waitIdle();
@@ -102,6 +113,11 @@ class RenderDevice {
   size_t collectGarbage();
   // Submits pending texture uploads now and waits for them (otherwise they ride the next frame).
   void flushUploads();
+
+  // Test seam: the (afterPasses + 1)th time execution passes `site`, one std::runtime_error is
+  // thrown, then the seam disarms. Production code never calls this; it costs one integer compare
+  // at three points that run once per frame or per swapchain build.
+  void injectFault(FaultSite site, uint32_t afterPasses = 0);
 
  // Private state; defined in vulkan/DeviceImpl.h and only used by the render library itself.
   struct Impl;

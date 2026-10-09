@@ -11,8 +11,9 @@
 //   painter(): valid between a successful beginFrame and endFrame; sized to width() x height().
 //   endFrame(): uploads the recorded draws, submits them and (windows) presents. Returns false
 //     when the frame had to be skipped (swapchain went out of date between begin and end; the
-//     next beginFrame recovers). Throws PaintLimitError / std::invalid_argument for a bad frame
-//     (nothing is submitted, the target stays usable) and DeviceLostError if the GPU is gone.
+//     next beginFrame recovers). Throws std::invalid_argument for a bad frame (nothing is
+//     submitted, the target stays usable) and DeviceLostError if the GPU is gone. Too many draws
+//     in one frame is not an error: see PaintStats::dropped.
 #pragma once
 
 #include <cstdint>

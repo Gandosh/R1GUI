@@ -1,10 +1,12 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: Engine::measure (cached dry sizing), Engine::commit (final sizing with clean-subtree
 //   skipping) and the measured-leaf path that talks to the host's MeasureProvider.
-// Why: see LayoutEngine.h. The cache is what keeps nested content-sized containers linear.
+// Why: see LayoutEngine.h. The node cache plus the pass memo keep nested content-sized containers linear.
 // Callers: FlexLayout.cpp, FlexContainer.cpp. Calls: runFlexContainer, MeasureProvider.
 #include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <new>
 
 #include "LayoutEngine.h"
 
@@ -20,7 +22,75 @@ double sanitizeExtent(double v) {
   return std::clamp(v, 0.0, kMaxExtent);
 }
 
+// FNV-1a over the bit patterns of the key; "+ 0.0" folds -0.0 into 0.0 so keys that compare equal
+// hash equal.
+size_t hashWords(const uint64_t* words, size_t count) {
+  uint64_t h = 1469598103934665603ULL;
+  for (size_t i = 0; i < count; ++i) {
+    h ^= words[i];
+    h *= 1099511628211ULL;
+    h ^= h >> 29;
+  }
+  return static_cast<size_t>(h);
+}
+
+uint64_t bitsOf(double v) {
+  v += 0.0;
+  uint64_t b = 0;
+  std::memcpy(&b, &v, sizeof b);
+  return b;
+}
+
 }  // namespace
+
+// ---- pass-scoped memo ----
+
+size_t MeasureMemo::hashOf(tree::WidgetId id, const SizeConstraint& c) {
+  const uint64_t words[8] = {(uint64_t{id.generation} << 32) | id.index,
+                              (uint64_t{static_cast<uint8_t>(c.w.mode)} << 8) | static_cast<uint8_t>(c.h.mode),
+                              bitsOf(c.w.size), bitsOf(c.w.min), bitsOf(c.w.max),
+                              bitsOf(c.h.size), bitsOf(c.h.min), bitsOf(c.h.max)};
+  return hashWords(words, 8);
+}
+
+const Size* MeasureMemo::find(tree::WidgetId id, const SizeConstraint& c) const {
+  if (slots_.empty()) return nullptr;
+  const size_t mask = slots_.size() - 1;
+  for (size_t i = hashOf(id, c) & mask;; i = (i + 1) & mask) {
+    const Slot& s = slots_[i];
+    if (!s.id.valid()) return nullptr;
+    if (s.id == id && s.key == c) return &s.result;
+  }
+}
+
+void MeasureMemo::grow() {
+  std::vector<Slot> old(slots_.empty() ? size_t{1024} : slots_.size() * 2);
+  old.swap(slots_);
+  const size_t mask = slots_.size() - 1;
+  for (const Slot& s : old) {
+    if (!s.id.valid()) continue;
+    size_t i = hashOf(s.id, s.key) & mask;
+    while (slots_[i].id.valid()) i = (i + 1) & mask;
+    slots_[i] = s;
+  }
+}
+
+void MeasureMemo::insert(tree::WidgetId id, const SizeConstraint& c, const Size& result) {
+  if (count_ >= kMaxEntries) return;
+  if (find(id, c) != nullptr) return;
+  if ((count_ + 1) * 2 > slots_.size()) {
+    try {
+      grow();
+    } catch (const std::bad_alloc&) {
+      return;  // the memo is an optimisation: out of memory only makes this pass slower
+    }
+  }
+  const size_t mask = slots_.size() - 1;
+  size_t i = hashOf(id, c) & mask;
+  while (slots_[i].id.valid()) i = (i + 1) & mask;
+  slots_[i] = Slot{id, c, result};
+  ++count_;
+}
 
 MeasureResult Engine::callMeasure(tree::WidgetId id, const MeasureInput& input) {
   ++stats_.measureCalls;
@@ -93,9 +163,22 @@ Size Engine::measure(tree::WidgetId id, const SizeConstraint& c) {
       return Size{st.cache[i].width, st.cache[i].height};
     }
   }
+  // Entries pushed out of the node cache during this pass live in the memo, so a node asked more
+  // than kCacheSlots distinct questions still computes each answer once.
+  if (st.spillPass == pass_) {
+    if (const Size* known = memo_.find(id, c)) {
+      ++stats_.cacheHits;
+      return *known;
+    }
+  }
   const Size result = node->style.hasMeasure ? measureLeaf(id, c) : runFlexContainer(*this, id, c, false);
   // runFlexContainer may have measured descendants but never touches this node's cache.
-  st.cache[st.cacheNext] = NodeLayoutState::Entry{c, result.w, result.h};
+  NodeLayoutState::Entry& slot = st.cache[st.cacheNext];
+  if (st.cacheCount == NodeLayoutState::kCacheSlots) {
+    memo_.insert(id, slot.key, Size{slot.width, slot.height});
+    st.spillPass = pass_;
+  }
+  slot = NodeLayoutState::Entry{c, result.w, result.h};
   st.cacheNext = static_cast<uint8_t>((st.cacheNext + 1) % NodeLayoutState::kCacheSlots);
   if (st.cacheCount < NodeLayoutState::kCacheSlots) ++st.cacheCount;
   return result;
