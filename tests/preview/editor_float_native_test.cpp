@@ -8,9 +8,10 @@
 // Why: a panel's content lives in the context of the window it is shown in, so floating (or docking)
 //   the panel destroys the content, and the context, that is dispatching the very key event that asked
 //   for it. The contract (docs/dev/docking.md section 5) is that this is legal; this test proves it
-//   for every panel type of the preview. The loop is paced like the application's (a short wait per step):
-//   a hot loop of frames with no wait stalls the display driver's present call for good, which is a
-//   property of the test loop, not of the commands.
+//   for every panel type of the preview. The loop waits 16 ms per step like the application's; with
+//   R1GUI_TEST_PACE=-1 it never waits. That used to stall the display driver's present call for good (a
+//   bug of the renderer, fixed: docs/dev/native-windows.md section 12), so both variants must pass;
+//   preview-editor-float-stress-test covers the unpaced loop in depth.
 // Callers: CTest (label gpu). Skips itself (SKIPPED, exit 0) without an interactive desktop or GPU.
 #include <windows.h>
 

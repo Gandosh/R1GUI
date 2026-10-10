@@ -24,6 +24,9 @@ target_include_directories(preview-editor-float-native-test PRIVATE
 target_compile_definitions(preview-editor-float-native-test PRIVATE ${R1UI_PREVIEW_TEST_DEFS} R1UI_ARTIFACT_DIR="${CMAKE_BINARY_DIR}/artifacts/preview")
 add_test(NAME preview.editor_float_native COMMAND preview-editor-float-native-test)
 set_tests_properties(preview.editor_float_native PROPERTIES LABELS "gpu" TIMEOUT 300)
+# The same scenarios with a loop that never waits between steps (it used to stall the present call for good).
+add_test(NAME preview.editor_float_native_unpaced COMMAND preview-editor-float-native-test)
+set_tests_properties(preview.editor_float_native_unpaced PROPERTIES LABELS "gpu" TIMEOUT 300 ENVIRONMENT "R1GUI_TEST_PACE=-1")
 
 # Stress mix of native floating windows (create, destroy, hide, minimize, move) with a hang watchdog.
 add_executable(preview-editor-float-stress-test editor_float_stress_test.cpp)

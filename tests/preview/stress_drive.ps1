@@ -274,12 +274,13 @@ try {
       $dstTab = if ($n -eq 4) { 2 } else { 4 }
       $dst = TabPos $dstTab
       $t = TabPos $n
-      if ($null -eq $t -or $null -eq $dst) { Say '  (tab not found, relaunching)'; try { $script:proc.Kill() } catch {}; Launch 'relaunch'; continue }
+      if ($null -eq $t -or $null -eq $dst) { Say '  (a tab is gone after an earlier close, starting a fresh preview; the round is repeated)'; try { $script:proc.Kill() } catch {}; Launch 'relaunch'; $it--; continue }
       $before = @(Floats).Count
       Click $t[0] $t[1]
       KeyTap 'F' @('Ctrl', 'Alt')
       if (-not (WaitFor { @(Floats).Count -eq ($before + 1) } 4000)) { if (-not (Probe "round $it after Ctrl+Alt+F")) { continue }; Say '  (the chord did not float the tab)' }
       if (-not (Probe "round $it after float")) { continue }
+      Say "  tab $n floated: $(@(Floats).Count) floating window(s), $(@([W]::Windows($script:procId)).Count) visible top-level window(s)"
       Start-Sleep -Milliseconds 400
       switch ($it % 4) {
         0 {
@@ -309,6 +310,7 @@ try {
         }
       }
       if (-not (Probe "round $it after the window ending")) { continue }
+      Say "  ending $($it % 4): $(@(Floats).Count) floating window(s) left"
       if ($it % 4 -eq 0) {
         EnsureForeground
         $c = WidgetCenter 'menu' 'Custom Menus'
@@ -321,6 +323,7 @@ try {
             $f = @(Floats) | Select-Object -Last 1
             [void][W]::PostMessage([IntPtr]([Convert]::ToInt64($f.hwnd, 16)), 0x10, [IntPtr]::Zero, [IntPtr]::Zero)
             [void](WaitFor { @(Floats).Count -eq 0 } 4000)
+            Say "  creator window opened and closed ($(@(Floats).Count) floating left)"
           }
           if (-not (Probe "round $it after the creator closed")) { continue }
         }

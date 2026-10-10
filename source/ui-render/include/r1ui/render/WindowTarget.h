@@ -1,12 +1,13 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the presentation surface and swapchain of one OS window, plus its per-frame-in-flight
-//   resources (command buffers, instance ring buffers, acquire semaphores).
+//   resources (command buffers, instance ring buffers, the acquire fence and the per-image present fences).
 // Why: every toolkit window (main window and floating panels) is one WindowTarget on the shared
 //   RenderDevice; each recreates its own swapchain independently.
 // Callers: application shell, Renderer facade, tests. Calls: Window::nativeHandle(),
 //   clientWidth(), clientHeight() only.
 // Lifetime: the Window and the RenderDevice must outlive the WindowTarget; destroy the target
-//   before the window. The destructor waits for the GPU (it never throws).
+//   before the window. The destructor waits (bounded, see "Waits") for the window's own GPU work and
+//   presents and never throws.
 // Resize: beginFrame compares the window's client size with the size the swapchain was built for
 //   and recreates it on change; VK_ERROR_OUT_OF_DATE / SUBOPTIMAL also trigger a recreate. A
 //   recreate waits (bounded) for this window's own last frames and presents only, never for other
