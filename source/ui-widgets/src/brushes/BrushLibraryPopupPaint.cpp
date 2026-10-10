@@ -51,6 +51,34 @@ double textWidth(PaintContext& ctx, std::string_view text, double size, int weig
   return static_cast<double>(ctx.ui().text().measure(text, static_cast<float>(size * ctx.scale()), weight)) / ctx.scale();
 }
 
+// Greedy word wrap into at most `maxLines` lines of `room` logical pixels; the last line takes the rest (the
+// caller draws it with an ellipsis when it is still too long).
+std::vector<std::string> wrapWords(PaintContext& ctx, const std::string& text, double size, int weight, double room, size_t maxLines) {
+  std::vector<std::string> lines;
+  std::string current;
+  size_t pos = 0;
+  while (pos < text.size()) {
+    size_t end = text.find(' ', pos);
+    if (end == std::string::npos) end = text.size();
+    const std::string word = text.substr(pos, end - pos);
+    const std::string candidate = current.empty() ? word : current + " " + word;
+    if (!current.empty() && textWidth(ctx, candidate, size, weight) > room) {
+      lines.push_back(current);
+      if (lines.size() + 1 >= maxLines) {
+        current = text.substr(pos);
+        pos = text.size();
+        break;
+      }
+      current = word;
+    } else {
+      current = candidate;
+    }
+    pos = end + 1;
+  }
+  if (!current.empty()) lines.push_back(current);
+  return lines;
+}
+
 // The first `count` code points of a UTF-8 string.
 std::string leading(const std::string& text, size_t count) {
   size_t pos = 0;
@@ -295,7 +323,7 @@ void BrushLibraryPopup::paintTile(PaintContext& ctx, size_t tile, const RectD& g
   // Favourite star: always for a favourite, on hover for the others.
   const bool hovered = static_cast<int>(tile) == hoverTile_;
   if (info.favourite || hovered) {
-    const RectD star{thumb.x + thumb.w - 22.0, thumb.y + 2.0, 20.0, 20.0};
+    const RectD star{thumb.x + thumb.w - 22.0, thumb.y + thumb.h - 22.0, 20.0, 20.0};
     if (hovered && hoverStar_) painter.fillRoundedRect(ctx.toPhysical(star.x, star.y, star.w, star.h), radius(ctx, 10.0), withAlpha(ctx.color("panel"), 0.9f));
     ctx.drawIcon("star", 14.0, ctx.toPhysical(star.x, star.y, star.w, star.h), info.favourite ? ctx.color("warning-action") : ctx.color("muted"));
   }
@@ -330,7 +358,13 @@ void BrushLibraryPopup::paintFooter(PaintContext& ctx) {
   else count = std::to_string(result_.totalCount) + (result_.totalCount == 1 ? " brush" : " brushes");
   const double countW = std::ceil(textWidth(ctx, count, 11.0, 400)) + 4.0;
   line(ctx, count, {option.x - countW - 10.0, option.y, countW, option.h}, 11.0, 400, ctx.color("muted"), TextAlign::End);
-  line(ctx, hint(), {f.x + 12.0, f.y + 2.0, std::max(0.0, option.x - countW - 36.0 - f.x), f.h - 4.0}, 11.0, 400, notice_.empty() ? ctx.color("muted") : ctx.color("surface"));
+  // The hint wraps over two lines beside the count and the option.
+  const double hintRoom = std::max(0.0, option.x - countW - 36.0 - f.x);
+  const std::vector<std::string> hintLines = wrapWords(ctx, hint(), 11.0, 400, hintRoom, 2);
+  const double hintTop = f.y + (f.h - 15.0 * static_cast<double>(std::max<size_t>(1, hintLines.size()))) * 0.5;
+  for (size_t i = 0; i < hintLines.size(); ++i) {
+    line(ctx, hintLines[i], {f.x + 12.0, hintTop + 15.0 * static_cast<double>(i), hintRoom, 15.0}, 11.0, 400, notice_.empty() ? ctx.color("muted") : ctx.color("surface"));
+  }
 }
 
 // ---- popovers -----------------------------------------------------------------------------------
@@ -386,19 +420,9 @@ void BrushLibraryPopup::paintPopovers(PaintContext& ctx) {
     // The feedback sentence wraps over up to three lines of the remaining width.
     const double textX = box.x + 64.0;
     const double room = box.w - 76.0;
-    std::string rest = assign_.feedback;
-    for (int row = 0; row < 3 && !rest.empty(); ++row) {
-      size_t cut = rest.size();
-      while (cut > 0 && textWidth(ctx, rest.substr(0, cut), 11.0, 400) > room) {
-        cut = rest.rfind(' ', cut - 1);
-        if (cut == std::string::npos) {
-          cut = 0;
-          break;
-        }
-      }
-      if (cut == 0) cut = rest.size();
-      line(ctx, rest.substr(0, cut), {textX, box.y + 34.0 + row * 14.0, room, 14.0}, 11.0, 400, ctx.color("muted"), TextAlign::Start, false);
-      rest = cut >= rest.size() ? std::string() : rest.substr(cut + 1);
+    const std::vector<std::string> rows = wrapWords(ctx, assign_.feedback, 11.0, 400, room, 3);
+    for (size_t row = 0; row < rows.size(); ++row) {
+      line(ctx, rows[row], {textX, box.y + 34.0 + 14.0 * static_cast<double>(row), room, 14.0}, 11.0, 400, ctx.color("muted"));
     }
     line(ctx, "Enter assigns  -  Delete clears  -  Esc cancels", {box.x + 12.0, box.y + box.h - 26.0, box.w - 24.0, 18.0}, 10.0, 400, ctx.color("muted"));
   }

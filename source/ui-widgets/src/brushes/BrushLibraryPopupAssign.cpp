@@ -58,9 +58,19 @@ void BrushLibraryPopup::showMenu(uint32_t brush) {
   for (size_t t = 0; t < result_.tiles.size(); ++t) {
     if (result_.tiles[t].brush != brush) continue;
     const RectD tile = tileRect(t);
-    if (tile.w > 0.0) openMenu(brush, tile.x + tile.w * 0.5, tile.y + tile.h * 0.5);
-    return;
+    if (tile.w > 0.0) {
+      openMenu(brush, tile.x + tile.w * 0.5, tile.y + tile.h * 0.5);
+      return;
+    }
+    break;
   }
+  // Not laid out yet (a gallery page builds the popup before the first frame): a fixed spot in the grid.
+  const core::layout::Rect self = ui().absRect(id());
+  openMenu(brush, self.x + 160.0, self.y + bx::kGridTop + 40.0);
+}
+
+void BrushLibraryPopup::previewAssign(char32_t letter) {
+  if (assign_.open) assignCharacter(letter);
 }
 
 RectD BrushLibraryPopup::menuRect() const {

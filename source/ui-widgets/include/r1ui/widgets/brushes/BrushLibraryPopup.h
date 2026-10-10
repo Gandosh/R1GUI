@@ -124,6 +124,8 @@ class BrushLibraryPopup : public WidgetObject {
   // Opens the Assign letter popover or the tile menu for a brush, as F2 and a right click do.
   void openAssign(uint32_t brush);
   void showMenu(uint32_t brush);
+  // Types a letter into the open Assign letter popover (the gallery shows its conflict feedback).
+  void previewAssign(char32_t letter);
 
  private:
   struct Chip {

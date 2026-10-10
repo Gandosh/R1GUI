@@ -19,6 +19,8 @@ void TileLayout::build(double width, uint32_t recentCount, uint32_t tileCount, b
 
   recentCount = std::min(recentCount, tileCount);
   sectionCount_ = 0;
+  sections_[0] = Section{};
+  sections_[1] = Section{};
   double y = kGridPad;
   const auto add = [&](uint32_t first, uint32_t count, bool header) {
     if (count == 0) return;

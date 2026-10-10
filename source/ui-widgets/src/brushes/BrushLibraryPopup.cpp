@@ -130,7 +130,7 @@ RectD BrushLibraryPopup::starRect(size_t tile) const {
   if (r.w <= 0.0) return {};
   const bx::TileRect thumb = layout_->thumbRect(static_cast<uint32_t>(tile));
   const bx::TileRect cell = layout_->tileRect(static_cast<uint32_t>(tile));
-  return {r.x + (thumb.x - cell.x) + thumb.w - 22.0, r.y + (thumb.y - cell.y) + 2.0, 20.0, 20.0};
+  return {r.x + (thumb.x - cell.x) + thumb.w - 22.0, r.y + (thumb.y - cell.y) + thumb.h - 22.0, 20.0, 20.0};
 }
 
 int BrushLibraryPopup::tileAt(double x, double y) const {
