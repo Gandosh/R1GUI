@@ -31,3 +31,7 @@ target_link_libraries(preview-editor-float-stress-test PRIVATE r1gui-preview-cor
 target_include_directories(preview-editor-float-stress-test PRIVATE
   ${CMAKE_SOURCE_DIR}/tests/ui-widgets/support ${CMAKE_SOURCE_DIR}/tests/ui-widgets/dock ${CMAKE_SOURCE_DIR}/tests/ui-widgets/dock/native)
 target_compile_definitions(preview-editor-float-stress-test PRIVATE ${R1UI_PREVIEW_TEST_DEFS} R1UI_ARTIFACT_DIR="${CMAKE_BINARY_DIR}/artifacts/preview")
+# The application's own blocking loop, and the unpaced scenario that stalled before the fix, three processes at once.
+add_test(NAME preview.float_stress_blocking COMMAND preview-editor-float-stress-test blocking 20 1)
+add_test(NAME preview.float_stress_unpaced_x3 COMMAND preview-editor-float-stress-test x3-unpaced-again 15 1)
+set_tests_properties(preview.float_stress_blocking preview.float_stress_unpaced_x3 PROPERTIES LABELS "gpu" TIMEOUT 120)

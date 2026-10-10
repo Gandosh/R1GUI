@@ -71,6 +71,21 @@ std::string readEnv(const char* name) {
 #endif
 }
 
+bool instanceSupportsExtension(const char* name) {
+  uint32_t count = 0;
+  if (vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr) != VK_SUCCESS) return false;
+  std::vector<VkExtensionProperties> extensions(count);
+  if (vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data()) != VK_SUCCESS) return false;
+  return std::any_of(extensions.begin(), extensions.end(),
+                     [name](const VkExtensionProperties& e) { return std::strcmp(e.extensionName, name) == 0; });
+}
+
+// The two instance extensions present fences depend on.
+bool surfaceMaintenanceAvailable() {
+  return instanceSupportsExtension(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME) &&
+         instanceSupportsExtension(VK_EXT_SURFACE_MAINTENANCE_1_EXTENSION_NAME);
+}
+
 bool layerAvailable(const char* name) {
   uint32_t count = 0;
   if (vkEnumerateInstanceLayerProperties(&count, nullptr) != VK_SUCCESS) return false;
@@ -204,6 +219,11 @@ const Candidate& choose(const std::vector<Candidate>& candidates, const DeviceOp
 // Creates an instance, with the validation layer and messenger when `validation` is true.
 VkInstance createInstance(bool validation) {
   std::vector<const char*> extensions = {VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME};
+  // Present fences (VK_EXT_swapchain_maintenance1) need these two instance extensions as well.
+  if (surfaceMaintenanceAvailable()) {
+    extensions.push_back(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
+    extensions.push_back(VK_EXT_SURFACE_MAINTENANCE_1_EXTENSION_NAME);
+  }
   std::vector<const char*> layers;
   if (validation) {
     layers.push_back("VK_LAYER_KHRONOS_validation");
@@ -269,6 +289,20 @@ void RenderDevice::Impl::init(const DeviceOptions& options) {
     if (memoryBudget) deviceExtensions.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
     VkPhysicalDeviceVulkan12Features features12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES};
     features12.timelineSemaphore = VK_TRUE;
+    // Present fences give a window its own "my last present is done" signal, so closing or resizing it
+    // never has to wait for the whole device. Used only when the instance extensions are on, too.
+    VkPhysicalDeviceSwapchainMaintenance1FeaturesEXT maintenance1{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_EXT};
+    if (surfaceMaintenanceAvailable() && deviceSupportsExtension(physical, VK_EXT_SWAPCHAIN_MAINTENANCE_1_EXTENSION_NAME)) {
+      VkPhysicalDeviceFeatures2 query{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+      query.pNext = &maintenance1;
+      vkGetPhysicalDeviceFeatures2(physical, &query);
+      if (maintenance1.swapchainMaintenance1 == VK_TRUE) {
+        swapchainMaintenance1 = true;
+        deviceExtensions.push_back(VK_EXT_SWAPCHAIN_MAINTENANCE_1_EXTENSION_NAME);
+        maintenance1.pNext = features12.pNext;
+        features12.pNext = &maintenance1;
+      }
+    }
     VkDeviceCreateInfo deviceInfo{VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
     deviceInfo.pNext = &features12;
     deviceInfo.queueCreateInfoCount = 1;
@@ -309,6 +343,7 @@ RenderDevice::Impl::~Impl() {
     pending.clear();  // staging chunks and recycled chunks hold buffers: free them while the device lives
     activeChunks.clear();
     deferred.clear();  // may recycle chunks into freeChunks
+    abandoned.clear();  // swapchains and surfaces a window could not release in time
     freeChunks.clear();
     pipelines.reset();
     if (timeline != VK_NULL_HANDLE) vkDestroySemaphore(device, timeline, nullptr);
@@ -365,6 +400,18 @@ uint64_t RenderDevice::Impl::submit(VkCommandBuffer commands, VkSemaphore waitBi
   vk(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE), "vkQueueSubmit");
   submitted = serial;
   return serial;
+}
+
+bool RenderDevice::Impl::waitSerialFor(uint64_t serial, uint64_t timeoutNs) {
+  if (serial == 0) return true;
+  VkSemaphoreWaitInfo wait{VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO};
+  wait.semaphoreCount = 1;
+  wait.pSemaphores = &timeline;
+  wait.pValues = &serial;
+  const VkResult result = vkWaitSemaphores(device, &wait, timeoutNs);
+  if (result == VK_TIMEOUT) return false;
+  vk(result, "vkWaitSemaphores");
+  return true;
 }
 
 void RenderDevice::Impl::waitSerial(uint64_t serial) {

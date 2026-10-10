@@ -676,6 +676,73 @@ void multiWindow() {
   device().waitIdle();
 }
 
+// Several windows drawn back to back while another, owned window is created and destroyed on every
+// round, as fast as the loop can go and for a few seconds: the pattern that stopped every present of the
+// process when a frame's GPU work waited for the presentation engine in the shared queue. Here no call may
+// take more than a couple of seconds (a stall is then a failure instead of a hung test), every window must
+// keep presenting, and the closing windows must not leak or raise validation messages.
+void windowWaitsBounded() {
+  using Clock = std::chrono::steady_clock;
+  constexpr double kSlowMs = 2000.0;
+  const auto since = [](Clock::time_point t) { return std::chrono::duration<double, std::milli>(Clock::now() - t).count(); };
+  const uint32_t messages = device().validationMessageCount();
+
+  std::vector<std::unique_ptr<platform::Window>> windows;
+  std::vector<std::unique_ptr<WindowTarget>> targets;
+  for (int i = 0; i < 3; ++i) {
+    platform::WindowDesc desc;
+    desc.title = "r1ui render test wait " + std::to_string(i);
+    desc.width = 260 + 40 * i;
+    desc.height = 180;
+    desc.position = platform::Point{80 + 60 * i, 80 + 40 * i};
+    windows.push_back(std::make_unique<platform::Window>(desc));
+    targets.push_back(std::make_unique<WindowTarget>(device(), *windows.back()));
+  }
+  std::vector<uint64_t> presented(targets.size(), 0);
+  double slowest = 0.0;
+  const auto frame = [&](WindowTarget& target, platform::Window& window, int round) {
+    window.pumpEvents();
+    const auto t0 = Clock::now();
+    bool shown = false;
+    if (target.beginFrame(rgb8(20, 20, 40))) {
+      target.painter().fillRect({static_cast<float>(round % 100), 10, 60, 40}, rgb8(200, 120, 20));
+      shown = target.endFrame();
+    }
+    slowest = std::max(slowest, since(t0));
+    return shown;
+  };
+
+  const auto deadline = Clock::now() + std::chrono::seconds(4);
+  int rounds = 0;
+  while (Clock::now() < deadline) {
+    for (size_t i = 0; i < targets.size(); ++i) presented[i] += frame(*targets[i], *windows[i], rounds) ? 1u : 0u;
+    platform::WindowDesc owned;
+    owned.title = "r1ui render test owned";
+    owned.width = 200;
+    owned.height = 140;
+    owned.borderless = true;
+    owned.toolWindow = true;
+    owned.owner = windows.front().get();
+    const auto t0 = Clock::now();
+    {
+      platform::Window transient(owned);
+      WindowTarget target(device(), transient);
+      for (int k = 0; k < 3; ++k) frame(target, transient, k);
+      for (size_t i = 0; i < targets.size(); ++i) presented[i] += frame(*targets[i], *windows[i], rounds) ? 1u : 0u;
+    }
+    slowest = std::max(slowest, since(t0));
+    ++rounds;
+  }
+  std::printf("window waits: %d rounds, slowest call %.1f ms, frames presented per window %llu/%llu/%llu\n", rounds, slowest,
+              static_cast<unsigned long long>(presented[0]), static_cast<unsigned long long>(presented[1]),
+              static_cast<unsigned long long>(presented[2]));
+  expect(slowest < kSlowMs, "no frame, window creation or window destruction waited more than " + std::to_string(kSlowMs) + " ms");
+  for (size_t i = 0; i < presented.size(); ++i) expect(presented[i] > 10, "window " + std::to_string(i) + " keeps presenting");
+  targets.clear();
+  device().waitIdle();
+  expect(device().validationMessageCount() == messages, "no validation messages while windows come and go");
+}
+
 // ---- cost ------------------------------------------------------------------------------------
 
 void frameCost() {
@@ -719,7 +786,7 @@ int main(int argc, char** argv) {
        {"ring_regrow_failure", ringRegrowFailure}, {"swapchain_build_failure", swapchainBuildFailure},
        {"descriptor_pool_churn", descriptorPoolChurn}, {"many_small_updates", manySmallUpdates},
        {"batching_stats", batchingStats},     {"hostile_inputs", hostileInputs},   {"panel_reference", panelReference},
-       {"window_lifecycle", windowLifecycle}, {"multi_window", multiWindow},       {"frame_cost", frameCost},
+       {"window_lifecycle", windowLifecycle}, {"multi_window", multiWindow},       {"window_waits_bounded", windowWaitsBounded}, {"frame_cost", frameCost},
        {"timings_and_memory", timingsAndMemory}},
       argc, argv);
   if (deviceSlot()) {

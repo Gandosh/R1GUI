@@ -142,6 +142,7 @@ PreviewApp::PreviewApp(const AppOptions& options) : started_(Clock::now()), path
       ui->setTime(nowMs());
       wake = ui->msUntilTick();
     }
+    if (const uint32_t retry = target_->retryDelayMs(); retry > 0) wake = wake ? std::min<uint64_t>(*wake, retry) : std::optional<uint64_t>(retry);
     if (editor_ && mode() == Mode::Editor) {
       if (const std::optional<uint64_t> save = editor_->msUntilTick()) wake = wake ? std::min(*wake, *save) : *save;
     }
@@ -477,6 +478,7 @@ void PreviewApp::paintMode(r1ui::render::Painter& painter) {
 
 bool PreviewApp::needsFrame() {
   const widgets::UiContext* ui = activeUi();
+  if (target_->retryDelayMs() > 0) return false;  // the compositor stopped serving the window: wait out the back-off
   return redraw_ || scene_->needsFrame() || (ui != nullptr && ui->needsFrame());
 }
 
