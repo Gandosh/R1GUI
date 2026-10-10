@@ -123,6 +123,10 @@ Each widget is compared against its Phase 1 reference screenshots.
 - [x] 5.17 [Create Custom Menu window and the Custom Menus top-level menu](Goal/evidence/P5_S17.md)
 - [x] 5.18 [Save and load a custom menu (.r1mn) and a custom workspace](Goal/evidence/P5_S18.md)
 - [x] 5.19 [Preview: the new menu creator, hotkey editor, pie menu and workspaces](Goal/evidence/P5_S19.md)
+- [ ] 5.20 [Brush library model: brushes, categories, favorites, quick-letter resolution (owner, 2026-10-10)](Goal/evidence/P5_S20.md)
+- [ ] 5.21 [Brush library popup: press B anywhere, type letters to pick a brush](Goal/evidence/P5_S21.md)
+- [ ] 5.22 [Brush library: thumbnails, categories, search, customize order and letters, persistence](Goal/evidence/P5_S22.md)
+- [ ] 5.23 [Preview: brush library on a sample brush set in the Editor screen](Goal/evidence/P5_S23.md)
 
 **P5 owner gate: PENDING** — [phase close record](Goal/evidence/P5_close.md)
 
