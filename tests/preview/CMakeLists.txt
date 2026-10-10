@@ -24,3 +24,17 @@ target_include_directories(preview-editor-float-native-test PRIVATE
 target_compile_definitions(preview-editor-float-native-test PRIVATE ${R1UI_PREVIEW_TEST_DEFS} R1UI_ARTIFACT_DIR="${CMAKE_BINARY_DIR}/artifacts/preview")
 add_test(NAME preview.editor_float_native COMMAND preview-editor-float-native-test)
 set_tests_properties(preview.editor_float_native PROPERTIES LABELS "gpu" TIMEOUT 300)
+# The same scenarios with a loop that never waits between steps (it used to stall the present call for good).
+add_test(NAME preview.editor_float_native_unpaced COMMAND preview-editor-float-native-test)
+set_tests_properties(preview.editor_float_native_unpaced PROPERTIES LABELS "gpu" TIMEOUT 300 ENVIRONMENT "R1GUI_TEST_PACE=-1")
+
+# Stress mix of native floating windows (create, destroy, hide, minimize, move) with a hang watchdog.
+add_executable(preview-editor-float-stress-test editor_float_stress_test.cpp)
+target_link_libraries(preview-editor-float-stress-test PRIVATE r1gui-preview-core r1ui::widgets_gpu r1ui_options)
+target_include_directories(preview-editor-float-stress-test PRIVATE
+  ${CMAKE_SOURCE_DIR}/tests/ui-widgets/support ${CMAKE_SOURCE_DIR}/tests/ui-widgets/dock ${CMAKE_SOURCE_DIR}/tests/ui-widgets/dock/native)
+target_compile_definitions(preview-editor-float-stress-test PRIVATE ${R1UI_PREVIEW_TEST_DEFS} R1UI_ARTIFACT_DIR="${CMAKE_BINARY_DIR}/artifacts/preview")
+# The application's own blocking loop, and the unpaced scenario that stalled before the fix, three processes at once.
+add_test(NAME preview.float_stress_blocking COMMAND preview-editor-float-stress-test blocking 20 1)
+add_test(NAME preview.float_stress_unpaced_x3 COMMAND preview-editor-float-stress-test x3-unpaced-again 15 1)
+set_tests_properties(preview.float_stress_blocking preview.float_stress_unpaced_x3 PROPERTIES LABELS "gpu" TIMEOUT 120)

@@ -161,6 +161,7 @@ void NativeWindow::applyTitle() {
 
 bool NativeWindow::needsFrame() const {
   if (!window_->isAlive() || !shown || !window_->isVisible() || window_->clientWidth() <= 0 || window_->clientHeight() <= 0) return false;
+  if (target_->retryDelayMs() > 0) return false;  // the compositor stopped serving this window: no frame until the back-off ends
   return redraw_ || ui_->needsFrame();
 }
 
@@ -179,7 +180,10 @@ bool NativeWindow::render(uint64_t nowMs) {
 
 std::optional<uint64_t> NativeWindow::msUntilTick(uint64_t nowMs) {
   ui_->setTime(nowMs);
-  return ui_->msUntilTick();
+  std::optional<uint64_t> ms = ui_->msUntilTick();
+  // A window waiting out a back-off has a frame owed: wake up when the back-off ends.
+  if (const uint32_t retry = target_->retryDelayMs(); retry > 0) ms = ms ? std::min<uint64_t>(*ms, retry) : std::optional<uint64_t>(retry);
+  return ms;
 }
 
 }  // namespace r1ui::widgets::native

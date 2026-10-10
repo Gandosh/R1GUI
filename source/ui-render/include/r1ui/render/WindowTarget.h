@@ -1,16 +1,26 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: the presentation surface and swapchain of one OS window, plus its per-frame-in-flight
-//   resources (command buffers, instance ring buffers, acquire semaphores).
+//   resources (command buffers, instance ring buffers, the acquire fence and the per-image present fences).
 // Why: every toolkit window (main window and floating panels) is one WindowTarget on the shared
 //   RenderDevice; each recreates its own swapchain independently.
 // Callers: application shell, Renderer facade, tests. Calls: Window::nativeHandle(),
 //   clientWidth(), clientHeight() only.
 // Lifetime: the Window and the RenderDevice must outlive the WindowTarget; destroy the target
-//   before the window. The destructor waits for the GPU (it never throws).
+//   before the window. The destructor waits (bounded, see "Waits") for the window's own GPU work and
+//   presents and never throws.
 // Resize: beginFrame compares the window's client size with the size the swapchain was built for
 //   and recreates it on change; VK_ERROR_OUT_OF_DATE / SUBOPTIMAL also trigger a recreate. A
-//   recreate stalls the GPU (vkDeviceWaitIdle) once; this is the documented cost of a resize.
+//   recreate waits (bounded) for this window's own last frames and presents only, never for other
+//   windows; the first swapchain of a window waits for nothing.
 //   A zero-sized (minimized) window makes beginFrame return false.
+// Waits: no call blocks for good. Waiting for a free swapchain image, for the image's fence and for the
+//   window's earlier GPU work is bounded (a few ms to one second); when the image does not come back in
+//   time endFrame() returns false (the frame is dropped, nothing is presented) and the caller draws
+//   again on its next step. After several drops in a row beginFrame() returns false for a short back-off
+//   (retryDelayMs() says how long) instead of paying the waits every step; a window the compositor
+//   stopped serving (hidden, occluded, not responding) therefore costs next to nothing and resumes by
+//   itself. Closing a window waits at most about a second for its last presents and otherwise hands the
+//   swapchain to the device, which frees it at its own teardown.
 // Present mode: FIFO is always available and is the default. Mailbox / Immediate are used when
 //   the surface offers them, otherwise FIFO; presentMode() reports the effective mode.
 #pragma once
@@ -56,6 +66,10 @@ class WindowTarget final : public RenderTarget {
   // Number of swapchains built so far (1 after construction).
   uint32_t swapchainGeneration() const;
   FrameTimings lastFrameTimings() const;
+  // Frames dropped since creation because no swapchain image came back in time (see "Waits").
+  uint64_t droppedFrames() const;
+  // Milliseconds until beginFrame() tries again after repeated drops; 0 when the window is not backing off.
+  uint32_t retryDelayMs() const;
 
  private:
   struct Impl;

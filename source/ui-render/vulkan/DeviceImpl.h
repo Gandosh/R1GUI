@@ -128,12 +128,15 @@ struct RenderDevice::Impl {
   uint32_t validationMessages = 0;
   bool lost = false;
   bool memoryBudget = false;  // VK_EXT_memory_budget enabled (RenderDevice::memoryUsage)
+  bool swapchainMaintenance1 = false;  // VK_EXT_swapchain_maintenance1 enabled: present fences (WindowTarget)
   VkCommandPool pool = VK_NULL_HANDLE;
   VkSemaphore timeline = VK_NULL_HANDLE;
   uint64_t submitted = 0;
   std::unique_ptr<detail::Pipelines> pipelines;
 
   std::deque<std::pair<uint64_t, detail::Retired>> deferred;
+  // Swapchains whose presents did not finish in time (WindowTarget): kept until the device is torn down.
+  std::vector<detail::Retired> abandoned;
   std::unordered_map<uint64_t, detail::TextureState*> textures;
   uint64_t nextTextureId = 1;
   std::vector<detail::PendingUpload> pending;
@@ -163,6 +166,8 @@ struct RenderDevice::Impl {
   uint64_t submit(VkCommandBuffer commands, VkSemaphore waitBinary, VkPipelineStageFlags waitStage,
                   VkSemaphore signalBinary);
   void waitSerial(uint64_t serial);
+  // Waits at most `timeoutNs` for the serial; false when it was not reached in time.
+  bool waitSerialFor(uint64_t serial, uint64_t timeoutNs);
   bool serialDone(uint64_t serial) const;
 
   // Frees `resource` once everything submitted so far has completed.
