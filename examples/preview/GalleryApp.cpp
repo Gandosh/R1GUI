@@ -10,6 +10,7 @@
 
 #include "ComposedUtil.h"
 #include "PreviewParts.h"
+#include "r1ui/widgets/brushes/GalleryBrushes.h"
 #include "r1ui/widgets/button/GalleryButtons.h"
 #include "r1ui/widgets/commands/GalleryCommands.h"
 #include "r1ui/widgets/custommenu/GalleryCustomMenus.h"
@@ -34,8 +35,8 @@ using r1ui::core::tree::WidgetId;
 
 namespace {
 
-constexpr const char* kPageNames[GalleryApp::kPageCount] = {"Buttons", "Fields", "Containers", "Overlays", "Editors", "Docking", "Commands", "Properties", "Customize", "Actions", "Hotkeys", "CustomMenus", "Creator"};
-constexpr const char* kPageIcons[GalleryApp::kPageCount] = {"square", "text-cursor-input", "layout-panel-top", "layers", "palette", "panel-left", "settings2", "sliders-horizontal", "pencil", "search", "settings2", "layout-panel-top", "plus"};
+constexpr const char* kPageNames[GalleryApp::kPageCount] = {"Buttons", "Fields", "Containers", "Overlays", "Editors", "Docking", "Commands", "Properties", "Customize", "Actions", "Hotkeys", "CustomMenus", "Creator", "Brushes"};
+constexpr const char* kPageIcons[GalleryApp::kPageCount] = {"square", "text-cursor-input", "layout-panel-top", "layers", "palette", "panel-left", "settings2", "sliders-horizontal", "pencil", "search", "settings2", "layout-panel-top", "plus", "palette"};
 constexpr double kListWidth = 200.0;
 
 // Pages without a container of their own: a padded column, children kept at their size.
@@ -61,7 +62,8 @@ void buildPage(UiContext& ui, WidgetId parent, size_t index) {
     case 9: buildPaddedPage(ui, parent, buildGalleryActions); break;
     case 10: buildPaddedPage(ui, parent, buildGalleryHotkeys); break;
     case 11: buildPaddedPage(ui, parent, buildGalleryCustomMenus); break;
-    default: buildPaddedPage(ui, parent, buildGalleryCreator); break;
+    case 12: buildPaddedPage(ui, parent, buildGalleryCreator); break;
+    default: buildPaddedPage(ui, parent, buildGalleryBrushes); break;
   }
 }
 

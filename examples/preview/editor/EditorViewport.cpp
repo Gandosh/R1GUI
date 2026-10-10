@@ -100,7 +100,23 @@ void ViewportCanvas::onPointerDown(r1ui::core::events::Event& e) {
   e.markHandled();
 }
 
+void ViewportCanvas::onPointerLeave(r1ui::core::events::Event&) {
+  if (pointerInside_) requestPaint();
+  pointerInside_ = false;
+}
+
+// Ctrl + wheel resizes the brush cursor ring (8 to 200 logical pixels).
+void ViewportCanvas::onPointerWheel(r1ui::core::events::Event& e) {
+  if ((e.modifiers & r1ui::core::events::Mod::kCtrl) == 0 || !std::isfinite(e.wheelY) || e.wheelY == 0.0) return;
+  model_.brushSize = std::clamp(model_.brushSize + (e.wheelY > 0.0 ? 4.0 : -4.0), 8.0, 200.0);
+  model_.touch();
+  e.markHandled();
+}
+
 void ViewportCanvas::onPointerMove(r1ui::core::events::Event& e) {
+  pointerInside_ = true;
+  pointer_ = {e.x, e.y};
+  requestPaint();
   if (!pressed_) return;
   const Point now = toWorld(e.x, e.y);
   if (!dragging_) {
@@ -219,7 +235,19 @@ void ViewportCanvas::paint(rw::PaintContext& ctx) {
     ctx.drawText(model_.nameOf(item), caption, toBox(x - 30.0, y + size + 6.0, size + 60.0, 16.0), options);
   }
 
-  const std::string label = "Viewport   tool: " + model_.tool.substr(model_.tool.find('.') + 1) + (model_.selection().empty() ? "" : "   selected: " + std::to_string(model_.selection().size()));
+  // The brush's cursor ring: its size is the brush size, drawn around the pointer.
+  if (pointerInside_) {
+    const double ring = model_.brushSize;
+    const render::Rect outer = toBox(pointer_.x - ring * 0.5, pointer_.y - ring * 0.5, ring, ring);
+    const float rr = outer.w * 0.5f;
+    painter.border(outer, {rr, rr, rr, rr}, 2.0f * s, ctx.color("accent", 0.95), true);
+    const render::Rect inner = toBox(pointer_.x - ring * 0.25, pointer_.y - ring * 0.25, ring * 0.5, ring * 0.5);
+    painter.border(inner, {inner.w * 0.5f, inner.w * 0.5f, inner.w * 0.5f, inner.w * 0.5f}, 1.0f * s, ctx.color("surface", 0.4), true);
+  }
+
+  const std::string label = "Viewport   tool: " + model_.tool.substr(model_.tool.find('.') + 1) + "   brush: " + (model_.brushName.empty() ? std::string("none") : model_.brushName) + " (size " +
+                            std::to_string(static_cast<int>(std::lround(model_.brushSize))) + ")" +
+                            (model_.selection().empty() ? "" : "   selected: " + std::to_string(model_.selection().size()));
   ctx.drawText(label, caption, toBox(r.x + 10.0, r.y + 8.0, r.w - 20.0, 16.0), {});
   painter.popClip();
   if (focusVisible()) ctx.focusRing(0.0f);

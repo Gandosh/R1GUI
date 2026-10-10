@@ -1,7 +1,7 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: ViewportCanvas, the Editor screen's placeholder viewport: a grid, the scene objects as flat
 //   shapes (squares for meshes, rings for lights) in their own colours, the selection outline, the
-//   active tool in a corner; click selects (Ctrl toggles), a drag with the Move tool moves the selected
+//   active tool and brush in a corner, the brush's cursor ring (its size changes with Ctrl + wheel); click selects (Ctrl toggles), a drag with the Move tool moves the selected
 //   objects through the property context, so the move is one undo step and the inspector follows live.
 // Why: the dock needs a recognisable main panel and the property/undo/selection plumbing needs a second
 //   producer of edits besides the generated panel.
@@ -29,6 +29,8 @@ class ViewportCanvas final : public r1ui::widgets::WidgetObject {
   void onPointerDown(r1ui::core::events::Event& e) override;
   void onPointerMove(r1ui::core::events::Event& e) override;
   void onPointerUp(r1ui::core::events::Event& e) override;
+  void onPointerLeave(r1ui::core::events::Event& e) override;
+  void onPointerWheel(r1ui::core::events::Event& e) override;
   void onCaptureLost(r1ui::core::events::Event& e) override;
   void onKeyDown(r1ui::core::events::Event& e) override;
 
@@ -48,6 +50,8 @@ class ViewportCanvas final : public r1ui::widgets::WidgetObject {
   EditorModel::ListenerId selectionListener_ = 0;
   EditorModel::ListenerId stateListener_ = 0;
   r1ui::props::ChangeNotifier::Token notifierToken_ = 0;
+  bool pointerInside_ = false;  // the brush cursor ring follows the pointer
+  Point pointer_;               // window coordinates
   bool pressed_ = false;
   bool dragging_ = false;
   uint64_t pressedItem_ = 0;

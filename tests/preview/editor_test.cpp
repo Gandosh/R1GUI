@@ -40,6 +40,7 @@
 #include "r1ui/widgets/pie/PieTrigger.h"
 #include "r1ui/widgets/text/TextureFactory.h"
 #include "r1ui/widgets/textinput/TextInput.h"
+#include "r1ui/widgets/thumbnailgrid/ThumbnailCache.h"
 
 namespace {
 
@@ -92,6 +93,7 @@ struct Rig {
     host.quit = [this] { quit = true; };
     host.showScreen = [this](int screen) { lastScreen = screen; };
     host.screenNames = [] { return std::vector<std::string>{"Editor", "Gallery", "Widgets"}; };
+    host.thumbnailSink = &brushSink;
     app = std::make_unique<ed::EditorApp>(ui, content, *backend, std::move(host));
     settle();
   }
@@ -117,12 +119,21 @@ struct Rig {
     ui.keyUp(k, mods);
     settle();
   }
+  // A letter as the platform delivers it: key down, the character, key up.
+  void type(char c) {
+    ui.setTime(ui.now() + 50);
+    ui.keyDown(static_cast<events::Key>(std::toupper(c)), 0);
+    ui.textInput(static_cast<char32_t>(c), 0);
+    ui.keyUp(static_cast<events::Key>(std::toupper(c)), 0);
+    settle();
+  }
 
   fs::path root;
   NullTextureFactory textures;
   Services services;
   UiContext ui;
   WidgetId content;
+  thumbs::MemoryThumbnailTextures brushSink;  // the brush library's pictures, in memory
   std::unique_ptr<InWindowFloatingBackend> backend;
   std::unique_ptr<ed::EditorApp> app;
   bool quit = false;
@@ -563,6 +574,18 @@ void testHotkeyEditorPanel(Rig& r) {
   expect(fs::exists(r.root / "hotkey-sets" / "Mine.json"), "the hotkey set was written to the data folder");
   r.app->tick();
   expect(fs::exists(r.root / "keybindings.json"), "keybindings.json holds the change");
+
+  // The brush library is one of the listed actions and can be rebound like any other: F4 opens and closes it, B no longer does.
+  expect(editor->selectAction("brush.library"), "the hotkey editor lists the brush library");
+  const events::Key f4 = static_cast<events::Key>(115);
+  expect(editor->assign("brush.library", 0, rc::ChordSequence::single({f4, 0, false})) == AssignOutcome::Assigned, "assigning F4 to the brush library works");
+  r.ui.clearFocus();
+  r.key(f4);
+  expect(app.brushLibrary().isOpen(), "the new key opens the brush library");
+  r.key(f4);
+  expect(!app.brushLibrary().isOpen(), "the new key closes it again");
+  r.type('b');
+  expect(!app.brushLibrary().isOpen(), "the old key B no longer opens it");
   app.overrides().resetAll();
   app.dock().closePanel(ed::panel::kShortcuts);
 }
@@ -624,6 +647,107 @@ void testDamagedMenusFile(Rig& r) {
   expect(r.app->viewportPieId().empty(), "no viewport pie without a pie menu");
 }
 
+// The brush library (slice 5.23): B anywhere, the second letter, arrows and Enter, the star, the Assign letter
+// popover, Escape, B in a text field, persistence across a restart and a damaged brushes.json.
+void testBrushLibrary(Rig& r) {
+  ed::EditorApp& app = *r.app;
+  const rc::CommandDef* command = app.registry().find("brush.library");
+  expect(command != nullptr && !command->description.empty(), "the brush library command exists and has a description");
+  expect(app.services().keymap.displayText("brush.library") == "B", "B is the default key of the brush library");
+  expect(app.brushModel().size() >= 38 && app.brushModel().categories().size() == 6, "about forty sample brushes in six categories");
+  expect(app.model().brushName == "Standard" && app.brushModel().activeId() == "standard", "the first start uses the Standard brush");
+
+  // B opens it over the viewport; S then N picks Snake Hook (the only brush starting with SN).
+  r.ui.pointerMove(700.0, 400.0);
+  r.type('b');
+  expect(app.brushLibrary().isOpen() && app.brushLibrary().popup() != nullptr, "B opens the brush library");
+  r.type('s');
+  expect(app.brushLibrary().isOpen() && app.brushLibrary().popup()->result().matchCount > 4, "S narrows the list to the brushes starting with S");
+  r.type('n');
+  expect(!app.brushLibrary().isOpen() && app.model().brushName == "Snake Hook" && app.statusText() == "Brush: Snake Hook", "the second letter picked Snake Hook and the status line says so");
+  expect(app.brushModel().activeId() == "snake-hook" && app.brushModel().recents().front() == "snake-hook", "the pick is the active brush and the most recent one");
+  expect(fs::exists(app.brushFile()), "brushes.json was written after the pick");
+
+  // Arrows and Enter pick the highlighted tile.
+  r.type('b');
+  r.key(events::Key::Right);
+  r.key(events::Key::Down);
+  const int tile = app.brushLibrary().popup()->highlight();
+  const std::string expected = tile >= 0 ? app.brushModel().brushes()[app.brushLibrary().popup()->result().tiles[static_cast<size_t>(tile)].brush].id : std::string();
+  r.key(events::Key::Enter);
+  expect(!app.brushLibrary().isOpen() && !expected.empty() && app.brushModel().activeId() == expected, "arrows and Enter pick the highlighted brush");
+
+  // The star of a tile makes a favourite without picking.
+  r.type('b');
+  const BrushLibraryPopup& popup = *app.brushLibrary().popup();
+  // The library opens scrolled to the active brush: take the last tile of the main list that is on screen.
+  size_t starTile = popup.result().tiles.size();
+  const auto grid = popup.gridRect();
+  for (size_t t = popup.result().tiles.size(); t-- > static_cast<size_t>(popup.result().recentCount);) {
+    const auto s = popup.starRect(t);
+    const bool whole = s.w > 0.0 && s.y >= grid.y && s.y + s.h <= grid.y + grid.h;
+    if (whole && popup.result().tiles[t].brush != *app.brushModel().indexOfId(app.brushModel().activeId())) {
+      starTile = t;
+      break;
+    }
+  }
+  expect(starTile < popup.result().tiles.size(), "a visible tile has a star");
+  if (starTile >= popup.result().tiles.size()) return;
+  const auto star = popup.starRect(starTile);
+  const std::string starred = app.brushModel().brushes()[popup.result().tiles[starTile].brush].id;
+  r.ui.pointerMove(star.x + 5, star.y + 5);
+  r.ui.pointerDown(star.x + 5, star.y + 5);
+  r.ui.pointerUp(star.x + 5, star.y + 5);
+  r.settle();
+  expect(app.brushLibrary().isOpen() && app.brushModel().isFavourite(starred), "a click on the star makes a favourite and keeps the library open");
+
+  // F2 assigns a letter to the highlighted brush.
+  const std::string highlighted = app.brushModel().brushes()[*app.brushLibrary().popup()->highlightedBrush()].id;
+  r.key(static_cast<events::Key>(113));
+  expect(app.brushLibrary().popup()->assigning(), "F2 opens the Assign letter popover");
+  r.type('q');
+  r.key(events::Key::Enter);
+  expect(!app.brushLibrary().popup()->assigning() && app.brushModel().userLetter(highlighted) == "Q", "the letter was assigned");
+  r.key(events::Key::Escape);
+  expect(!app.brushLibrary().isOpen() && app.brushModel().activeId() == expected, "Escape closes the library without picking");
+
+  // B in a text field types B.
+  TextInput& field = r.ui.create<TextInput>(r.ui.root());
+  r.settle();
+  r.ui.focusWidget(field.id());
+  r.type('b');
+  expect(!app.brushLibrary().isOpen() && field.text() == "b", "B typed in a text field is a B, not the brush library");
+  r.ui.destroy(field.id());
+  r.settle();
+
+  // An open library at rest costs nothing: no frame wanted, no timer armed.
+  r.ui.pointerMove(700.0, 400.0);
+  r.type('b');
+  r.settle();
+  r.settle();
+  expect(app.brushLibrary().isOpen() && !r.ui.needsFrame() && !r.ui.msUntilTick().has_value(), "an open brush library at rest needs no frame and no timer");
+  r.key(events::Key::Escape);
+  expect(!app.brushLibrary().isOpen(), "Escape closed it");
+
+  // The letter, the favourite and the recents survive a restart; the last pick is the active brush again.
+  const std::string lastActive = app.brushModel().activeId();
+  r.restart();
+  expect(r.app->brushModel().isFavourite(starred) && r.app->brushModel().userLetter(highlighted) == "Q", "favourite and letter survive a restart");
+  expect(r.app->brushModel().activeId() == lastActive && r.app->brushModel().recents().front() == lastActive, "the last pick is the active brush after a restart");
+  r.type('b');
+  r.type('q');  // the assigned letter answers at once: its brush is the only one with Q
+  expect(!r.app->brushLibrary().isOpen() && r.app->brushModel().activeId() == highlighted, "the assigned letter picks its brush after a restart");
+
+  // A damaged file is kept aside and the defaults apply.
+  r.stop();
+  writeFile(r.root / "brushes.json", "{ this is not a brush file");
+  r.start();
+  bool kept = false;
+  for (const auto& entry : fs::directory_iterator(r.root)) kept = kept || entry.path().filename().string().find("brushes.json.corrupt") == 0;
+  expect(kept && r.app->brushModel().favourites().empty() && r.app->model().brushName == "Standard", "a damaged brushes.json is kept aside and the defaults apply");
+  expect(!r.app->brushLibrary().isOpen(), "the library starts closed");
+}
+
 void testIdle(Rig& r) {
   r.settle();
   r.settle();
@@ -668,6 +792,7 @@ int main() {
       testMenuFilesAndRestart(r);
       testWorkspaces(r);
       testDamagedMenusFile(r);
+      testBrushLibrary(r);
       testIdle(r);
       testFloatingAndCloseOrder(r);
     }

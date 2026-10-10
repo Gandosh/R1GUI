@@ -34,6 +34,7 @@ inline constexpr const char* kToolSelect = "tool.select";
 inline constexpr const char* kToolMove = "tool.move";
 inline constexpr const char* kToolRotate = "tool.rotate";
 inline constexpr const char* kToolScale = "tool.scale";
+inline constexpr const char* kBrushLibrary = "brush.library";  // registered by the brush library controller
 inline constexpr const char* kFloatTab = "window.floatTab";
 inline constexpr const char* kMoveStack = "window.moveStack";
 inline constexpr const char* kNextTab = "window.nextTab";
