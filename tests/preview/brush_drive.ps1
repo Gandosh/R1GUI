@@ -246,7 +246,13 @@ function Brush() {
 }
 function Text2() { $m = [regex]::Match(@(Lines 'text layout')[0], 'layout=(.*?) status=(.*) floating=(\d+)$'); [pscustomobject]@{ layout = $m.Groups[1].Value; status = $m.Groups[2].Value; floating = [int]$m.Groups[3].Value } }
 function BrushHint() { $l = @(Lines 'text brushhint='); if ($l.Count -eq 0) { return '' }; $l[0].Substring('text brushhint='.Length) }
-function OpenLibrary() { KeyTap 'B'; if (-not (WaitFor { (Brush).open -eq 1 } 3000)) { throw 'B did not open the brush library' }; Settle 250 }
+function OpenLibrary() {
+  KeyTap 'B'
+  if (-not (WaitFor { (Brush).open -eq 1 } 3000)) { throw 'B did not open the brush library' }
+  # The coordinates are valid once the first frame has laid the popup out (tiles are listed then).
+  if (-not (WaitFor { @(VisibleTiles).Count -gt 0 } 5000)) { throw 'the opened library listed no tile' }
+  Settle 400
+}
 function WaitClosed() { WaitFor { (Brush).open -eq 0 } 3000 }
 function TileCenter($name) { WidgetCenter 'widget' $name }
 function VisibleTiles() { @((ReadStatus) -split "`r?`n" | Where-Object { $_ -match '^widget brushtile-(?!recent-)(\S+?)=' } | ForEach-Object { [regex]::Match($_, '^widget brushtile-(\S+?)=').Groups[1].Value }) }
@@ -444,16 +450,19 @@ try {
   if ($sorted.Count -gt 0) { Check ($sorted[[int]($sorted.Count / 2)] -lt 100) "the median key to pixel time is under 100 ms ($([int]$sorted[[int]($sorted.Count / 2)]) ms)" }
 
   Say "13. idle CPU and GPU"
+  # The decisive number is the count of frames the app presents while nothing happens; the CPU time is
+  # printed too but is only informative (other applications on a shared machine disturb it).
+  function FramesNow() { [int][regex]::Match((ReadStatus), '(?m)^text frames=(\d+)').Groups[1].Value }
   OpenLibrary
   Settle 1500
-  $cpuOpen = CpuPercent 5
-  Say ("  CPU with the library open and idle: {0:N2} %" -f $cpuOpen)
-  Check ($cpuOpen -lt 2.0) 'an open idle library costs under 2 percent of one core'
+  $f0 = FramesNow; $cpuOpen = CpuPercent 5; $f1 = FramesNow
+  Say ("  library open and idle for 5 s: {0} frames presented, CPU {1:N2} % of one core" -f ($f1 - $f0), $cpuOpen)
+  Check (($f1 - $f0) -le 3) 'an open idle library presents no frames (at most 3 in 5 s)'
   KeyTap 'Escape'; WaitClosed | Out-Null
   Settle 1000
-  $cpuClosed = CpuPercent 5
-  Say ("  CPU with the library closed and idle: {0:N2} %" -f $cpuClosed)
-  Check ($cpuClosed -lt 1.0) 'a closed idle library costs under 1 percent of one core'
+  $f0 = FramesNow; $cpuClosed = CpuPercent 5; $f1 = FramesNow
+  Say ("  library closed and idle for 5 s: {0} frames presented, CPU {1:N2} % of one core" -f ($f1 - $f0), $cpuClosed)
+  Check (($f1 - $f0) -le 3) 'a closed idle library presents no frames (at most 3 in 5 s)'
   $smi = & nvidia-smi --query-compute-apps=pid,gpu_uuid --format=csv,noheader 2>$null
   $mine = @($smi | Where-Object { $_ -match "^$($script:procId)," })
   Say "  GPU processes of ours: $($mine -join ' | ')"

@@ -137,6 +137,7 @@ void checkTheme(r1ui::theme::ThemeId theme, const char* name, r1ui::widgets::ima
     ui.frame();
     *galleryOut = render(rig, ui, 1300, 1960, 2);
     save(*galleryOut, std::string("brush-gallery-") + name);
+    R1_EXPECT(rig.device.validationMessageCount() == 0);  // the Debug tree runs the validation layers
   }
 
   // ---- live: the key, the popup, pictures ----
@@ -241,6 +242,7 @@ void checkTheme(r1ui::theme::ThemeId theme, const char* name, r1ui::widgets::ima
   R1_EXPECT(popup->assigning());
   controller->close();
   ui.setGlobalKeyHandler(nullptr);
+  R1_EXPECT(rig.device.validationMessageCount() == 0);
 }
 
 // The time from the B key to the first drawn frame with 2000 brushes: the key through the router, the command,
@@ -311,6 +313,7 @@ void measureOpenLatency() {
               times.front() - coldOpenMs, warm[warm.size() / 2], warm.back());
   R1_EXPECT(warm[warm.size() / 2] < 16.0);
   ui.setGlobalKeyHandler(nullptr);
+  R1_EXPECT(rig.device.validationMessageCount() == 0);
 }
 
 }  // namespace

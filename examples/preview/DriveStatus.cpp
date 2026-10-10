@@ -249,6 +249,7 @@ std::string driveStatus(PreviewApp& app) {
     out << "\n";
   }
   out << "text viewportpie=" << editor->viewportPieId() << "\n";
+  out << "text frames=" << app.framesPresented() << "\n";
 
   size_t overlays = 0;  // popups and dialogs of every window
   for (const Surface& s : surfaces) overlays += s.ui->overlays().stack().size();

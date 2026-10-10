@@ -720,6 +720,15 @@ void testBrushLibrary(Rig& r) {
   r.ui.destroy(field.id());
   r.settle();
 
+  // An open library at rest costs nothing: no frame wanted, no timer armed.
+  r.ui.pointerMove(700.0, 400.0);
+  r.type('b');
+  r.settle();
+  r.settle();
+  expect(app.brushLibrary().isOpen() && !r.ui.needsFrame() && !r.ui.msUntilTick().has_value(), "an open brush library at rest needs no frame and no timer");
+  r.key(events::Key::Escape);
+  expect(!app.brushLibrary().isOpen(), "Escape closed it");
+
   // The letter, the favourite and the recents survive a restart; the last pick is the active brush again.
   const std::string lastActive = app.brushModel().activeId();
   r.restart();
