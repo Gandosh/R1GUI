@@ -9,6 +9,7 @@
 #include "EditorApp.h"
 #include "r1ui/widgets/commands/CommandMenus.h"
 #include "r1ui/widgets/commands/CommandToolbar.h"
+#include "r1ui/widgets/custommenu/CustomMenusMenu.h"
 #include "r1ui/widgets/customize/LayoutConvert.h"
 
 namespace preview::editor {
@@ -22,7 +23,7 @@ namespace cz = r1ui::commands::customize;
 using E = r1ui::widgets::CommandMenuEntry;
 using I = r1ui::widgets::CommandToolbarItem;
 
-cz::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames) {
+cz::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames, const r1ui::commands::custommenu::CustomMenuSet* menus) {
   cz::LayoutSet set;
   const auto menu = [&](const char* id, const char* title, const std::vector<E>& entries) {
     set.menuBar.menus.push_back(r1ui::widgets::menuNodeFromEntries(id, title, entries));
@@ -30,12 +31,12 @@ cz::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames) {
   menu("menu.file", "File", {E::command(cmd::kFileNew), E::command(cmd::kFileSave), E::separator(), E::command(cmd::kFileExit)});
   menu("menu.edit", "Edit",
        {E::command(cmd::kUndo), E::command(cmd::kRedo), E::separator(), E::command(cmd::kSelectAll), E::command(cmd::kDeselect), E::command(cmd::kResetValues), E::separator(),
-        E::command(cmd::kShortcuts), E::command(cmd::kCustomize)});
-  menu("menu.view", "View", {E::command(cmd::kTheme), E::separator(), E::command(cmd::kGrid), E::command(cmd::kLights)});
+        E::command(cmd::kShortcuts)});
+  menu("menu.view", "View", {E::command(cmd::kTheme), E::separator(), E::command(cmd::kGrid), E::command(cmd::kLights), E::separator(), E::command(cmd::kFrame), E::command(cmd::kWireframe)});
   menu("menu.tools", "Tools", {E::command(cmd::kToolSelect), E::command(cmd::kToolMove), E::command(cmd::kToolRotate), E::command(cmd::kToolScale)});
 
   std::vector<E> panels;
-  for (unsigned id = 1; id <= panel::kCount; ++id) panels.push_back(E::command(cmd::panelToggle(id)));
+  for (const unsigned id : panel::kStandard) panels.push_back(E::command(cmd::panelToggle(id)));
   std::vector<E> screens;
   for (size_t i = 0; i < screenNames.size(); ++i) screens.push_back(E::command(cmd::screenCommand(static_cast<int>(i))));
   std::vector<E> windowMenu = {E::submenu("Panels", std::move(panels)), E::separator(), E::command(cmd::kFloatTab), E::command(cmd::kMoveStack), E::separator(),
@@ -48,7 +49,8 @@ cz::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames) {
 
   menu("menu.layout", "Layout",
        {E::command(cmd::kLayoutDefault), E::command(cmd::kLayoutModeling), E::command(cmd::kLayoutReview), E::command(cmd::kLayoutSwitch), E::separator(),
-        E::command(cmd::kLayoutSave), E::command(cmd::kLayoutSaveAs), E::command(cmd::kLayoutRename), E::command(cmd::kLayoutDelete), E::separator(), E::command(cmd::kLayoutReset)});
+        E::command(cmd::kLayoutSave), E::command(cmd::kLayoutSaveAs), E::command(cmd::kLayoutRename), E::command(cmd::kLayoutDelete), E::separator(), E::command(cmd::kLayoutReset),
+        E::separator(), E::command(cmd::kWorkspaceSave), E::command(cmd::kWorkspaceLoad)});
   menu("menu.help", "Help", {E::command(cmd::kShortcuts), E::command(cmd::kAbout)});
 
   set.toolbars.push_back(r1ui::widgets::toolbarFromItems(
@@ -56,15 +58,8 @@ cz::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames) {
       {I::command(cmd::kToolSelect), I::command(cmd::kToolMove), I::command(cmd::kToolRotate), I::command(cmd::kToolScale), I::separator(), I::command(cmd::kUndo), I::command(cmd::kRedo),
        I::separator(), I::command(cmd::kGrid), I::command(cmd::kLights), I::separator(), I::command(cmd::kTheme)}));
 
-  cz::FreeFormPanelLayout quick;
-  quick.id = kPanelQuick;
-  quick.title = "Quick actions";
-  quick.width = 380;
-  quick.height = 150;
-  quick.buttons = {cz::Node::freeButton("fp.quick.save", cmd::kFileSave, {12, 12, 100, 32}), cz::Node::freeButton("fp.quick.undo", cmd::kUndo, {124, 12, 100, 32}),
-                   cz::Node::freeButton("fp.quick.redo", cmd::kRedo, {236, 12, 100, 32}), cz::Node::freeButton("fp.quick.grid", cmd::kGrid, {12, 56, 100, 32}),
-                   cz::Node::freeButton("fp.quick.theme", cmd::kTheme, {124, 56, 140, 32})};
-  set.panels.push_back(std::move(quick));
+  // The user's own menus come last; its entries are real commands registered by CustomMenuCommands.
+  if (menus != nullptr) set.menuBar.menus.push_back(r1ui::widgets::customMenusMenuNode(*menus));
   return set;
 }
 

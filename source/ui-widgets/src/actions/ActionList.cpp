@@ -61,7 +61,11 @@ void ActionList::onAttached() {
     field.setOnTextChanged([context, self](std::string_view text) {
       if (ActionList* list = context->objectAs<ActionList>(self)) list->view().setQuery(text);
     });
+    // Enter activates the selected action. The field also "commits" when it loses the focus, and it does so
+    // while the press that took the focus is still in progress (a press on a row to drag it, a click
+    // elsewhere): a commit with a mouse button held is that blur, not Enter, and must activate nothing.
     field.setOnCommitted([context, self](std::string_view) {
+      if (context->router().heldButtons() != 0) return;
       if (ActionList* list = context->objectAs<ActionList>(self)) list->view().activateSelected();
     });
   }

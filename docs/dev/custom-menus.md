@@ -12,7 +12,7 @@ Developer guide to slices 5.15 (custom menus: pie menu and dockable menu), 5.16 
 | dockable menu, glue | `.../custommenu` | `r1ui::widgets`, commands | `CustomMenuPanel.h` (panel, button, dock factory), `CustomMenuCommands.h` (registers the commands behind the menu), `CustomMenusMenu.h` (entries, title, layout node), `GalleryCustomMenus.h` |
 | tests | `tests/ui-commands/{custommenu,workspace}`, `tests/ui-widgets/{pie,custommenu}` | | section 8 |
 
-No CMake file was edited (every folder is globbed). The creator window ("Create Custom Menu" with the action list on the right) is a later slice; the model API below is shaped for it.
+No CMake file was edited (every folder is globbed). The creator window (slice 5.17, section 10) and the file path dialog (section 11) are built on the model API below.
 
 ## 2. The model (`namespace r1ui::commands::custommenu`)
 
@@ -101,10 +101,35 @@ Fast tier: `ui-commands.custom_menu_set_test` (operations, refusals, hostile nam
 
 ## 9. Not implemented, by design or yet
 
-- The creator window and any dialogs (save, load, confirm delete); the hooks are where they plug in.
-- The drop of the owner-rejected "Customize" edit-mode button from the Editor screen (integrator); the customize library is untouched.
+- The pie opens from a `PieTrigger` the host puts around an area; the preview only puts one around the viewport and uses the pie created, edited or loaded last (no per-area choice, no "use in viewport" entry).
+- The Customize edit mode was removed from the Editor screen by the owner (slice 5.19); the customize library is untouched.
 - The pie is drawn from the press point with direction selection; at a window edge the overlay shifts it inward (it can then sit off-centre of the pointer). Nested pies, sub-menus inside a pie and per-slot colours do not exist.
 - No undo for edits of custom menus (the creator window can use `preview`; session revert can be added over `replaceAll`).
 - `PanelRegistry` cannot remove a panel; a deleted dockable menu's open panel shows a notice.
 - Keys: a pie is opened with the right button only; no keyboard or touch trigger.
 - Workspace parts are not interpreted: applying a layout, delta or overrides is the host's job and uses the owners' own strict loaders.
+
+## 10. The Create Custom Menu window (`ui-widgets/custommenu/creator`, slice 5.17)
+
+| Part | Owns |
+|---|---|
+| `MenuDraft` (`ui-commands/custommenu/MenuDraft.h`) | the working copy of one menu: a private `CustomMenuSet` with one menu, the raw typed name, every edit (`setSlot`, `addEntry`, `moveEntry`, `clearSlot`, `setLabel`, slot count and panel settings; each returns the model's `MenuEditResult`), the dry runs (`canSetSlot`, `canAddEntry`, `canMoveEntry` over `CustomMenuSet::preview`), `issues(live)` (name required, unique ASCII case-insensitively, at least one action) and `commit(live)` |
+| `CreatorSession` | the draft and "type chosen" state that must outlive the widget (the dock recreates a panel when it moves to another native window; the host starts edits and file loads): `beginCreate`, `beginEdit(id)`, `beginFromFile(menu)`, `chooseType`, `end`, a generation counter and listeners |
+| `PiePreviewEditor` | the pie as the real `PieMenu` drawing plus an overlay: slot outlines and numbers, selection ring, drop highlight; each slot is a `DragTarget` for a `Command` payload, a filled slot is a drag source (a `Node` payload `slot:<n>`) for swaps; click selects, right-click opens "Clear slot", arrows and Delete work |
+| `PanelPreviewEditor` | the panel as the grid of buttons it will have (columns, button size, labels, icon and label as `CustomMenuPanel` draws them, a dashed drop-here cell); a drop inserts before or after the button under the pointer or appends; drag moves, Ctrl+arrows move, Delete removes, right-click menu |
+| `CreateCustomMenuWindow` | the type chooser page (two cards), the editor page (left: preview, slot or panel settings, the selected entry's own label and Clear; right: the `ActionList`; footer: name, first problem, Save to file, Load from file, Cancel, Create or Save), the rebuild from a timer when the session's draft changes |
+| `GalleryCreator` | the window over a sample command set with working Save to file and Load from file (temporary folder) |
+
+**Live or on Save (decision, 2026-10-10).** Edits go to the working copy, the live set is touched only by Create/Save, in one validated step (rename plus replace for an existing menu, dry-run first). Cancel therefore reverts by doing nothing, the Custom Menus menu and the dock panels never show a half-edited menu, and the files stay untouched until the user decides. An edit keeps the menu's id and serial (its dock panel, its commands and any key bound to its open command stay valid); a new menu is adopted with a fresh id.
+
+**Drops.** A drop of a command the registry does not know is refused with a message (a missing command can only live in a menu that was loaded); a payload with an invalid id is refused by the model; dropping on a pie slot replaces what was there; dropping a slot on another swaps them (an empty target slot moves it); the hub asks `dragOver` at the release point, so an editor must stay the drag source until the hub's `end` returns.
+
+**Hooks (`CreatorHooks`)**: `committed(menuId, edited)`, `cancelled()`, `saveFile(ui, owner, menu)` and `loadFile(ui, owner)`; the last two receive the window's own context and widget because a dialog must open in the window that asked (a native floating window has a context of its own). A hook may destroy the window: the window touches nothing after calling one.
+
+**Tests**: `ui-commands.menu_draft_test`, `ui-widgets.custommenu-creator.creator_window_test` (real pointer and key events on a headless context), `gallery_creator_test` and the GPU render `creator_visual_test`.
+
+## 11. The file path dialog (`ui-widgets/filepath`)
+
+`openFilePathDialog(ui, FilePathOptions, onChosen)`: a modal dialog with a text field for a path, the default folder, the list of the files already there (`FileListView`, filtered by extension) and one button. Open mode needs an existing regular file; Save mode accepts a new name and asks for a second press ("Overwrite") when the file exists; a name without an extension gets the given one; a relative name lives in the default folder; Enter in the field and Enter or a double click on a row do what the button does; a click on a row copies its name into the field; Escape cancels and never calls back. `checkFilePath` (headless) refuses an empty path, invalid UTF-8, more than 520 characters, control characters and `< > " | ? *`, a colon that is not the drive letter, a drive-relative or rooted-without-drive path, a Windows device name (CON, NUL, COM1, ...), names ending in a dot or space and directories. A Save into a folder that does not exist creates it. The preview uses it for menus (`menus\`), workspaces (`workspaces\`, whose list is the workspace list) and the hotkey editor's import and export (`keybindings\`); no operating-system file dialog is used anywhere because it would block scripted runs.
+
+Test: `ui-widgets.filepath.file_path_dialog_test`.

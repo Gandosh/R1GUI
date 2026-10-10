@@ -102,6 +102,12 @@ class EditorModel {
   std::string tool = "tool.select";
   bool showGrid = true;
   bool showLights = true;
+  bool wireframe = false;
+  // The world point at the centre of the viewport (Frame selection moves it).
+  double viewX = 0.0;
+  double viewY = 0.0;
+  // Centres the view on the selected objects, or on the whole scene when nothing is selected, and tells the views.
+  void frameSelection();
   // Tells the views that tool, grid or light display changed (commands call it after changing them).
   void touch();
   ListenerId onState(Listener listener);

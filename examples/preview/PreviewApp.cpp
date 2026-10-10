@@ -136,6 +136,7 @@ PreviewApp::PreviewApp(const AppOptions& options) : started_(Clock::now()), path
   hooks.mainNeedsFrame = [this] { return needsFrame(); };
   hooks.renderMain = [this](uint64_t) { frame(); };
   hooks.mainMsUntilTick = [this](uint64_t) -> std::optional<uint64_t> {
+    writeDriveStatus();  // after the native windows were served: what they did shows up without another event
     std::optional<uint64_t> wake;
     if (widgets::UiContext* ui = activeUi()) {
       ui->setTime(nowMs());

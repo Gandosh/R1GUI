@@ -31,11 +31,13 @@ std::vector<std::string> screenNamesOf(const EditorHost& host) { return host.scr
 
 // The GlobalKeyHandler of a native window's context: the same router as the main window, with the focus
 // path decided in this window. It never creates timers (a pending sequence expires on the next key or
-// the main window's tick), so it cannot outlive its context in a harmful way.
+// the main window's tick), so it cannot outlive its context in a harmful way. Escape first ends a pie
+// gesture that has not been drawn yet (the pie's own overlay handles the drawn one).
 class FloatKeys final : public r1ui::core::events::GlobalKeyHandler {
  public:
-  FloatKeys(rw::UiContext& ui, rw::CommandServices services) : ui_(ui), services_(services) {}
+  FloatKeys(rw::UiContext& ui, rw::CommandServices services, std::function<void()> cancelPies) : ui_(ui), services_(services), cancelPies_(std::move(cancelPies)) {}
   bool onGlobalKey(const r1ui::core::events::Event& event, r1ui::core::events::Router&) override {
+    if (event.key == r1ui::core::events::Key::Escape && cancelPies_) cancelPies_();
     const rw::WidgetObject* focused = ui_.object(ui_.router().focused());
     const std::vector<std::string> chain{focused != nullptr && focused->wantsTextInput() ? rc::kTextContext : rc::kWindowContext};
     return services_.router.handleKey({event.key, event.modifiers, event.repeat, false}, chain).consumed;
@@ -44,6 +46,21 @@ class FloatKeys final : public r1ui::core::events::GlobalKeyHandler {
  private:
   rw::UiContext& ui_;
   rw::CommandServices services_;
+  std::function<void()> cancelPies_;
+};
+
+// The main window's handler: Escape ends a pie gesture, then the command keys decide.
+class MainKeys final : public r1ui::core::events::GlobalKeyHandler {
+ public:
+  MainKeys(rw::CommandKeyHandler& inner, std::function<void()> cancelPies) : inner_(inner), cancelPies_(std::move(cancelPies)) {}
+  bool onGlobalKey(const r1ui::core::events::Event& event, r1ui::core::events::Router& router) override {
+    if (event.key == r1ui::core::events::Key::Escape && cancelPies_) cancelPies_();
+    return inner_.onGlobalKey(event, router);
+  }
+
+ private:
+  rw::CommandKeyHandler& inner_;
+  std::function<void()> cancelPies_;
 };
 
 }  // namespace
@@ -73,18 +90,27 @@ EditorApp::EditorApp(rw::UiContext& ui, WidgetId parent, rw::IFloatingBackend& b
       router_(registry_, keymap_, clock_),
       model_(ui),
       sync_(ui, services()),
-      customization_(editorLayoutSet(screenNamesOf(host_))),
+      customization_(editorLayoutSet(screenNamesOf(host_), &menuSet_)),
       customizationStore_(host_.dataRoot / "customization.json"),
       customizationStorage_(customization_, customizationStore_),
       controller_(ui, services(), sync_, customization_),
       keyStore_(host_.dataRoot / "keybindings.json"),
       keys_(ui, services()),
+      menuStore_(host_.dataRoot / "custom-menus.json"),
+      menuStorage_(menuSet_, menuStore_),
+      creator_(menuSet_),
       layoutStore_(host_.dataRoot / "layouts") {
   std::error_code ignored;
   std::filesystem::create_directories(host_.dataRoot / "layouts", ignored);
 
+  // The menu bar and toolbar are still built by the customizable widgets, but the Editor no longer offers
+  // the Customize mode (owner decision 2026-10-10: menus are made in the Create Custom Menu window): its
+  // four commands would only clutter the action lists and the hotkey editor.
+  for (const char* id : {rw::kCmdCustomizeToggle, rw::kCmdCustomizeRevert, rw::kCmdCustomizeResetAll, rw::kCmdCustomizeNewMenu}) registry_.remove(id);
+
   registerPanels();
   registerCommands();
+  startCustomMenus();  // before the key bindings and customization load: they refer to its commands
 
   const rc::ImportReport keys = rc::loadOverrides(keyStore_, registry_, overrides_);
   if (!keys.ok && !keys.error.empty()) model_.log(LogLevel::Warning, "keybindings.json was not used: " + keys.error);
@@ -97,28 +123,27 @@ EditorApp::EditorApp(rw::UiContext& ui, WidgetId parent, rw::IFloatingBackend& b
 
   router_.setPendingObserver([this](const rc::PendingState& state) { pendingText_ = state.active ? state.text : std::string(); });
   undoListener_ = model_.context().undo().addListener([this](const r1ui::props::UndoEvent&) { registry_.touch(); });
-  ui_.setGlobalKeyHandler(&keys_);
+  mainKeys_ = std::make_unique<MainKeys>(keys_, [this] { cancelPies(); });
+  ui_.setGlobalKeyHandler(mainKeys_.get());
 
   buildUi(parent);
-  controllerListener_ = controller_.subscribe([this] {
-    const bool editing = controller_.editMode();
-    if (editing == wasEditing_) return;
-    wasEditing_ = editing;
-    model_.info(editing ? "Customize mode on: drag commands from the palette onto the menu bar or the toolbar" : "Customize mode off: changes saved");
-    if (editing && dockPtr() != nullptr) {
-      dockPtr()->openPanel(panel::kCommands);
-      dockPtr()->openPanel(panel::kQuickActions);
-    }
-  });
   ui_.frame();  // the dock needs a rectangle before a stored layout is applied
   startLayouts();
+  if (firstMenuRun_) {  // the owner can try the sample dockable menu at once, and it stays in the Default layout
+    for (const auto& menu : menuSet_.menus()) {
+      if (menu.kind == r1ui::commands::custommenu::MenuKind::Panel) openMenuPanel(menu.id);
+    }
+    if (layouts_ && !activeKey_.empty()) {
+      if (const r1ui::dock::Status saved = layouts_->save(activeKey_); !saved) model_.log(LogLevel::Warning, "the Default layout was not updated: " + saved.error);
+    }
+  }
   model_.info("Editor ready");
 }
 
 EditorApp::~EditorApp() {
   flush();
   *alive_ = false;
-  controller_.unsubscribe(controllerListener_);
+  menuSet_.unsubscribe(menuListener_);
   model_.context().undo().removeListener(undoListener_);
   ui_.setGlobalKeyHandler(nullptr);
   if (dialog_.valid() && rw::isDialogOpen(ui_, dialog_)) rw::closeDialog(ui_, dialog_);
@@ -210,8 +235,7 @@ void EditorApp::refreshStatus() {
   if (rw::Label* label = ui_.objectAs<rw::Label>(statusLabel_); label != nullptr && label->text() != left) label->setText(left);
   const std::string name = activeName_;
   const r1ui::props::UndoStack& undo = model_.context().undo();
-  const std::string right = "Layout: " + (name.empty() ? std::string("custom") : name) + "     Undo: " + (undo.canUndo() ? undo.undoLabel() : std::string("nothing")) +
-                            (controller_.editMode() ? "     CUSTOMIZE MODE" : "");
+  const std::string right = "Layout: " + (name.empty() ? std::string("custom") : name) + "     Undo: " + (undo.canUndo() ? undo.undoLabel() : std::string("nothing"));
   if (rw::Label* label = ui_.objectAs<rw::Label>(layoutLabel_); label != nullptr && label->text() != right) label->setText(right);
 }
 
@@ -230,14 +254,12 @@ void EditorApp::saveAll() {
   savedOverridesVersion_ = 0;
   saveUserFiles();
   if (!customizationStorage_.save()) model_.log(LogLevel::Error, "customization.json not saved: " + customizationStorage_.lastError());
-  setStatus("Saved the layout, shortcuts and customization");
+  if (!menuStorage_.save()) model_.log(LogLevel::Error, "custom-menus.json not saved: " + menuStorage_.lastError());
+  setStatus("Saved the layout, shortcuts, customization and custom menus");
 }
 
-// Application exit: leaving edit mode commits (and so saves) the open customization session first.
-void EditorApp::flush() {
-  if (controller_.editMode()) controller_.setEditMode(false);
-  saveAll();
-}
+// Application exit and tests: the layout and every user file now.
+void EditorApp::flush() { saveAll(); }
 
 bool EditorApp::run(std::string_view commandId) {
   const rc::ExecuteResult result = router_.execute(commandId, rc::ExecuteSource::Api);
@@ -251,7 +273,7 @@ void EditorApp::installKeyForwarder(rw::UiContext& ui) {
       return;
     }
   }
-  floatKeys_.emplace_back(&ui, std::make_unique<FloatKeys>(ui, services()));
+  floatKeys_.emplace_back(&ui, std::make_unique<FloatKeys>(ui, services(), [this] { cancelPies(); }));
   ui.setGlobalKeyHandler(floatKeys_.back().second.get());
 }
 

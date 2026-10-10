@@ -39,14 +39,14 @@ dk::DockLayout EditorApp::builtinLayout(int which) const {
     case 1:  // Modeling: a big viewport, curves and console below, the inspector and tools on the right
       root = Node::split(Axis::Row, {Node::stack({kOutliner, kAssets}, 0, 1.0),
                                      Node::split(Axis::Column, {Node::stack({kViewport}, 0, 4.0), Node::stack({kCurves, kConsole}, 0, 1.1)}, 4.6),
-                                     Node::stack({kInspector, kCommands, kQuickActions}, 0, 1.4)});
+                                     Node::stack({kInspector, kCommands}, 0, 1.4)});
       break;
     case 2:  // Review: the viewport on top, console, inspector and outliner in a strip below
       root = Node::split(Axis::Column, {Node::stack({kViewport}, 0, 3.2), Node::split(Axis::Row, {Node::stack({kConsole}, 0, 1.0), Node::stack({kInspector}, 0, 1.0), Node::stack({kOutliner, kAssets}, 0, 1.0)}, 1.2)});
       break;
     default:  // Default: outliner and assets left, viewport over console/actions/curves, inspector over the palette right
       root = Node::split(Axis::Row, {Node::split(Axis::Column, {Node::stack({kOutliner}, 0, 1.0), Node::stack({kAssets}, 0, 1.0)}, 1.0),
-                                     Node::split(Axis::Column, {Node::stack({kViewport}, 0, 3.0), Node::stack({kConsole, kQuickActions, kCurves}, 0, 1.4)}, 3.6),
+                                     Node::split(Axis::Column, {Node::stack({kViewport}, 0, 3.0), Node::stack({kConsole, kCurves}, 0, 1.4)}, 3.6),
                                      Node::split(Axis::Column, {Node::stack({kInspector}, 0, 1.7), Node::stack({kCommands}, 0, 1.2)}, 1.3)});
       break;
   }

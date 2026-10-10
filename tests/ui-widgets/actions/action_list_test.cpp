@@ -176,6 +176,22 @@ void testTypeToSearch() {
   R1_EXPECT(s.view().selectedAction()->id == first);
   s.key(Key::Enter);
   R1_EXPECT(activated == std::vector<std::string>{first});
+  // Leaving the search box (the press that starts a drag of a row) commits the field but must not activate.
+  activated.clear();
+  s.list->setFilter("act");
+  s.t.ui.focusWidget(s.list->searchField(), r1ui::core::events::FocusReason::Keyboard);
+  s.t.ui.textInput(U'i');
+  s.t.layout();
+  r1ui::core::layout::RectD row;
+  for (size_t i = 0; i < s.view().rows().size() && row.w <= 0.0; ++i) {
+    if (!s.view().rows()[i].header) row = s.view().rowRect(static_cast<int>(i));
+  }
+  R1_EXPECT(row.w > 0.0);
+  s.t.ui.pointerMove(row.x + 30.0, row.y + 10.0);
+  s.t.ui.pointerDown(row.x + 30.0, row.y + 10.0);
+  s.t.ui.pointerUp(row.x + 30.0, row.y + 10.0);
+  s.t.layout();
+  R1_EXPECT(activated.empty());
 }
 
 void testScrollAndTooltip() {

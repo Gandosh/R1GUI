@@ -1,9 +1,9 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: the nine dockable panels of the Editor screen and their registration: viewport, outliner
-//   (tree over the sample scene, selection shared with the viewport and the inspector), inspector (the
-//   generated property panel), assets (thumbnail grid), curves (curve editor), console (the command and
-//   layout log), commands (the customization palette), quick actions (tool strip and free-form panel) and
-//   shortcuts (the keybinding editor with import/export files).
+// Owns: the standard dockable panels of the Editor screen and their registration: viewport (with the pie
+//   menu trigger), outliner (tree over the sample scene, selection shared with the viewport and the
+//   inspector), inspector (the generated property panel), assets (thumbnail grid), curves (curve editor),
+//   console (the command and layout log), actions (the searchable action list with descriptions) and the
+//   hotkey editor (a keyboard view, hotkey sets, import/export through the file path dialog).
 // Why: DockHost recreates a panel's content from its factory whenever the panel moves into another
 //   window's context, so every panel is a small widget over state that lives in EditorApp (the model,
 //   the registry, the controller) and never over state of its own.
@@ -11,15 +11,14 @@
 //   installs the shortcut forwarder there; panels remove their model listeners in onDetached.
 // Callers: EditorApp's constructor (registerPanels).
 #include <algorithm>
+#include <cctype>
 
 #include "EditorApp.h"
 #include "EditorMenus.h"
 #include "EditorViewport.h"
-#include "r1ui/widgets/commands/KeybindingEditor.h"
+#include "r1ui/widgets/actions/ActionList.h"
 #include "r1ui/widgets/curveeditor/CurveEditor.h"
-#include "r1ui/widgets/customize/CommandPalette.h"
-#include "r1ui/widgets/customize/CustomizeToolStrip.h"
-#include "r1ui/widgets/customize/FreeFormPanel.h"
+#include "r1ui/widgets/hotkeys/HotkeyEditor.h"
 #include "r1ui/widgets/label/Label.h"
 #include "r1ui/widgets/scroll/ScrollArea.h"
 #include "r1ui/widgets/section/Section.h"
@@ -237,11 +236,14 @@ void EditorApp::registerPanels() {
       if (&ui != &ui_) installKeyForwarder(ui);  // a native window's context has no shortcut handler of its own
       return make(ui, parent);
     };
-    if (id == kShortcuts) d.suggested = {kConsole, true, r1ui::dock::Side::Right};
+    if (id == kShortcuts) {
+      d.suggested = {kViewport, true, r1ui::dock::Side::Right};
+      d.minSize = {560.0, 380.0};
+    }
     panels_.add(std::move(d));
   };
 
-  add(kViewport, "Viewport", "shapes", {720.0, 480.0}, [this](rw::UiContext& ui, WidgetId parent) { return ui.create<ViewportCanvas>(parent, model_).id(); });
+  add(kViewport, "Viewport", "shapes", {720.0, 480.0}, [this](rw::UiContext& ui, WidgetId parent) { return makeViewport(ui, parent); });
   add(kOutliner, "Outliner", "layers", {300.0, 380.0}, [this](rw::UiContext& ui, WidgetId parent) { return ui.create<OutlinerView>(parent, model_).id(); });
   add(kInspector, "Inspector", "sliders-horizontal", {320.0, 520.0}, [this](rw::UiContext& ui, WidgetId parent) {
     rw::PropertyPanel& p = ui.create<rw::PropertyPanel>(parent, model_.context(), model_.panelState());
@@ -260,33 +262,41 @@ void EditorApp::registerPanels() {
     return box.id();
   });
   add(kConsole, "Console", "code", {560.0, 300.0}, [this](rw::UiContext& ui, WidgetId parent) { return ui.create<ConsoleView>(parent, model_).id(); });
-  add(kCommands, "Commands", "search", {320.0, 460.0}, [this](rw::UiContext& ui, WidgetId parent) {
-    rw::CommandPalette& palette = ui.create<rw::CommandPalette>(parent, controller_);
-    palette.setOnChoose([this](const std::string& command) { router_.execute(command, rc::ExecuteSource::Menu); });
-    return palette.id();
+  add(kCommands, "Actions", "search", {520.0, 460.0}, [this](rw::UiContext& ui, WidgetId parent) {
+    rw::ActionList& list = ui.create<rw::ActionList>(parent);
+    fill(list.style());
+    list.bindRegistry(&registry_, &keymap_);
+    list.view().setOnActivate([this](const rw::ActionInfo& action) { router_.execute(action.id, rc::ExecuteSource::Menu); });
+    return list.id();
   });
-  add(kQuickActions, "Quick Actions", "sparkles", {420.0, 260.0}, [this](rw::UiContext& ui, WidgetId parent) {
-    rw::SectionBox& box = ui.create<rw::SectionBox>(parent);
-    box.style().direction = layout::FlexDirection::Column;
-    box.style().gapRow = 8.0;
-    for (double& p : box.style().padding) p = 8.0;
-    ui.create<rw::CustomizeToolStrip>(box.id(), controller_);
-    ui.create<rw::FreeFormPanel>(box.id(), controller_, kPanelQuick);
-    return box.id();
-  });
-  add(kShortcuts, "Shortcuts", "settings2", {620.0, 480.0}, [this](rw::UiContext& ui, WidgetId parent) {
-    rw::KeybindingEditor& editor = ui.create<rw::KeybindingEditor>(parent, services());
+  add(kShortcuts, "Hotkey Editor", "settings2", {1100.0, 640.0}, [this](rw::UiContext& ui, WidgetId parent) {
+    rw::HotkeyEditor& editor = ui.create<rw::HotkeyEditor>(parent, services());
     fill(editor.style());
-    editor.setOnExport([this] { exportKeybindings(); });
-    editor.setOnImport([this] { importKeybindings(); });
+    restoreHotkeySets(editor);
+    editor.setOnSetsChanged([this](const std::string& name, const std::string& json) { persistHotkeySet(name, json); });
+    editor.setOnExport([this, context = &ui, self = editor.id()] { askKeybindingFile(*context, self, true); });
+    editor.setOnImport([this, context = &ui, self = editor.id()] { askKeybindingFile(*context, self, false); });
     return editor.id();
   });
 }
 
-// ---- keybinding files -----------------------------------------------------------------------
+// ---- keybinding files and hotkey sets -------------------------------------------------------------
 
-void EditorApp::exportKeybindings() {
-  const std::filesystem::path file = host_.dataRoot / "keybindings-export.json";
+void EditorApp::askKeybindingFile(rw::UiContext& ui, WidgetId owner, bool save) {
+  rw::FilePathOptions options;
+  options.mode = save ? rw::FilePathMode::Save : rw::FilePathMode::Open;
+  options.title = save ? "Export hotkeys" : "Import hotkeys";
+  options.description = save ? "Write your key bindings (only what differs from the defaults) to a file." : "Replace your key bindings with the ones in a file; a file with a problem changes nothing.";
+  options.folder = host_.dataRoot / "keybindings";
+  options.extension = ".json";
+  options.initialName = "my-hotkeys";
+  chooseFile(ui, owner, std::move(options), [this, save](const std::filesystem::path& path) {
+    if (save) exportKeybindingsTo(path);
+    else importKeybindingsFrom(path);
+  });
+}
+
+void EditorApp::exportKeybindingsTo(const std::filesystem::path& file) {
   const r1ui::dock::Status written = r1ui::dock::writeFileAtomic(file, rc::exportOverrides(registry_, overrides_));
   if (written) {
     model_.info("Shortcuts exported to " + file.string());
@@ -297,16 +307,11 @@ void EditorApp::exportKeybindings() {
   }
 }
 
-// The preview has no file dialog: import reads keybindings-import.json from the data folder, else the
-// file the last export wrote there.
-void EditorApp::importKeybindings() {
-  std::filesystem::path file = host_.dataRoot / "keybindings-import.json";
-  std::error_code ignored;
-  if (!std::filesystem::exists(file, ignored)) file = host_.dataRoot / "keybindings-export.json";
+void EditorApp::importKeybindingsFrom(const std::filesystem::path& file) {
   const std::optional<std::string> text = r1ui::dock::readBoundedFile(file);
   if (!text) {
-    model_.log(LogLevel::Warning, "import shortcuts: no file " + file.string());
-    setStatus("Nothing to import: put keybindings-import.json in " + host_.dataRoot.string());
+    model_.log(LogLevel::Warning, "import shortcuts: cannot read " + file.string());
+    setStatus("Nothing to import: " + file.string() + " cannot be read");
     return;
   }
   const rc::ImportReport report = rc::importOverrides(*text, registry_, overrides_, rc::ImportMode::Replace);
@@ -318,6 +323,34 @@ void EditorApp::importKeybindings() {
   for (const rc::ImportIssue& issue : report.issues) model_.log(LogLevel::Warning, "import shortcuts: entry " + std::to_string(issue.index) + ": " + issue.message);
   model_.info("Shortcuts imported from " + file.string() + " (" + std::to_string(report.applied) + " applied)");
   setStatus("Shortcuts imported (" + std::to_string(report.applied) + " applied)");
+}
+
+// A hotkey set is a named copy of the key bindings; the editor keeps them in memory and tells us when one is
+// saved. They live in <data>/hotkey-sets/<name>.json and come back each time the editor is built.
+void EditorApp::persistHotkeySet(const std::string& name, const std::string& json) {
+  std::string stem;
+  for (const char c : name) stem += (std::isalnum(static_cast<unsigned char>(c)) != 0 || c == ' ' || c == '_' || c == '-' || c == '.' || c == '(' || c == ')') ? c : '_';
+  if (stem.empty() || stem == "." || stem == "..") stem = "set";
+  std::error_code ignored;
+  std::filesystem::create_directories(host_.dataRoot / "hotkey-sets", ignored);
+  const r1ui::dock::Status written = r1ui::dock::writeFileAtomic(host_.dataRoot / "hotkey-sets" / (stem + ".json"), json);
+  if (written) model_.info("Hotkey set \"" + name + "\" saved");
+  else model_.log(LogLevel::Error, "hotkey set not saved: " + written.error);
+}
+
+void EditorApp::restoreHotkeySets(rw::HotkeyEditor& editor) {
+  std::error_code ec;
+  const std::filesystem::path folder = host_.dataRoot / "hotkey-sets";
+  if (!std::filesystem::is_directory(folder, ec)) return;
+  size_t count = 0;
+  for (const auto& entry : std::filesystem::directory_iterator(folder, ec)) {
+    if (++count > rw::kMaxHotkeySets) break;
+    if (!entry.is_regular_file(ec) || entry.path().extension() != ".json") continue;
+    const std::optional<std::string> text = r1ui::dock::readBoundedFile(entry.path());
+    if (!text) continue;
+    const std::u8string stem = entry.path().stem().u8string();
+    editor.addSet(std::string(reinterpret_cast<const char*>(stem.data()), stem.size()), *text);
+  }
 }
 
 }  // namespace preview::editor

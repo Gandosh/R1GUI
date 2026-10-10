@@ -12,8 +12,11 @@
 #include "PreviewParts.h"
 #include "r1ui/widgets/button/GalleryButtons.h"
 #include "r1ui/widgets/commands/GalleryCommands.h"
+#include "r1ui/widgets/custommenu/GalleryCustomMenus.h"
+#include "r1ui/widgets/custommenu/creator/GalleryCreator.h"
 #include "r1ui/widgets/customize/GalleryCustomize.h"
 #include "r1ui/widgets/dock/GalleryDock.h"
+#include "r1ui/widgets/hotkeys/GalleryHotkeys.h"
 #include "r1ui/widgets/label/Label.h"
 #include "r1ui/widgets/menu/GalleryOverlays.h"
 #include "r1ui/widgets/props/GalleryProps.h"
@@ -31,8 +34,8 @@ using r1ui::core::tree::WidgetId;
 
 namespace {
 
-constexpr const char* kPageNames[GalleryApp::kPageCount] = {"Buttons", "Fields", "Containers", "Overlays", "Editors", "Docking", "Commands", "Properties", "Customize"};
-constexpr const char* kPageIcons[GalleryApp::kPageCount] = {"square", "text-cursor-input", "layout-panel-top", "layers", "palette", "panel-left", "settings2", "sliders-horizontal", "pencil"};
+constexpr const char* kPageNames[GalleryApp::kPageCount] = {"Buttons", "Fields", "Containers", "Overlays", "Editors", "Docking", "Commands", "Properties", "Customize", "Actions", "Hotkeys", "CustomMenus", "Creator"};
+constexpr const char* kPageIcons[GalleryApp::kPageCount] = {"square", "text-cursor-input", "layout-panel-top", "layers", "palette", "panel-left", "settings2", "sliders-horizontal", "pencil", "search", "settings2", "layout-panel-top", "plus"};
 constexpr double kListWidth = 200.0;
 
 // Pages without a container of their own: a padded column, children kept at their size.
@@ -54,7 +57,11 @@ void buildPage(UiContext& ui, WidgetId parent, size_t index) {
     case 5: buildPaddedPage(ui, parent, buildGalleryDock); break;
     case 6: buildPaddedPage(ui, parent, buildGalleryCommands); break;
     case 7: buildPaddedPage(ui, parent, buildGalleryProps); break;
-    default: buildPaddedPage(ui, parent, buildGalleryCustomize); break;
+    case 8: buildPaddedPage(ui, parent, buildGalleryCustomize); break;
+    case 9: buildPaddedPage(ui, parent, buildGalleryActions); break;
+    case 10: buildPaddedPage(ui, parent, buildGalleryHotkeys); break;
+    case 11: buildPaddedPage(ui, parent, buildGalleryCustomMenus); break;
+    default: buildPaddedPage(ui, parent, buildGalleryCreator); break;
   }
 }
 

@@ -94,15 +94,16 @@ void EditorApp::registerCommands() {
           rc::CommandKind::Action, [this] { return !model_.selection().empty(); });
   declare(cmd::kResetValues, "Reset values", "Reset every property of the selection to its default", "rotate-ccw-square", "Edit", chord(letter('R'), kCtrl | kShift),
           [this] { model_.context().resetCategory(std::nullopt); }, rc::CommandKind::Action, [this] { return !model_.selection().empty(); });
-  declare(cmd::kShortcuts, "Keyboard shortcuts...", "Show and change the keyboard shortcuts", "settings2", "Edit", rc::ChordSequence::pair({letter('K'), kCtrl, false}, {letter('S'), kCtrl, false}),
+  declare(cmd::kShortcuts, "Hotkey editor...", "Assign keyboard shortcuts: pick an action, then click a key on the keyboard view", "settings2", "Edit",
+          rc::ChordSequence::pair({letter('K'), kCtrl, false}, {letter('S'), kCtrl, false}),
           [this] {
-            if (rw::DockHost* d = dockPtr()) {
-              d->openPanel(panel::kShortcuts);
-              d->activatePanel(panel::kShortcuts);
-            }
+            rw::DockHost* d = dockPtr();
+            if (d == nullptr) return;
+            const bool wasOpen = d->layout().isDocked(panel::kShortcuts);
+            d->openPanel(panel::kShortcuts);
+            d->activatePanel(panel::kShortcuts);
+            if (!wasOpen) floatPanelSized(panel::kShortcuts, 1100.0, 640.0);  // the keyboard view needs room: a window of its own
           }, rc::CommandKind::Action, hasDock);
-  declare(cmd::kCustomize, "Customize...", "Edit the menus and the toolbar: drag commands from the palette, hide, rename", "sliders-horizontal", "Edit",
-          chord(letter('C'), kCtrl | kShift), [this] { controller_.toggleEditMode(); }, rc::CommandKind::Toggle, {}, [this] { return controller_.editMode(); });
 
   // ---- View ----
   declare(cmd::kTheme, "Dark theme", "Switch between the dark and the light theme", "moon", "View", chord(letter('T'), kCtrl | kShift), [this] {
@@ -112,6 +113,9 @@ void EditorApp::registerCommands() {
           rc::CommandKind::Toggle, {}, [this] { return model_.showGrid; });
   declare(cmd::kLights, "Show lights", "Show or hide the lights in the viewport", "sun", "View", chord(letter('L'), kCtrl), [this] { model_.showLights = !model_.showLights; },
           rc::CommandKind::Toggle, {}, [this] { return model_.showLights; });
+  declare(cmd::kFrame, "Frame selection", "Center the viewport on the selected objects (or on the whole scene when nothing is selected)", "scan", "View", chord(letter('F')), [this] { model_.frameSelection(); });
+  declare(cmd::kWireframe, "Wireframe", "Draw the objects of the viewport as outlines instead of filled shapes", "box", "View", chord(letter('Z')), [this] { model_.wireframe = !model_.wireframe; },
+          rc::CommandKind::Toggle, {}, [this] { return model_.wireframe; });
 
   // ---- Tools (one radio group) ----
   struct ToolDef {
@@ -178,6 +182,10 @@ void EditorApp::registerCommands() {
   declare(cmd::kLayoutDelete, "Delete layout...", "Delete the current layout", "trash-2", "Layout", {}, [this] { deleteLayout(); }, rc::CommandKind::Action,
           [this] { return layouts_ && !layouts_->activeKey().empty(); });
   declare(cmd::kLayoutReset, "Reset layout...", "Return to the built-in default arrangement", "rotate-ccw-square", "Layout", {}, [this] { resetLayout(); }, rc::CommandKind::Action, hasDock);
+  declare(cmd::kWorkspaceSave, "Save custom workspace...", "Save the layout, custom menus, customization and key bindings into one .r1ws file", "save", "Layout", {},
+          [this] { askSaveWorkspace(); }, rc::CommandKind::Action, hasDock);
+  declare(cmd::kWorkspaceLoad, "Load custom workspace...", "Load a .r1ws file: replaces the layout, custom menus, customization and key bindings", "folder-open", "Layout", {},
+          [this] { askLoadWorkspace(); }, rc::CommandKind::Action, hasDock);
 
   // ---- Help ----
   declare(cmd::kAbout, "About the preview", "About this preview", "circle-alert", "Help", chord(Key::F1), [this] {
