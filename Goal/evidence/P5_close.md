@@ -24,6 +24,10 @@
 | 5.17 Create Custom Menu window, Custom Menus menu | TECHNICAL PASS (owner interaction pending) | [P5_S17](P5_S17.md) |
 | 5.18 .r1mn and custom workspace files | TECHNICAL PASS (owner interaction pending) | [P5_S18](P5_S18.md) |
 | 5.19 Preview: creator, hotkey editor, pie, workspaces | TECHNICAL PASS (owner interaction pending) | [P5_S19](P5_S19.md) |
+| 5.20 Brush library model (headless) | TECHNICAL PASS (owner interaction pending) | [P5_S20](P5_S20.md) |
+| 5.21 Brush library popup, controller, gallery | TECHNICAL PASS (owner interaction pending) | [P5_S21](P5_S21.md) |
+| 5.22 Brush pictures, chips, search, favourites, recents, letters, settings, docs | TECHNICAL PASS (owner interaction pending) | [P5_S22](P5_S22.md) |
+| 5.23 Preview: the brush library in the Editor | TECHNICAL PASS (owner interaction pending) | [P5_S23](P5_S23.md) |
 
 ## Launch the preview
 `tools/run/preview.cmd`. It opens on the Editor screen. Full checklist in `docs/dev/preview.md`. Quick tour:
@@ -34,7 +38,8 @@
 - Edit > Hotkey editor (Ctrl+K, Ctrl+S): click an action, click a key on the keyboard to assign it.
 - Layout > Save custom workspace... and Load custom workspace... (layout, menus, key bindings in one .r1ws file).
 - Inspector: type a value, drag in the viewport, Ctrl+Z and Ctrl+Y. Exit with File > Exit (Ctrl+Q).
-Ctrl+Tab cycles to the earlier screens (Gallery has 13 pages, new ones: Docking, Commands, Properties, Customize, Actions, Hotkeys, CustomMenus, Creator). User data lives in `%LOCALAPPDATA%\R1GUI\preview\`.
+- Brush library (slices 5.20 to 5.23): press **B** over the viewport; type **S**, then **N**: Snake Hook is picked (status line and viewport follow). Try arrows and Enter, a click, the star, Backspace, Esc, B again, **Tab** (search), right click a tile > Assign letter, B inside a number field, B in a floating window. Full list in `docs/dev/preview.md` item 14.
+Ctrl+Tab cycles to the earlier screens (Gallery has 14 pages, new ones: Docking, Commands, Properties, Customize, Actions, Hotkeys, CustomMenus, Creator, Brushes). User data lives in `%LOCALAPPDATA%\R1GUI\preview\`.
 
 ## Verification summary
 - Merged main, fresh MSVC build with warnings as errors; fast and GPU tiers pass on the RTX 4080 (fast 144 of 144, GPU 72 of 72, desktop 1 of 1). The builders' Debug trees passed with the validation layer clean.
@@ -45,7 +50,11 @@ Ctrl+Tab cycles to the earlier screens (Gallery has 13 pages, new ones: Docking,
 ## Slices 5.13 to 5.19 (2026-10-10, same day)
 Action list, hotkey editor with keyboard, custom menus (pie and dockable), pie trigger, the Create Custom Menu window, .r1mn and .r1ws files, the file path dialog and their preview integration. The Customize mode of the Editor was removed on the owner's decision. Verification of the final tree: build exit 0 (dev and Debug, warnings as errors); fast 167 of 167, GPU 78 of 78, desktop 1 of 1 in both trees; real-desktop drives `menus_drive.ps1` and `editor_drive.ps1` 0 failures.
 
+## Slices 5.20 to 5.23 (brush library, 2026-10-10)
+Owner requirement: "pressing B opens the brush library anywhere in the scene, so people can access their brush quickly by typing its letter." Headless model and letter algorithm (`ui-commands/brushes`), the popup, controller and gallery (`ui-widgets/brushes`), pictures through the asset browser's machinery, persistence (`brushes.json`), the preview wiring (40 sample brushes with procedural pictures, status line, viewport label and cursor ring, hotkey editor entry) and `docs/dev/brush-library.md`. Verification is in the four evidence records; the owner's checklist is `docs/dev/preview.md` item 14.
+
 ## Accepted risks and open items
+- **Brush library behaviour decisions** (docs/dev/brush-library.md section 4): B closes the library only before anything is typed (Shift+B, the search mode or a letter override reach brushes that start with B); type-ahead widgets (the preview's Assets grid and Actions list) keep plain letters; folding of letters is an approximation (Latin, Greek, Cyrillic); the first opening of a session is slower (about 21 ms offscreen) than later ones (under 1 ms). No independent review of the new overlay and key flow yet.
 - Not verified on this machine: a window crossing monitors of different display scale (both monitors are 100 percent), snap layouts, DWM shadow, a real display-change event.
 - Per-window full screen not implemented; floating windows have no minimize button; popups clip to their window.
 - Dragging from a floated palette onto the main menu bar does not work; the main window position is not restored; floating windows stay open when another screen is shown; auto-save does not mark named layouts as modified.
