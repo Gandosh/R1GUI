@@ -122,10 +122,14 @@ void BrushLibraryPopup::paintHeader(PaintContext& ctx) {
   const render::Rect modeBox = ctx.toPhysical(mode.x, mode.y, mode.w, mode.h);
   painter.fillRoundedRect(modeBox, radius(ctx, 6.0), ctx.color(hoverMode_ ? "panel-field-hover" : "panel-field"));
   painter.border(modeBox, radius(ctx, 6.0), ctx.px(1.0), ctx.color("border"));
-  line(ctx, typing ? "Type to pick" : "Search names", {mode.x + 10.0, mode.y, mode.w - 52.0, mode.h}, 12.0, 500, ctx.color("surface"));
-  const RectD cap{mode.x + mode.w - 40.0, mode.y + 7.0, 32.0, mode.h - 14.0};
-  painter.border(ctx.toPhysical(cap.x, cap.y, cap.w, cap.h), radius(ctx, 4.0), ctx.px(1.0), ctx.color("border-strong"));
-  line(ctx, "Tab", cap, 10.0, 500, ctx.color("muted"), TextAlign::Center);
+  if (mode.w >= 140.0) {
+    line(ctx, typing ? "Type to pick" : "Search names", {mode.x + 10.0, mode.y, mode.w - 52.0, mode.h}, 12.0, 500, ctx.color("surface"));
+    const RectD cap{mode.x + mode.w - 40.0, mode.y + 7.0, 32.0, mode.h - 14.0};
+    painter.border(ctx.toPhysical(cap.x, cap.y, cap.w, cap.h), radius(ctx, 4.0), ctx.px(1.0), ctx.color("border-strong"));
+    line(ctx, "Tab", cap, 10.0, 500, ctx.color("muted"), TextAlign::Center);
+  } else {
+    line(ctx, typing ? "Type" : "Search", mode, 12.0, 500, ctx.color("surface"), TextAlign::Center);
+  }
 }
 
 // ---- chips --------------------------------------------------------------------------------------
@@ -356,6 +360,7 @@ void BrushLibraryPopup::paintFooter(PaintContext& ctx) {
   if (mode_ == cb::QueryMode::TypeToPick && !text_.empty()) count = std::to_string(result_.matchCount) + (result_.matchCount == 1 ? " match" : " matches");
   else if (!text_.empty()) count = std::to_string(result_.matchCount) + " of " + std::to_string(result_.totalCount);
   else count = std::to_string(result_.totalCount) + (result_.totalCount == 1 ? " brush" : " brushes");
+  if (widthNow() < 460.0) return;  // a narrow popup (a small floating window) shows the option only
   const double countW = std::ceil(textWidth(ctx, count, 11.0, 400)) + 4.0;
   line(ctx, count, {option.x - countW - 10.0, option.y, countW, option.h}, 11.0, 400, ctx.color("muted"), TextAlign::End);
   // The hint wraps over two lines beside the count and the option.

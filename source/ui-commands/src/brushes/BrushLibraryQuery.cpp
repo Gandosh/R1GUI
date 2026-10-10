@@ -77,11 +77,12 @@ QueryResult BrushLibraryModel::query(const QueryRequest& request) const {
       }
     }
     out.matchCount = static_cast<uint32_t>(out.tiles.size() - out.recentCount);
+    // The active brush: its Recent tile when it has one (the Recent row is what the user sees first), else its tile in the list.
     out.defaultHighlight = out.recentCount;
-    for (size_t t = out.recentCount; t < out.tiles.size(); ++t) {
-      if (out.tiles[t].active) {
+    for (size_t t = 0; t < out.tiles.size(); ++t) {
+      if (out.tiles[t].active && (t < out.recentCount || out.defaultHighlight == out.recentCount)) {
         out.defaultHighlight = static_cast<uint32_t>(t);
-        break;
+        if (t < out.recentCount) break;
       }
     }
     if (out.tiles.empty()) out.defaultHighlight = 0;

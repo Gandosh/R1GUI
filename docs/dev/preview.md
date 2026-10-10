@@ -1,4 +1,4 @@
-# The preview application and its Editor screen (slices 5.12 and 5.19)
+# The preview application and its Editor screen (slices 5.12, 5.19 and 5.23)
 
 `examples/preview` is the launchable application of every phase (owner requirement 2026-10-09). From Phase 5 it opens on the **Editor** screen: a sample editor workspace built only from the toolkit's docking, native floating windows, command, property and menu modules. The earlier screens (Gallery, Widgets, Swatches, Screens, Sandbox) are still there. Slice 5.19 (2026-10-10) replaced the Customize mode with the Create Custom Menu window and added custom menus, the pie menu, custom workspaces and the hotkey editor.
 
@@ -18,6 +18,7 @@ r1gui-preview.exe              (build\dev\bin) the same without building
 | `layouts\editor\<name>.layout.json` | the named layouts (Default, Modeling, Review, yours) | Layout > Save layout, Save layout as, Rename |
 | `layouts\active-layout.txt` | the key of the named layout the arrangement came from (the layout manager restores the arrangement, not its name) | whenever the active layout changes |
 | `keybindings.json` | your key bindings: only what differs from the defaults (`r1ui-keybindings`, version 1) | on the next loop step after a binding changes |
+| `brushes.json` | the brush library's favourites, recents, assigned letters and the pick-on-unique option (`r1ui-brush-library`, version 1; `docs/dev/brush-library.md` section 8) | after every change in the library and on File > Save |
 | `customization.json` | menu and toolbar customization (`r1ui-customization`, version 1); the Editor has no UI for it any more, a file from an earlier version is still read | on File > Save and at exit |
 | `custom-menus.json` | your custom menus, pie and dockable (`r1ui-custom-menus`, version 1) | after every change of a menu |
 | `viewport-pie.txt` | the id of the pie the right mouse button opens in the viewport | when a pie is created, edited or loaded |
@@ -32,7 +33,7 @@ Every write goes through a temporary file and an atomic replace. A file that can
 
 ## 2. Screens and keys
 
-`Ctrl+Tab` (Shift reverses) cycles the six screens at any time; **Window > Screen** lists them. On the Editor screen plain keys belong to the commands (Tab is focus navigation), on the other screens Tab cycles, `T` toggles dark and light, `Esc` leaves a focused widget and then quits. The Gallery has 13 pages; the newest are Docking, Commands, Properties, Customize, Actions, Hotkeys, CustomMenus and Creator.
+`Ctrl+Tab` (Shift reverses) cycles the six screens at any time; **Window > Screen** lists them. On the Editor screen plain keys belong to the commands (Tab is focus navigation), on the other screens Tab cycles, `T` toggles dark and light, `Esc` leaves a focused widget and then quits. The Gallery has 14 pages; the newest are Docking, Commands, Properties, Customize, Actions, Hotkeys, CustomMenus, Creator and Brushes.
 
 ## 3. What is on the Editor screen
 
@@ -49,7 +50,7 @@ Every write goes through a temporary file and an atomic replace. A file that can
 | Create Custom Menu | `CreateCustomMenuWindow` | a native floating window opened by Custom Menus > Create Custom Menu... or an Edit entry |
 | one panel per dockable menu | `CustomMenuPanel` | the buttons of a menu you made (the sample **Quick Tools** on the first start); it opens next to the viewport and is listed under Custom Menus |
 
-Above the dock: the customizable **menu bar** (File, Edit, View, Tools, Window, Layout, Help, **Custom Menus**), a **layout drop-down** (right) and the customizable **toolbar**; below it a status line (last action, the key sequence in progress, active layout, the undo label).
+Above the dock: the customizable **menu bar** (File, Edit, View, Tools, Window, Layout, Help, **Custom Menus**), a **layout drop-down** (right) and the customizable **toolbar**; below it a status line (last action, the key sequence in progress; at the right the active brush, the active layout and the undo label).
 
 The Quick Actions panel and Edit > Customize (the edit mode with its tool strip) were removed in slice 5.19 because they customized areas nobody needed; the customization library is untouched and the menu bar and toolbar are still built from it. The command palette panel became the **Actions** panel (the new list shows the same commands with their descriptions); a stored layout that names the old panel 8 drops it.
 
@@ -60,7 +61,7 @@ The Quick Actions panel and Edit > Customize (the edit mode with its tool strip)
 | File | New scene (Ctrl+N), Save (Ctrl+S: layout, shortcuts, customization, menus), Exit (Ctrl+Q) |
 | Edit | Undo (Ctrl+Z), Redo (Ctrl+Y, Ctrl+Shift+Z), Select all (Ctrl+A), Deselect (Ctrl+Shift+A), Reset values (Ctrl+Shift+R), Hotkey editor... (Ctrl+K, Ctrl+S: a two-chord sequence) |
 | View | Dark theme (Ctrl+Shift+T), Show grid (Ctrl+G), Show lights (Ctrl+L), Frame selection (F), Wireframe (Z) |
-| Tools | Select (V), Move (W), Rotate (E), Scale (R) |
+| Tools | Select (V), Move (W), Rotate (E), Scale (R), **Brush library (B)** |
 | Window | Panels > the eight panels (toggles), Float tab (Ctrl+Alt+F), Move tab group to new window (Ctrl+Alt+M), Next tab (Ctrl+PageDown), Previous tab (Ctrl+PageUp), Close tab (Ctrl+W), Screen > the six preview screens |
 | Layout | Default, Modeling, Review (Ctrl+Alt+1, 2, 3), Switch layout... (Ctrl+Alt+L: opens the drop-down), Save layout, Save layout as... (Ctrl+Shift+S), Rename layout..., Delete layout..., Reset layout..., **Save custom workspace...**, **Load custom workspace...** |
 | Custom Menus | the dockable menus (one entry each: opens or focuses the panel), Pie menus (a submenu per pie: Edit..., Save As..., Delete), Edit Dockable Menu (a submenu per dockable menu: Edit..., Save As..., Delete), **Create Custom Menu...**, **Load Custom Menu...** |
@@ -85,6 +86,16 @@ Run `tools\run\preview.cmd`. The Editor opens in the Default layout with the sam
 11. **Custom workspace.** Layout > **Save custom workspace...**: type a name. Change the layout, delete a menu, rebind a key; then Layout > **Load custom workspace...** and pick the file from the list: the layout, the menus and the keys are back. Restart the preview: your menus, their panels and the viewport pie are still there.
 12. **Undo in the inspector.** Select the Cube in the outliner, type a new value into Position X in the inspector, then Ctrl+Z / Ctrl+Y; with two objects selected the differing values read "Mixed". Press W, drag the cube in the viewport: one drag is one undo step.
 13. **Dark and light.** View > Dark theme.
+14. **Brush library** (slices 5.20 to 5.23, `docs/dev/brush-library.md`). Move the pointer over the viewport and press **B**: a popup with 38 sample brushes opens around the pointer (pictures drawn by code, the brush name under each, a letter badge on each tile, the active brush outlined). Then:
+    - Type **S**: only the brushes starting with S remain (ten) and every tile shows the letter that picks it (the badge turns into a dim S and an accent coloured second letter). Press **N**: Snake Hook is picked at once, the popup closes, the status line (right) and the viewport label say Snake Hook, the cursor ring follows the pointer (Ctrl + wheel over the viewport changes its size).
+    - Press **B** and type **C**, **L**: Clay comes first (its name is complete), Clay Buildup needs one more letter (**B**) or Enter on the highlight. **Backspace** widens, **Esc** closes without picking, **B** again closes (when nothing is typed).
+    - **Arrows**, Home, End, PageUp, PageDown move the highlight, **Enter** picks it. Hover highlights, a click picks, the **star** at a tile's lower right corner (or Ctrl+F) makes a favourite: favourites come first, and the last picks appear as a **Recent** row above the list.
+    - **Tab** switches to searching anywhere in the names (type "ish": Hpolish and Polish); Tab again returns. Ctrl+Left and Ctrl+Right or a click on a chip change the category.
+    - **Change a brush's letter:** right click a tile (or highlight it and press **F2**): choose **Assign letter...**, press a letter (the popover says how many other brushes start with it), **Enter**. From now on that letter picks the brush at once. The tile menu has Clear letter.
+    - Untick **Pick on unique match** at the bottom right: a single remaining brush is then only highlighted (Enter picks it).
+    - **B inside a text field**: click the Position X field in the Inspector and press B: it is typed, the library does not open. (The Assets grid and the Actions list keep plain letters for their own type-ahead.)
+    - **B while a floating window is focused:** float the Outliner (Ctrl+Alt+F), click inside it, press B: the library opens inside that window (it shrinks to fit) and goes with the window if you close it.
+    - Restart the preview: favourites, recents, letters and the last brush are back (`%LOCALAPPDATA%\R1GUI\preview\brushes.json`). Edit > Hotkey editor lists "Brush library" under Brushes: rebind it and the new key opens (and closes) the library.
 
 ## 5. How it is wired (for developers)
 
@@ -107,11 +118,12 @@ Run `tools\run\preview.cmd`. The Editor opens in the Default layout with the sam
 | Test | Label | What it proves |
 |---|---|---|
 | `preview.editor` (`tests/preview/editor_test.cpp`) | fast | every panel builds (also in a second context); every menu and toolbar command exists; no default chord lost to a conflict; every command has a description; first-run layouts and sample menus; undo/redo; a viewport drag is one undo step; the layout, a rebound key and the menus survive a restart; damaged layout, keybindings and menus files are kept aside or ignored; the layout dialogs work from the keyboard; the creator window creates a pie and a dockable menu and the Custom Menus menu lists them; a panel can be closed and opened again; the right-mouse pie runs a command and Escape cancels it; a menu saved as .r1mn, deleted and loaded; workspaces save, load and refuse bad files without changing anything; the hotkey editor panel assigns a key and saves a set; an idle Editor needs no frame and schedules no timer |
-| `preview.modes` | fast | the gallery pages (now thirteen) build and switch |
+| `preview.modes` | fast | the gallery pages (now fourteen) build and switch |
 | `tests/preview/editor_drive.ps1` | manual | the real-desktop drive of window and layout behaviour (native windows, layouts, undo, restart) |
 | `tests/preview/menus_drive.ps1` | manual | the real-desktop drive of the custom menu features: pie in the viewport with the real right mouse button, the creator window (type chooser, drags from the list), the dockable menu, close and reopen, .r1mn save, delete and load, the hotkey editor with a key click, workspaces, idle CPU, restart |
+| `tests/preview/brush_drive.ps1` | manual | the real-desktop drive of the brush library: B, S then N, arrows and Enter, a click, the star, Backspace, Escape, B again, search mode, B in a number field, a letter assigned from the tile menu, B in a floating window and the window closed while it is open, key to first changed pixel, idle CPU open and closed, the GPU, restart |
 
-`powershell -File tests\preview\menus_drive.ps1 -Exe <r1gui-preview.exe> -OutDir <dir>` starts the preview on the RTX 4080 with a throwaway data folder and drives it with real mouse and keyboard input (`SetCursorPos`, `mouse_event`, `keybd_event`; before every press it checks that the point belongs to a preview window and before every key that the foreground window does). It writes `drive.log` and PNG captures (`PrintWindow`) and kills the preview in a `finally` block.
+`powershell -File tests\preview\menus_drive.ps1 -Exe <r1gui-preview.exe> -OutDir <dir>` (and `brush_drive.ps1`, the same arguments) starts the preview on the RTX 4080 with a throwaway data folder and drives it with real mouse and keyboard input (`SetCursorPos`, `mouse_event`, `keybd_event`; before every press it checks that the point belongs to a preview window and before every key that the foreground window does). It writes `drive.log` and PNG captures (`PrintWindow`) and kills the preview in a `finally` block.
 
 ## 7. Not wired, approximate, unverified
 

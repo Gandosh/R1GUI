@@ -11,12 +11,17 @@ namespace r1ui::widgets {
 
 namespace {
 
+// A paint may spend this long and make this many pictures: the library must open within a frame, so the tiles
+// show their icons first and the pictures arrive over the next few frames (about 16 per frame).
+constexpr double kFirstPassBudgetMs = 2.5;
+constexpr size_t kMaxPerPass = 16;
+
 double steadyMs() { return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now().time_since_epoch()).count(); }
 
 }  // namespace
 
 BrushThumbnailSource::BrushThumbnailSource(thumbs::ThumbnailProvider& provider, thumbs::ThumbnailTextureSink& sink, thumbs::CacheLimits limits)
-    : cache_(sink, limits), scheduler_(cache_) {
+    : cache_(sink, limits), scheduler_(cache_, thumbs::SchedulerConfig{kFirstPassBudgetMs, kMaxPerPass}) {
   scheduler_.setProvider(&provider);
 }
 

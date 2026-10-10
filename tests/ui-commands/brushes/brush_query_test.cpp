@@ -141,6 +141,11 @@ int main() {
     R1_EXPECT(all.recentCount == 3 && all.tiles.size() == model.size() + 3);
     R1_EXPECT(model.brushes()[all.tiles[0].brush].id == "smooth" && all.tiles[0].recent && all.tiles[2].recent && !all.tiles[3].recent);
     R1_EXPECT(model.brushes()[all.tiles[all.defaultHighlight].brush].id == "move" && all.tiles[all.defaultHighlight].active && !all.tiles[all.defaultHighlight].recent);
+    // An active brush that has a Recent tile is highlighted there (the Recent row is what the user sees first).
+    model.setActiveId("blob");
+    const QueryResult activeInRecent = typed(model, "");
+    R1_EXPECT(activeInRecent.tiles[activeInRecent.defaultHighlight].recent && model.brushes()[activeInRecent.tiles[activeInRecent.defaultHighlight].brush].id == "blob");
+    model.setActiveId("move");
     // No Recent section while typing, in a category, or when asked not to.
     R1_EXPECT(typed(model, "s").recentCount == 0);
     R1_EXPECT(typed(model, "", "Sculpt").recentCount == 0);

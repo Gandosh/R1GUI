@@ -13,6 +13,7 @@
 
 #include "PreviewApp.h"
 #include "r1ui/widgets/actions/ActionList.h"
+#include "r1ui/widgets/brushes/BrushLibraryController.h"
 #include "r1ui/widgets/custommenu/CustomMenuPanel.h"
 #include "r1ui/widgets/custommenu/creator/CreateCustomMenuWindow.h"
 #include "r1ui/widgets/custommenu/creator/PanelPreviewEditor.h"
@@ -201,6 +202,47 @@ std::string driveStatus(PreviewApp& app) {
     }, true);
   }
   out << creatorText;
+
+  // The brush library: where its popup is (in any window) and what it shows.
+  {
+    namespace cb = r1ui::commands::brushes;
+    rw::BrushLibraryController& library = editor->brushLibrary();
+    const cb::BrushLibraryModel& brushes = editor->brushModel();
+    rw::BrushLibraryPopup* popup = library.popup();
+    std::string windowName = "none";
+    if (popup != nullptr) {
+      for (const Surface& s : surfaces) {
+        if (s.ui != library.window()) continue;
+        windowName = &s == &surfaces.front() ? "main" : "float";
+        rectLine("widget", "brushpopup", s, popup->id());
+        const auto box = [&](const char* name, const r1ui::core::layout::RectD& r) {
+          if (r.w > 0.0) boxLine("widget", name, s, r.x, r.y, r.w, r.h);
+        };
+        box("brushsearch", popup->searchRect());
+        box("brushmode", popup->modeRect());
+        box("brushoption", popup->optionRect());
+        for (size_t chip = 0; chip < popup->chipCount(); ++chip) box(("brushchip" + std::to_string(chip)).c_str(), popup->chipRect(chip));
+        const r1ui::core::layout::RectD grid = popup->gridRect();
+        for (size_t tile = 0; tile < popup->result().tiles.size(); ++tile) {
+          const r1ui::core::layout::RectD r = popup->tileRect(tile);
+          if (r.w <= 0.0 || r.y < grid.y || r.y + r.h > grid.y + grid.h) continue;  // only tiles that are fully on screen can be clicked
+          const std::string id = brushes.brushes()[popup->result().tiles[tile].brush].id;
+          const std::string tag = (popup->result().tiles[tile].recent ? "recent-" : "") + id;
+          box(("brushtile-" + tag).c_str(), r);
+          box(("brushstar-" + tag).c_str(), popup->starRect(tile));
+        }
+      }
+    }
+    out << "text brush active=" << editor->model().brushName << " activeid=" << brushes.activeId() << " open=" << (popup != nullptr ? 1 : 0) << " window=" << windowName
+        << " typed=" << (popup != nullptr ? popup->text() : std::string()) << " mode=" << (popup != nullptr ? (popup->mode() == cb::QueryMode::TypeToPick ? "type" : "search") : "-")
+        << " matches=" << (popup != nullptr ? popup->result().matchCount : 0) << " tiles=" << (popup != nullptr ? popup->result().tiles.size() : 0)
+        << " highlight=" << (popup != nullptr && popup->highlightedBrush() ? brushes.brushes()[*popup->highlightedBrush()].id : std::string("-"))
+        << " assigning=" << (popup != nullptr && popup->assigning() ? 1 : 0) << " menu=" << (popup != nullptr && popup->menuOpen() ? 1 : 0) << " favourites=" << brushes.favourites().size()
+        << " pick=" << (brushes.pickOnUniqueOption() ? 1 : 0) << " recents=";
+    for (const std::string& id : brushes.recents()) out << id << ",";
+    out << "\n";
+    if (popup != nullptr) out << "text brushhint=" << popup->hint() << "\n";
+  }
   for (const auto& menu : editor->menuSet().menus()) {
     out << "cmenu " << menu.id << " " << r1ui::commands::custommenu::kindName(menu.kind) << "|" << menu.name << "|";
     for (const auto& entry : menu.entries) out << entry.commandId << ",";

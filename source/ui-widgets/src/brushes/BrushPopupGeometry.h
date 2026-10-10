@@ -6,6 +6,8 @@
 // Callers: the BrushLibraryPopup*.cpp files only (not a public header). Calls: BrushTileLayout.h types.
 #pragma once
 
+#include <algorithm>
+
 #include "BrushTileLayout.h"
 
 namespace r1ui::widgets::brushes {
@@ -30,11 +32,17 @@ struct Box {
   bool contains(double px, double py) const { return px >= x && px < x + w && py >= y && py < y + h; }
 };
 
-inline Box searchBox(double width) { return {kEdge, kHeaderTop, width - 2.0 * kEdge - kModeWidth - 8.0, kHeaderHeight}; }
-inline Box modeBox(double width) { return {width - kEdge - kModeWidth, kHeaderTop, kModeWidth, kHeaderHeight}; }
+// The mode switch shrinks to a short label in a narrow popup (a small floating window).
+inline double modeWidth(double width) { return width >= 460.0 ? kModeWidth : 78.0; }
+inline Box searchBox(double width) { return {kEdge, kHeaderTop, width - 2.0 * kEdge - modeWidth(width) - 8.0, kHeaderHeight}; }
+inline Box modeBox(double width) { return {width - kEdge - modeWidth(width), kHeaderTop, modeWidth(width), kHeaderHeight}; }
 inline Box chipsBox(double width) { return {kEdge, kChipsTop, width - 2.0 * kEdge, kChipsHeight}; }
 inline Box gridBox(double width, double height) { return {0.0, kGridTop, width, height - kGridTop - kFooterHeight}; }
 inline Box footerBox(double width, double height) { return {0.0, height - kFooterHeight, width, kFooterHeight}; }
-inline Box optionBox(double width, double height) { return {width - kEdge - kOptionWidth, height - kFooterHeight + 7.0, kOptionWidth, kFooterHeight - 14.0}; }
+// The option has the whole footer in a narrow popup (no room for the hint and the count then).
+inline Box optionBox(double width, double height) {
+  const double w = width >= 460.0 ? kOptionWidth : std::max(0.0, width - 2.0 * kEdge);
+  return {width - kEdge - w, height - kFooterHeight + 7.0, w, kFooterHeight - 14.0};
+}
 
 }  // namespace r1ui::widgets::brushes

@@ -41,7 +41,7 @@ std::u32string keyOf(std::string_view text);
 std::u32string foldText(std::string_view text, size_t maxCodePoints);
 // The folded code point when `text` is exactly one letter or digit (after folding); nullopt otherwise.
 std::optional<char32_t> singleKeyLetter(std::string_view text);
-// A key, upper-cased for display (the badge on a tile); the inverse of nothing, display only.
+// The first `length` characters of a key, upper-cased for display (the badge on a tile); never fed back into matching.
 std::string displayKey(std::u32string_view key, size_t length);
 
 }  // namespace r1ui::commands::brushes

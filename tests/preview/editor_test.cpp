@@ -670,8 +670,11 @@ void testBrushLibrary(Rig& r) {
   const BrushLibraryPopup& popup = *app.brushLibrary().popup();
   // The library opens scrolled to the active brush: take the last tile of the main list that is on screen.
   size_t starTile = popup.result().tiles.size();
+  const auto grid = popup.gridRect();
   for (size_t t = popup.result().tiles.size(); t-- > static_cast<size_t>(popup.result().recentCount);) {
-    if (popup.starRect(t).w > 0.0 && popup.result().tiles[t].brush != *app.brushModel().indexOfId(app.brushModel().activeId())) {
+    const auto s = popup.starRect(t);
+    const bool whole = s.w > 0.0 && s.y >= grid.y && s.y + s.h <= grid.y + grid.h;
+    if (whole && popup.result().tiles[t].brush != *app.brushModel().indexOfId(app.brushModel().activeId())) {
       starTile = t;
       break;
     }

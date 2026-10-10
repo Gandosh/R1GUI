@@ -7,9 +7,13 @@
 //   pixels the icon cannot produce), the accent colour marks the active brush and the next letter, and
 //   the validation layer (Debug trees) reports nothing.
 // Callers: CTest (label gpu, offscreen, no window).
+#include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 #include "TestSupport.h"
 #include "r1ui/commands/CommandRegistry.h"
@@ -239,9 +243,80 @@ void checkTheme(r1ui::theme::ThemeId theme, const char* name, r1ui::widgets::ima
   ui.setGlobalKeyHandler(nullptr);
 }
 
+// The time from the B key to the first drawn frame with 2000 brushes: the key through the router, the command,
+// the popup, the query, the layout and one real frame on the device (offscreen, fence wait included). The
+// first opening of the session (cold: fonts, glyphs, pipelines) is reported apart from the later ones.
+void measureOpenLatency() {
+  Rig rig;
+  PaintProvider provider;
+  GpuThumbnailTextures sink(rig.device);
+  r1ui::commands::CommandRegistry registry;
+  r1ui::commands::KeybindingOverrides overrides{registry};
+  r1ui::commands::Keymap keymap{registry, overrides};
+  br::BrushLibraryModel model;
+  std::vector<br::BrushInfo> list;
+  uint64_t state = 4242;
+  static const char* const syllables[] = {"ca", "ma", "so", "ti", "ro", "ne", "lu", "pa", "ki", "do", "fe", "gu"};
+  for (int i = 0; i < 2000; ++i) {
+    br::BrushInfo info;
+    for (int p = 0; p < 3; ++p) {
+      state = state * 6364136223846793005ull + 1442695040888963407ull;
+      info.name += syllables[(state >> 33) % 12];
+    }
+    info.name += " " + std::to_string(i);
+    info.id = "m" + std::to_string(i);
+    info.category = "Cat" + std::to_string(i % 6);
+    info.icon = "palette";
+    list.push_back(std::move(info));
+  }
+  model.setBrushes(std::move(list));
+  UiContext ui(rig.services);
+  ui.setAnimationsEnabled(false);
+  ui.setViewport(900, 620, 1.0f);
+  UiClock clock(ui);
+  r1ui::commands::CommandRouter router(registry, keymap, clock);
+  CommandServices services{registry, overrides, keymap, router};
+  Label& canvas = ui.create<Label>(ui.root(), "Viewport", LabelRole::Muted);
+  canvas.style().margin[layout::kLeft] = layout::Length::px(40.0);
+  CommandKeyHandler keys(ui, services);
+  BrushLibraryController controller(ui, services, model, [&](const std::string& id) { model.setActiveId(id); });
+  controller.setThumbnails(&provider, &sink);
+  auto tap = controller.tapKeys(ui, &keys);
+  ui.setGlobalKeyHandler(tap.get());
+  ui.frame();
+  r1ui::render::OffscreenTarget target(rig.device, 900, 620);
+  const r1ui::render::Color clear = rig.services.color("canvas");
+  for (int i = 0; i < 2; ++i) renderFrame(ui, target, clear);  // the renderer's own first frames (pipelines) are not the library's cost
+  using Clock = std::chrono::steady_clock;
+  std::vector<double> times;
+  double coldOpenMs = 0.0;
+  for (int round = 0; round < 8; ++round) {
+    ui.pointerMove(450, 310);
+    const auto begin = Clock::now();
+    ui.keyDown(static_cast<Key>('B'), 0);
+    ui.textInput(U'b', 0);
+    ui.keyUp(static_cast<Key>('B'), 0);
+    const auto opened = Clock::now();
+    if (!renderFrame(ui, target, clear)) throw std::runtime_error("the offscreen frame was skipped");
+    times.push_back(std::chrono::duration<double, std::milli>(Clock::now() - begin).count());
+    if (round == 0) coldOpenMs = std::chrono::duration<double, std::milli>(opened - begin).count();
+    R1_EXPECT(controller.isOpen());
+    for (int i = 0; i < 4; ++i) renderFrame(ui, target, clear);  // the pictures arrive
+    controller.close();
+    renderFrame(ui, target, clear);
+  }
+  std::vector<double> warm(times.begin() + 1, times.end());
+  std::sort(warm.begin(), warm.end());
+  std::printf("brush library, 2000 brushes: key to first drawn frame (offscreen): cold %.2f ms (key and popup %.2f ms, frame %.2f ms), warm median %.2f ms, worst %.2f ms\n", times.front(), coldOpenMs,
+              times.front() - coldOpenMs, warm[warm.size() / 2], warm.back());
+  R1_EXPECT(warm[warm.size() / 2] < 16.0);
+  ui.setGlobalKeyHandler(nullptr);
+}
+
 }  // namespace
 
 int main() {
+  measureOpenLatency();
   r1ui::widgets::image::Image gallery[2];
   r1ui::widgets::image::Image live[2][4];
   checkTheme(r1ui::theme::ThemeId::Dark, "dark", &gallery[0], live[0]);

@@ -50,6 +50,16 @@ void BrushLibraryPopup::onAttached() {
     if (BrushLibraryPopup* popup = context->objectAs<BrushLibraryPopup>(self)) popup->refresh(true);
   });
   refresh(false);
+  // The first view puts the active brush of the list in the middle of the grid (its row starts at a whole row,
+  // so no tile is cut at the top), so its neighbours are around it. The Recent row is shown from its top.
+  if (highlight_ >= static_cast<int>(result_.recentCount) && result_.recentCount == 0) {
+    const bx::TileRect r = layout_->tileRect(static_cast<uint32_t>(highlight_));
+    const double centred = r.y + r.h * 0.5 - gridHeight() * 0.5;
+    const bx::TileRect first = layout_->tileRect(0);
+    const double rowSpan = bx::kCellH + bx::kGap;
+    const double rows = std::max(0.0, std::round((centred - first.y) / rowSpan));
+    scrollTo(first.y + rows * rowSpan - bx::kGap);
+  }
 }
 
 void BrushLibraryPopup::onDetached() {
