@@ -15,3 +15,12 @@ endfunction()
 r1ui_preview_test(preview-scene-test scene_test.cpp preview.scene gpu)
 r1ui_preview_test(preview-modes-test modes_test.cpp preview.modes fast)
 r1ui_preview_test(preview-editor-test editor_test.cpp preview.editor fast)
+
+# Native-backend window commands over a real desktop window: reuses the dock tests' native rig.
+add_executable(preview-editor-float-native-test editor_float_native_test.cpp)
+target_link_libraries(preview-editor-float-native-test PRIVATE r1gui-preview-core r1ui::widgets_gpu r1ui_options)
+target_include_directories(preview-editor-float-native-test PRIVATE
+  ${CMAKE_SOURCE_DIR}/tests/ui-widgets/support ${CMAKE_SOURCE_DIR}/tests/ui-widgets/dock ${CMAKE_SOURCE_DIR}/tests/ui-widgets/dock/native)
+target_compile_definitions(preview-editor-float-native-test PRIVATE ${R1UI_PREVIEW_TEST_DEFS} R1UI_ARTIFACT_DIR="${CMAKE_BINARY_DIR}/artifacts/preview")
+add_test(NAME preview.editor_float_native COMMAND preview-editor-float-native-test)
+set_tests_properties(preview.editor_float_native PROPERTIES LABELS "gpu" TIMEOUT 300)
