@@ -219,7 +219,7 @@ void CreateCustomMenuWindow::buildChooser(WidgetId parent) {
     load.setOnClick([context, self] {
       if (CreateCustomMenuWindow* w = context->objectAs<CreateCustomMenuWindow>(self)) {
         auto callback = w->hooks_.loadFile;
-        if (callback) callback();
+        if (callback) callback(*context, self);
       }
     });
     loadFileButton_ = load.id();
@@ -433,7 +433,7 @@ void CreateCustomMenuWindow::buildFooter(WidgetId parent) {
         return;
       }
       auto callback = w->hooks_.saveFile;
-      if (callback) callback(menu);
+      if (callback) callback(*context, self, menu);
     });
     saveFileButton_ = save.id();
   }
@@ -445,7 +445,7 @@ void CreateCustomMenuWindow::buildFooter(WidgetId parent) {
     load.setOnClick([context, self] {
       if (CreateCustomMenuWindow* w = context->objectAs<CreateCustomMenuWindow>(self)) {
         auto callback = w->hooks_.loadFile;
-        if (callback) callback();
+        if (callback) callback(*context, self);
       }
     });
     loadFileButton_ = load.id();

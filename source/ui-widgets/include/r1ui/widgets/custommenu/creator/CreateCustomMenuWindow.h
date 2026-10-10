@@ -37,6 +37,7 @@
 namespace r1ui::widgets {
 
 class ActionList;
+class UiContext;
 class PanelPreviewEditor;
 class PiePreviewEditor;
 
@@ -46,9 +47,11 @@ struct CreatorHooks {
   // Cancel was pressed; the session's draft is already dropped.
   std::function<void()> cancelled;
   // "Save to file...": the menu as it would be stored; the host asks for a path and writes the .r1mn file.
-  std::function<void(const commands::custommenu::CustomMenu& menu)> saveFile;
+  // `ui` and `owner` are the window's own context and widget: a dialog must open there (the window may
+  // live in a native floating window with a context of its own).
+  std::function<void(UiContext& ui, core::tree::WidgetId owner, const commands::custommenu::CustomMenu& menu)> saveFile;
   // "Load from file...": the host asks for a path and, when the file is good, calls session.beginFromFile.
-  std::function<void()> loadFile;
+  std::function<void(UiContext& ui, core::tree::WidgetId owner)> loadFile;
 };
 
 class CreateCustomMenuWindow final : public WidgetObject {

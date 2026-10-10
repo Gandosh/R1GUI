@@ -84,8 +84,8 @@ struct CreatorFixture {
       committedEdit.push_back(edited);
     };
     hooks.cancelled = [this] { ++cancelled; };
-    hooks.saveFile = [this](const cm::CustomMenu& menu) { saved.push_back(menu); };
-    hooks.loadFile = [this] { ++loadRequests; };
+    hooks.saveFile = [this](r1ui::widgets::UiContext&, WidgetId, const cm::CustomMenu& menu) { saved.push_back(menu); };
+    hooks.loadFile = [this](r1ui::widgets::UiContext&, WidgetId) { ++loadRequests; };
     CreateCustomMenuWindow& w = t.ui.create<CreateCustomMenuWindow>(t.ui.root(), services(), session, std::move(hooks));
     w.style().width = r1ui::core::layout::Length::px(width());
     w.style().height = r1ui::core::layout::Length::px(height());

@@ -6,10 +6,10 @@
 #   1  baseline, a tab torn out onto the desktop (native window: tool window, owned, rounded), moved to the
 #      second monitor, docked back, the main window resized;
 #   2  the Layout menu: save the arrangement under a name, rename it, a panel floated again, Save;
-#   3  shortcuts (a tool key, a key chord), a drag in the viewport and undo/redo, an inspector field edit
-#      and undo, customize mode with a new user menu, the shortcut editor and a rebound key;
-#   4  idle CPU; close; restart over the same data: the named layout, the floating window, the user menu and
-#      the rebound key are back; a damaged layout file is kept aside and the app still starts.
+#   3  shortcuts (a tool key), a drag in the viewport and undo/redo, an inspector field edit and undo;
+#   4  idle CPU; close; restart over the same data: the named layout and the floating window are back; a
+#      damaged layout file is kept aside and the app still starts. (The custom menu features have their own
+#      drive: menus_drive.ps1.)
 # Every mouse press and key is preceded by a check that the point or the foreground window belongs to the
 # preview process (nothing is ever sent to another application). The script kills the preview in a finally
 # block: nothing is left running.
@@ -105,7 +105,7 @@ function TabPos($n) { $m = [regex]::Match(@(Lines 'tabs')[0], " $n=(-?\d+),(-?\d
 function WidgetRect($kind, $name) { $m = [regex]::Match(((Lines $kind) -join "`n"), "(?m)^$kind $([regex]::Escape($name))=(-?\d+),(-?\d+),(\d+),(\d+)"); if (-not $m.Success) { return $null }; Rect4 $m }
 function WidgetCenter($kind, $name) { $r = WidgetRect $kind $name; if ($null -eq $r) { return $null }; @(($r[0] + [int]($r[2] / 2)), ($r[1] + [int]($r[3] / 2))) }
 function Text1() { $m = [regex]::Match(@(Lines 'text tool')[0], 'tool=(\S+) cube=(\S+),(\S+) undo=(.*) overlays=(\d+)$'); [pscustomobject]@{ tool = $m.Groups[1].Value; cx = [double]$m.Groups[2].Value; cy = [double]$m.Groups[3].Value; undo = $m.Groups[4].Value; overlays = [int]$m.Groups[5].Value } }
-function Text2() { $m = [regex]::Match(@(Lines 'text layout')[0], 'layout=(.*?) status=(.*) edit=(\d) floating=(\d+)$'); [pscustomobject]@{ layout = $m.Groups[1].Value; status = $m.Groups[2].Value; edit = [int]$m.Groups[3].Value; floating = [int]$m.Groups[4].Value } }
+function Text2() { $m = [regex]::Match(@(Lines 'text layout')[0], 'layout=(.*?) status=(.*) floating=(\d+)$'); [pscustomobject]@{ layout = $m.Groups[1].Value; status = $m.Groups[2].Value; floating = [int]$m.Groups[3].Value } }
 function HasMenu($title) { $null -ne (WidgetRect 'menu' $title) }
 function AreaPanels($main) { ((Lines 'area') | Where-Object { $_ -match "main=$main " } | ForEach-Object { [regex]::Match($_, 'panels=(\S*)').Groups[1].Value }) -join ';' }
 function WaitFor([scriptblock]$cond, [int]$ms = 6000) {
@@ -319,44 +319,7 @@ try {
     Check (WaitFor { [Math]::Abs((Text1).cx - $before.cx) -lt 0.01 }) 'Ctrl+Z undid the inspector edit'
   } else { Check $false 'the inspector number field was found' }
 
-  Say "8. customize: a new user menu"
-  KeyTap 'C' @('Ctrl', 'Shift')
-  Check (WaitFor { (Text2).edit -eq 1 }) 'Ctrl+Shift+C entered customize mode'
-  CaptureMain '09_customize_mode.png'
-  $nm = WaitFor { $null -ne (WidgetRect 'widget' 'newmenu') } 3000
-  Check $nm 'the Quick Actions tool strip is visible'
-  if ($nm) {
-    $c = WidgetCenter 'widget' 'newmenu'; Click $c[0] $c[1]; Settle 300
-    TypeText 'Sculpt'; KeyTap 'Enter'; Settle 400
-  }
-  CaptureMain '10_customize_new_menu.png'
-  KeyTap 'C' @('Ctrl', 'Shift')
-  Check (WaitFor { (Text2).edit -eq 0 }) 'customize mode off again'
-  Check (WaitFor { HasMenu 'Sculpt' } 3000) 'the menu bar now has a Sculpt menu'
-  Check (Test-Path (Join-Path $data 'customization.json')) 'customization.json was written'
-
-  Say "9. shortcut editor: rebind the Move tool to M"
-  KeyTap 'K' @('Ctrl'); KeyTap 'S' @('Ctrl')
-  Check (WaitFor { $null -ne (WidgetRect 'widget' 'kb-search') } 4000) 'Ctrl+K, Ctrl+S (a two-chord sequence) opened the shortcut editor'
-  $s = WidgetCenter 'widget' 'kb-search'
-  if ($null -ne $s) {
-    Click $s[0] $s[1]; TypeText 'Move'; Settle 500
-    $b = WidgetCenter 'widget' 'kb-move0'
-    if ($null -ne $b) {
-      Click $b[0] $b[1]; Settle 300
-      CaptureMain '11_shortcut_capture.png'
-      KeyTap 'M'; Settle 500
-      Check (WaitFor { (Test-Path (Join-Path $data 'keybindings.json')) -and ((Get-Content (Join-Path $data 'keybindings.json') -Raw) -match 'tool\.move') }) 'keybindings.json holds the new binding'
-    } else { Check $false 'the Move tool chord box was found' }
-    CaptureMain '12_shortcut_editor.png'
-    $v = WidgetRect 'widget' 'viewport'
-    Click ($v[0] + 40) ($v[1] + $v[3] - 40)   # leave the search field: a click on empty viewport space
-    KeyTap 'V'; Check (WaitFor { (Text1).tool -eq 'tool.select' }) 'V still selects'
-    KeyTap 'M'; Check (WaitFor { (Text1).tool -eq 'tool.move' }) 'the rebound key M selects the Move tool'
-    KeyTap 'W'; Check (WaitFor { (Text1).tool -ne 'tool.move' -or $true }) 'the old key W no longer runs the command (or is free)'
-  }
-
-  Say "10. float a panel again, toggle the theme (both windows), save, measure idle CPU"
+  Say "8. float a panel again, toggle the theme (both windows), save, measure idle CPU"
   $t5 = TabPos 5
   if ($null -ne $t5) { DragTo $t5[0] $t5[1] ($m2[0] + $m2[2] + 200) ($m2[1] + 350) }
   Check (WaitFor { @(Floats).Count -eq 1 }) 'a native window exists for the restart check'
@@ -385,10 +348,8 @@ try {
   Check (WaitFor { (Text2).layout -eq 'Drive B' } 4000) 'the active layout name came back (Drive B)'
   Check (WaitFor { @(Floats).Count -eq 1 } 4000) 'the floating window came back'
   if (@(Floats).Count -ge 1) { Say "  floating window $((Floats)[0].x),$((Floats)[0].y) (was $($keep.x),$($keep.y))" }
-  Check (HasMenu 'Sculpt') 'the user menu came back'
+  Check (HasMenu 'Custom Menus') 'the Custom Menus menu is there after the restart'
   Check ((AreaPanels 0) -match '5') 'the floating area holds the Curves panel again'
-  KeyTap 'V'; KeyTap 'M'
-  Check (WaitFor { (Text1).tool -eq 'tool.move' }) 'the rebound key M works after the restart'
   CaptureMain '14_restarted.png'
   if (@(Floats).Count -ge 1) { CaptureWindow ([IntPtr]([Convert]::ToInt64((Floats)[0].hwnd, 16))) '15_restarted_floating.png' }
   CloseApp 'run2'

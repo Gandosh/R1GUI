@@ -48,12 +48,12 @@ void ViewportCanvas::onDetached() {
 
 ViewportCanvas::Point ViewportCanvas::toLocal(double wx, double wy) const {
   const r1ui::core::layout::Rect r = ui().absRect(id());
-  return {r.x + r.w * 0.5 + wx * kPixelsPerUnit, r.y + r.h * 0.5 - wy * kPixelsPerUnit};
+  return {r.x + r.w * 0.5 + (wx - model_.viewX) * kPixelsPerUnit, r.y + r.h * 0.5 - (wy - model_.viewY) * kPixelsPerUnit};
 }
 
 ViewportCanvas::Point ViewportCanvas::toWorld(double x, double y) const {
   const r1ui::core::layout::Rect r = ui().absRect(id());
-  return {(x - r.x - r.w * 0.5) / kPixelsPerUnit, -(y - r.y - r.h * 0.5) / kPixelsPerUnit};
+  return {(x - r.x - r.w * 0.5) / kPixelsPerUnit + model_.viewX, -(y - r.y - r.h * 0.5) / kPixelsPerUnit + model_.viewY};
 }
 
 uint64_t ViewportCanvas::hit(double x, double y) const {
@@ -169,20 +169,22 @@ void ViewportCanvas::paint(rw::PaintContext& ctx) {
   painter.pushClip(box);
   const float s = ctx.scale();
   const r1ui::core::layout::Rect r = ctx.rect();
-  const double cx = r.x + r.w * 0.5;
-  const double cy = r.y + r.h * 0.5;
+  const double cx = r.x + r.w * 0.5 - model_.viewX * kPixelsPerUnit;  // the world origin on screen
+  const double cy = r.y + r.h * 0.5 + model_.viewY * kPixelsPerUnit;
   const auto toBox = [&](double x, double y, double w, double h) { return ctx.toPhysical(x, y, w, h); };
 
   if (model_.showGrid) {
     const render::Color minor = ctx.color("border", 0.45);
     const render::Color axis = ctx.color("border-strong", 0.9);
     const double step = kPixelsPerUnit * 2.0;
-    for (double x = std::fmod(r.w * 0.5, step); x <= r.w; x += step) {
-      const bool isAxis = std::abs(x - r.w * 0.5) < 0.5;
+    const double originX = cx - r.x;  // the axes, relative to the widget
+    const double originY = cy - r.y;
+    for (double x = originX - std::floor(originX / step) * step; x <= r.w; x += step) {
+      const bool isAxis = std::abs(x - originX) < 0.5;
       painter.fillRect(toBox(r.x + x, r.y, isAxis ? 2.0 : 1.0, r.h), isAxis ? axis : minor);
     }
-    for (double y = std::fmod(r.h * 0.5, step); y <= r.h; y += step) {
-      const bool isAxis = std::abs(y - r.h * 0.5) < 0.5;
+    for (double y = originY - std::floor(originY / step) * step; y <= r.h; y += step) {
+      const bool isAxis = std::abs(y - originY) < 0.5;
       painter.fillRect(toBox(r.x, r.y + y, r.w, isAxis ? 2.0 : 1.0), isAxis ? axis : minor);
     }
   }
@@ -200,6 +202,8 @@ void ViewportCanvas::paint(rw::PaintContext& ctx) {
     const float radius = light ? shape.w * 0.5f : 4.0f * s;
     if (light) {
       painter.fillRoundedRect(shape, {radius, radius, radius, radius}, toColor(model_.colorOf(item), 0.35f));
+      painter.border(shape, {radius, radius, radius, radius}, 2.0f * s, toColor(model_.colorOf(item)));
+    } else if (model_.wireframe) {
       painter.border(shape, {radius, radius, radius, radius}, 2.0f * s, toColor(model_.colorOf(item)));
     } else {
       painter.fillRoundedRect(shape, {radius, radius, radius, radius}, toColor(model_.colorOf(item)));

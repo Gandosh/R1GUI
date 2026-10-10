@@ -8,8 +8,8 @@
 //                             then quits.
 //   --bench <directory>       the Phase 4 performance baseline (Bench.h); writes phase4_baseline.json/.md
 //   --bench-editor <dir>      the Phase 5 baseline of the Editor screen; writes phase5_baseline.md
-//   --shot <directory>        offscreen renders of the Editor screen (arrangement, customize mode,
-//                             shortcut editor, floating panel), the Widgets screen and the gallery pages
+//   --shot <directory>        offscreen renders of the Editor screen (arrangement, hotkey editor, menu creator,
+//                             floating panel), the Widgets screen and the gallery pages
 //                             (both themes) for visual comparison
 // Why: owner requirement that every phase ends with something launchable to interact with, built
 //   from the real modules (ui-core, ui-theme, ui-text, ui-render, ui-platform, ui-dock, ui-widgets).

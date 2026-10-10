@@ -23,11 +23,13 @@ add_library(r1gui-preview-core STATIC
   DriveStatus.cpp
   editor/EditorApp.cpp
   editor/EditorCommands.cpp
+  editor/EditorCustomMenus.cpp
   editor/EditorLayouts.cpp
   editor/EditorMenus.cpp
   editor/EditorModel.cpp
   editor/EditorPanels.cpp
   editor/EditorViewport.cpp
+  editor/EditorWorkspaces.cpp
   GalleryApp.cpp
   ModeViews.cpp
   PreviewApp.cpp

@@ -117,7 +117,8 @@ void renderShots(const std::filesystem::path& directory, r1ui::theme::ThemeId th
   }
 
   // The Editor screen over the in-window backend (a native window cannot be rendered offscreen) with its
-  // own throwaway data folder: the arrangement, customize mode, the shortcut editor and a floating panel.
+  // own throwaway data folder: the arrangement, the hotkey editor, the menu creator, the Custom Menus menu
+  // content (the sample Quick Tools panel) and a floating panel.
   r.setMode(Mode::Editor);
   {
     auto ui = r.context(content);
@@ -134,13 +135,25 @@ void renderShots(const std::filesystem::path& directory, r1ui::theme::ThemeId th
       app.update();
       r.write(*ui, directory / (std::string("editor_") + tag + name + ".png"));
     };
+    // Dialogs and the creator open from timers: advance the context clock like the app loop does.
+    const auto settle = [&] {
+      for (int i = 0; i < 4; ++i) {
+        ui->setTime(ui->now() + 60);
+        ui->tick();
+        app.update();
+        ui->frame();
+      }
+    };
+    settle();
     shot("");
-    app.run("edit.customize");
-    shot("customize_");
-    app.run("edit.customize");
     app.run("edit.shortcuts");
+    settle();
     shot("shortcuts_");
+    app.run("custommenu.create");
+    settle();
+    shot("creator_");
     app.dock().floatPanel(editor::panel::kCurves);
+    settle();
     shot("floating_");
   }
 }

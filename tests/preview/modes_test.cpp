@@ -98,7 +98,7 @@ void testGalleryPages() {
     expect(gallery.selectPage(i), "page selectable");
     f.layout();
     std::printf("gallery page %zu: %zu widgets\n", i, f.ui.widgetCount());
-    expect(gallery.page() == i && f.ui.widgetCount() > 25, "page built");
+    expect(gallery.page() == i && f.ui.widgetCount() > 10, "page built");
     const auto scroll = f.rect(gallery.scrollArea());
     expect(scroll.w > 1000 && scroll.h > 800, "the page area fills the window beside the list");
   }

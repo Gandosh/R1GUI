@@ -1,6 +1,6 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
-// Owns: the built-in menu bar, toolbar and free-form panel layouts of the Editor screen and the stable
-//   command ids they and the command registry share.
+// Owns: the built-in menu bar and toolbar layouts of the Editor screen (the last menu is "Custom Menus",
+//   built from the user's custom menu set) and the stable command ids they and the command registry share.
 // Why: the customization model (user menus, hidden entries, moved commands) is a delta over these
 //   layouts, so the ids here are a compatibility surface: renaming one orphans users' customization.
 // Callers: EditorApp (builds the Customization over it), EditorCommands (declares the ids), tests.
@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "r1ui/commands/custommenu/CustomMenuSet.h"
 #include "r1ui/commands/customize/Layout.h"
 
 namespace preview::editor {
@@ -24,10 +25,11 @@ inline constexpr const char* kSelectAll = "edit.selectAll";
 inline constexpr const char* kDeselect = "edit.deselect";
 inline constexpr const char* kResetValues = "edit.resetValues";
 inline constexpr const char* kShortcuts = "edit.shortcuts";
-inline constexpr const char* kCustomize = "edit.customize";
 inline constexpr const char* kTheme = "view.darkTheme";
 inline constexpr const char* kGrid = "view.grid";
 inline constexpr const char* kLights = "view.lights";
+inline constexpr const char* kFrame = "view.frame";
+inline constexpr const char* kWireframe = "view.wireframe";
 inline constexpr const char* kToolSelect = "tool.select";
 inline constexpr const char* kToolMove = "tool.move";
 inline constexpr const char* kToolRotate = "tool.rotate";
@@ -46,16 +48,18 @@ inline constexpr const char* kLayoutRename = "layout.rename";
 inline constexpr const char* kLayoutDelete = "layout.delete";
 inline constexpr const char* kLayoutReset = "layout.reset";
 inline constexpr const char* kLayoutSwitch = "layout.switch";
+inline constexpr const char* kWorkspaceSave = "workspace.save";
+inline constexpr const char* kWorkspaceLoad = "workspace.load";
 inline constexpr const char* kAbout = "help.about";
 // "window.panel.<n>" toggles panel n; "window.screen.<n>" shows preview screen n.
 std::string panelToggle(unsigned panelId);
 std::string screenCommand(int screen);
 }  // namespace cmd
 
-// Menus File, Edit, View, Tools, Window, Layout, Help; `screenNames` fill Window > Screen.
-r1ui::commands::customize::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames);
+// Menus File, Edit, View, Tools, Window, Layout, Help and, after them, Custom Menus (when `menus` is given);
+// `screenNames` fill Window > Screen.
+r1ui::commands::customize::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames, const r1ui::commands::custommenu::CustomMenuSet* menus = nullptr);
 
 inline constexpr const char* kToolbarMain = "tb.main";
-inline constexpr const char* kPanelQuick = "fp.quick";
 
 }  // namespace preview::editor

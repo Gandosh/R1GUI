@@ -134,6 +134,22 @@ void EditorModel::removeSelectionListener(ListenerId id) {
   std::erase_if(selectionListeners_, [id](const Slot& s) { return s.id == id; });
 }
 
+void EditorModel::frameSelection() {
+  double sumX = 0.0;
+  double sumY = 0.0;
+  size_t count = 0;
+  for (const SceneItem& item : items_) {
+    if (!selection_.empty() && !isSelected(item.id)) continue;
+    const r1ui::props::Vec3 p = positionOf(item);
+    sumX += p.x;
+    sumY += p.y;
+    ++count;
+  }
+  viewX = count > 0 ? sumX / static_cast<double>(count) : 0.0;
+  viewY = count > 0 ? sumY / static_cast<double>(count) : 0.0;
+  touch();
+}
+
 void EditorModel::touch() {
   const std::vector<Slot> listeners = stateListeners_;
   for (const Slot& slot : listeners) slot.fn();

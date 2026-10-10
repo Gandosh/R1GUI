@@ -17,21 +17,33 @@
 | 5.10 Generated property panel | TECHNICAL PASS | [P5_S10](P5_S10.md) |
 | 5.11 Undo grouping, mixed values | TECHNICAL PASS | [P5_S11](P5_S11.md) |
 | 5.12 Preview: sample editor | TECHNICAL PASS (owner interaction pending) | [P5_S12](P5_S12.md) |
+| 5.13 Action list | TECHNICAL PASS (owner interaction pending) | [P5_S13](P5_S13.md) |
+| 5.14 Hotkey editor with keyboard view | TECHNICAL PASS (owner interaction pending) | [P5_S14](P5_S14.md) |
+| 5.15 Custom menu model | TECHNICAL PASS (owner interaction pending) | [P5_S15](P5_S15.md) |
+| 5.16 Pie menu | TECHNICAL PASS (owner interaction pending) | [P5_S16](P5_S16.md) |
+| 5.17 Create Custom Menu window, Custom Menus menu | TECHNICAL PASS (owner interaction pending) | [P5_S17](P5_S17.md) |
+| 5.18 .r1mn and custom workspace files | TECHNICAL PASS (owner interaction pending) | [P5_S18](P5_S18.md) |
+| 5.19 Preview: creator, hotkey editor, pie, workspaces | TECHNICAL PASS (owner interaction pending) | [P5_S19](P5_S19.md) |
 
 ## Launch the preview
 `tools/run/preview.cmd`. It opens on the Editor screen. Full checklist in `docs/dev/preview.md`. Quick tour:
 - Drag a tab (for example Outliner) out of the window onto the desktop: a rounded native window appears. Drag it to your second monitor by its title bar, resize it, drop its tab back onto a panel tab strip to dock it.
 - Layout menu: switch Default, Modeling, Review; Save as; rename; close the app and start it again, the arrangement comes back.
-- Edit > Customize (Ctrl+Shift+C): New menu, rename it, drag commands from the palette into it, hide items with the eye, restart to see it kept.
-- Edit > Keyboard Shortcuts (Ctrl+K, Ctrl+S): rebind Move to M and see a conflict warning when you reuse a key.
+- Hold the right mouse button in the viewport and flick toward a slot of the sample Tools Pie (Escape cancels).
+- Custom Menus > Create Custom Menu...: choose Pie menu or Dockable panel, drag actions from the list on the right onto the slots or into the panel, name it, Create. The dockable menu appears as a panel and under Custom Menus (close it, open it again). Custom Menus > (menu) > Edit, Save As (.r1mn), Delete; Custom Menus > Load Custom Menu.
+- Edit > Hotkey editor (Ctrl+K, Ctrl+S): click an action, click a key on the keyboard to assign it.
+- Layout > Save custom workspace... and Load custom workspace... (layout, menus, key bindings in one .r1ws file).
 - Inspector: type a value, drag in the viewport, Ctrl+Z and Ctrl+Y. Exit with File > Exit (Ctrl+Q).
-Ctrl+Tab cycles to the earlier screens (Gallery has new Docking, Commands, Properties and Customize pages). User data lives in `%LOCALAPPDATA%\R1GUI\preview\`.
+Ctrl+Tab cycles to the earlier screens (Gallery has 13 pages, new ones: Docking, Commands, Properties, Customize, Actions, Hotkeys, CustomMenus, Creator). User data lives in `%LOCALAPPDATA%\R1GUI\preview\`.
 
 ## Verification summary
 - Merged main, fresh MSVC build with warnings as errors; fast and GPU tiers pass on the RTX 4080 (fast 144 of 144, GPU 72 of 72, desktop 1 of 1). The builders' Debug trees passed with the validation layer clean.
 - Real-desktop drives (native windows 31 of 31 checks; editor drive 0 failures on release and Debug) with real mouse and keyboard input.
 - Performance (docs/perf/phase5_baseline.md): idle 0 frames, 0.00 percent CPU with a native window open; redraw frame 0.78 ms median.
 - Two library defects found by the drive and fixed with tests: widgets in a closed window were not detached on UiContext destruction (dangling subscription crash), and two classes named UiClock in different modules.
+
+## Slices 5.13 to 5.19 (2026-10-10, same day)
+Action list, hotkey editor with keyboard, custom menus (pie and dockable), pie trigger, the Create Custom Menu window, .r1mn and .r1ws files, the file path dialog and their preview integration. The Customize mode of the Editor was removed on the owner's decision. Verification of the final tree: build exit 0 (dev and Debug, warnings as errors); fast 167 of 167, GPU 78 of 78, desktop 1 of 1 in both trees; real-desktop drives `menus_drive.ps1` and `editor_drive.ps1` 0 failures.
 
 ## Accepted risks and open items
 - Not verified on this machine: a window crossing monitors of different display scale (both monitors are 100 percent), snap layouts, DWM shadow, a real display-change event.
@@ -41,3 +53,6 @@ Ctrl+Tab cycles to the earlier screens (Gallery has new Docking, Commands, Prope
 - No independent code review of Phase 5 code (recommended before Phase 6; multi-window lifetime and serialization are the risky parts).
 - The interaction specs remain local only.
 - Disk: J: filled up during parallel builds; build trees for builders moved to C:. Old worktrees were removed.
+- **Native window hang (open):** one of five real-desktop runs of the new drive hung the preview after a floating window closed. A separate builder owns the fix (swapchain creation `vkDeviceWaitIdle`, `destroyWindow` hiding the window). The slice 5.17 to 5.19 verification ran with those two uncommitted changes applied; the branch of slice 5.19 does not contain them. Re-run `tests/preview/menus_drive.ps1` after that fix is merged.
+- ActionList defect fixed in 5.19 (search field blur activated the selected action) and a host contract found: do not close dock panels inside the custom menu set's change notification.
+- Hotkey editor layout below 860 px (caption overlap) not fixed; the preview opens it at 1100 px.
