@@ -574,6 +574,18 @@ void testHotkeyEditorPanel(Rig& r) {
   expect(fs::exists(r.root / "hotkey-sets" / "Mine.json"), "the hotkey set was written to the data folder");
   r.app->tick();
   expect(fs::exists(r.root / "keybindings.json"), "keybindings.json holds the change");
+
+  // The brush library is one of the listed actions and can be rebound like any other: F4 opens and closes it, B no longer does.
+  expect(editor->selectAction("brush.library"), "the hotkey editor lists the brush library");
+  const events::Key f4 = static_cast<events::Key>(115);
+  expect(editor->assign("brush.library", 0, rc::ChordSequence::single({f4, 0, false})) == AssignOutcome::Assigned, "assigning F4 to the brush library works");
+  r.ui.clearFocus();
+  r.key(f4);
+  expect(app.brushLibrary().isOpen(), "the new key opens the brush library");
+  r.key(f4);
+  expect(!app.brushLibrary().isOpen(), "the new key closes it again");
+  r.type('b');
+  expect(!app.brushLibrary().isOpen(), "the old key B no longer opens it");
   app.overrides().resetAll();
   app.dock().closePanel(ed::panel::kShortcuts);
 }

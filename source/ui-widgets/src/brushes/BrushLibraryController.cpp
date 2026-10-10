@@ -71,8 +71,8 @@ bool BrushLibraryController::Impl::open(UiContext& ui, bool fromKey) {
   const double vw = ui.viewportWidth();
   const double vh = ui.viewportHeight();
   if (!(vw > 0.0) || !(vh > 0.0)) return false;
-  const double width = std::clamp(options.width, 280.0, std::max(280.0, vw - 24.0));
-  const double height = std::clamp(options.height, 220.0, std::max(220.0, vh - 24.0));
+  const double width = std::clamp(options.width, 200.0, std::max(200.0, vw - 24.0));
+  const double height = std::clamp(options.height, 160.0, std::max(160.0, vh - 24.0));
   const double cx = ui.pointerKnown() ? ui.pointerX() : vw * 0.5;
   const double cy = ui.pointerKnown() ? ui.pointerY() : vh * 0.5;
   const double x = std::clamp(cx - width * 0.5, 8.0, std::max(8.0, vw - width - 8.0));

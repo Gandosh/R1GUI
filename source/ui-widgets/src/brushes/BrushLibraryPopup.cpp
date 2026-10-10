@@ -30,8 +30,8 @@ constexpr size_t kMaxTypedBytes = 128;
 
 BrushLibraryPopup::BrushLibraryPopup(cb::BrushLibraryModel& model, BrushPopupHooks hooks, BrushPopupOptions options)
     : model_(model), hooks_(std::move(hooks)), options_(std::move(options)), mode_(options_.mode), layout_(std::make_unique<bx::TileLayout>()) {
-  options_.width = std::isfinite(options_.width) ? std::clamp(options_.width, 240.0, 2400.0) : 680.0;
-  options_.height = std::isfinite(options_.height) ? std::clamp(options_.height, 200.0, 2400.0) : 480.0;
+  options_.width = std::isfinite(options_.width) ? std::clamp(options_.width, 160.0, 2400.0) : 680.0;
+  options_.height = std::isfinite(options_.height) ? std::clamp(options_.height, 140.0, 2400.0) : 480.0;
 }
 
 BrushLibraryPopup::~BrushLibraryPopup() = default;
