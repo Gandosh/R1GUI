@@ -33,7 +33,8 @@ cz::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames, const
        {E::command(cmd::kUndo), E::command(cmd::kRedo), E::separator(), E::command(cmd::kSelectAll), E::command(cmd::kDeselect), E::command(cmd::kResetValues), E::separator(),
         E::command(cmd::kShortcuts)});
   menu("menu.view", "View", {E::command(cmd::kTheme), E::separator(), E::command(cmd::kGrid), E::command(cmd::kLights), E::separator(), E::command(cmd::kFrame), E::command(cmd::kWireframe)});
-  menu("menu.tools", "Tools", {E::command(cmd::kToolSelect), E::command(cmd::kToolMove), E::command(cmd::kToolRotate), E::command(cmd::kToolScale)});
+  menu("menu.tools", "Tools",
+       {E::command(cmd::kToolSelect), E::command(cmd::kToolMove), E::command(cmd::kToolRotate), E::command(cmd::kToolScale), E::separator(), E::command(cmd::kBrushLibrary)});
 
   std::vector<E> panels;
   for (const unsigned id : panel::kStandard) panels.push_back(E::command(cmd::panelToggle(id)));
@@ -56,7 +57,7 @@ cz::LayoutSet editorLayoutSet(const std::vector<std::string>& screenNames, const
   set.toolbars.push_back(r1ui::widgets::toolbarFromItems(
       kToolbarMain, "Main toolbar",
       {I::command(cmd::kToolSelect), I::command(cmd::kToolMove), I::command(cmd::kToolRotate), I::command(cmd::kToolScale), I::separator(), I::command(cmd::kUndo), I::command(cmd::kRedo),
-       I::separator(), I::command(cmd::kGrid), I::command(cmd::kLights), I::separator(), I::command(cmd::kTheme)}));
+       I::separator(), I::command(cmd::kGrid), I::command(cmd::kLights), I::separator(), I::command(cmd::kBrushLibrary), I::command(cmd::kTheme)}));
 
   // The user's own menus come last; its entries are real commands registered by CustomMenuCommands.
   if (menus != nullptr) set.menuBar.menus.push_back(r1ui::widgets::customMenusMenuNode(*menus));

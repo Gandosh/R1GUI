@@ -205,6 +205,8 @@ void PreviewApp::ensureModeBuilt(Mode mode) {
       return names;
     };
     host.monitors = [this] { return monitorSet(); };
+    if (!brushTextures_) brushTextures_ = std::make_unique<widgets::GpuThumbnailTextures>(*device_);
+    host.thumbnailSink = brushTextures_.get();
     editor_ = std::make_unique<editor::EditorApp>(*editorUi_, content, *backend_, std::move(host));
   } else if (mode == Mode::Gallery && !galleryUi_) {
     galleryUi_ = makeContext(content);

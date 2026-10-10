@@ -25,6 +25,7 @@
 #include "r1ui/widgets/image/Png.h"
 #include "r1ui/widgets/runtime/Services.h"
 #include "r1ui/widgets/runtime/UiContext.h"
+#include "r1ui/widgets/thumbnailgrid/GpuThumbnailTextures.h"
 
 namespace preview {
 
@@ -130,6 +131,8 @@ void renderShots(const std::filesystem::path& directory, r1ui::theme::ThemeId th
     host.setDarkTheme = [&](bool dark) { r.services.theme().set(dark ? r1ui::theme::ThemeId::Dark : r1ui::theme::ThemeId::Light); };
     host.isDark = [&] { return r.services.theme().id() == r1ui::theme::ThemeId::Dark; };
     host.quit = [] {};
+    widgets::GpuThumbnailTextures brushSink(r.device);  // outlives the app: its pictures are released first
+    host.thumbnailSink = &brushSink;
     editor::EditorApp app(*ui, content, backend, std::move(host));
     const auto shot = [&](const char* tag) {
       app.update();
@@ -155,6 +158,15 @@ void renderShots(const std::filesystem::path& directory, r1ui::theme::ThemeId th
     app.dock().floatPanel(editor::panel::kCurves);
     settle();
     shot("floating_");
+    // The brush library over the viewport: opened (pictures arrive in batches), then after typing S.
+    app.brushLibrary().open();
+    settle();
+    shot("brushes_");
+    shot("brushes_");
+    ui->textInput(U's');
+    settle();
+    shot("brushes_s_");
+    app.brushLibrary().close();
   }
 }
 

@@ -28,12 +28,15 @@
 #include <string_view>
 #include <vector>
 
+#include "EditorBrushes.h"
 #include "EditorModel.h"
 #include "r1ui/commands/CommandRegistry.h"
 #include "r1ui/commands/CommandRouter.h"
 #include "r1ui/commands/Keymap.h"
 #include "r1ui/commands/OverrideIo.h"
 #include "r1ui/commands/Overrides.h"
+#include "r1ui/commands/brushes/BrushLibraryModel.h"
+#include "r1ui/commands/brushes/BrushState.h"
 #include "r1ui/commands/customize/Customization.h"
 #include "r1ui/commands/custommenu/CustomMenuIo.h"
 #include "r1ui/commands/custommenu/CustomMenuSet.h"
@@ -42,6 +45,7 @@
 #include "r1ui/dock/DockMonitors.h"
 #include "r1ui/dock/LayoutManager.h"
 #include "r1ui/dock/LayoutStore.h"
+#include "r1ui/widgets/brushes/BrushLibraryController.h"
 #include "r1ui/widgets/commands/CommandKeys.h"
 #include "r1ui/widgets/dialog/Dialog.h"
 #include "r1ui/widgets/commands/CommandUiSync.h"
@@ -90,6 +94,9 @@ struct EditorHost {
   std::function<void(int screen)> showScreen;           // index of a preview screen (Window > Screen)
   std::function<std::vector<std::string>()> screenNames;  // names for the Window > Screen entries
   std::function<r1ui::dock::MonitorSet()> monitors;     // empty = no monitor information
+  // Where the brush library's pictures are uploaded (the GPU sink of the window's device); null = the brush
+  // tiles show their icons only (tests without a device).
+  r1ui::widgets::thumbs::ThumbnailTextureSink* thumbnailSink = nullptr;
 };
 
 // The data root of the preview: R1GUI_PREVIEW_DATA when set (tests, scripted drives), otherwise
@@ -161,6 +168,14 @@ class EditorApp {
   bool loadWorkspaceFrom(const std::filesystem::path& file);
   // Ends a running pie gesture in every window (Escape).
   void cancelPies();
+
+  // ---- the brush library (slice 5.23), for tests and the scripted drive ----
+  r1ui::commands::brushes::BrushLibraryModel& brushModel() { return brushModel_; }
+  r1ui::widgets::BrushLibraryController& brushLibrary() { return *brushController_; }
+  // Makes a brush the active one (the library's pick does the same): the status line, the viewport and the
+  // outline in the library follow. False for an unknown id.
+  bool selectBrush(const std::string& brushId);
+  std::filesystem::path brushFile() const { return host_.dataRoot / "brushes.json"; }
   // Floats an open panel into a window of its own with the content size the panel wants (capped to the main
   // window), centred over the main window. The dock would otherwise keep the size of the region it left.
   bool floatPanelSized(r1ui::dock::PanelId panelId, double width, double height);
@@ -182,6 +197,9 @@ class EditorApp {
   void declare(std::string id, std::string label, std::string description, std::string icon, std::string category,
                r1ui::commands::ChordSequence primary, std::function<void()> run, r1ui::commands::CommandKind kind = r1ui::commands::CommandKind::Action,
                std::function<bool()> enabled = {}, std::function<bool()> checked = {}, r1ui::commands::ChordSequence alternate = {});
+
+  // ---- EditorBrushLibrary.cpp ----
+  void startBrushLibrary();
 
   // ---- EditorPanels.cpp ----
   void registerPanels();
@@ -268,7 +286,22 @@ class EditorApp {
   std::unique_ptr<r1ui::core::events::GlobalKeyHandler> mainKeys_;  // Escape ends a pie gesture, then keys_
   // One shortcut handler per native-window context that ever showed a panel (never freed before the app:
   // a context holds a raw pointer to its handler).
-  std::vector<std::pair<r1ui::widgets::UiContext*, std::unique_ptr<r1ui::core::events::GlobalKeyHandler>>> floatKeys_;
+  struct FloatKeyEntry {
+    r1ui::widgets::UiContext* ui = nullptr;
+    std::unique_ptr<r1ui::core::events::GlobalKeyHandler> keys;
+    std::unique_ptr<r1ui::core::events::GlobalKeyHandler> tap;  // tells the brush library which window a key came from
+  };
+  std::vector<FloatKeyEntry> floatKeys_;
+
+  // The brush library: the model (sample brushes, favourites, recents, letters), its pictures, its file and
+  // the controller (command "brush.library", the popup, the key taps of every window). The controller dies
+  // before the registry and the model; the taps are destroyed with it or after, they only hold weak links.
+  r1ui::commands::brushes::BrushLibraryModel brushModel_;
+  SampleBrushThumbnails brushThumbs_{brushModel_};
+  r1ui::commands::customize::FileTextStore brushStore_;
+  r1ui::commands::brushes::BrushStateStorage brushStorage_;
+  std::unique_ptr<r1ui::widgets::BrushLibraryController> brushController_;
+  std::unique_ptr<r1ui::core::events::GlobalKeyHandler> mainTap_;
 
   // Custom menus: the set, its file, the commands behind the Custom Menus menu, the creator window's state.
   r1ui::commands::customize::FileTextStore menuStore_;

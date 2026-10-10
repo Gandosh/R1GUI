@@ -45,6 +45,7 @@
 #include "r1ui/widgets/dock/native/NativeFloatingBackend.h"
 #include "r1ui/widgets/runtime/Services.h"
 #include "r1ui/widgets/runtime/UiContext.h"
+#include "r1ui/widgets/thumbnailgrid/GpuThumbnailTextures.h"
 
 namespace preview {
 
@@ -132,6 +133,8 @@ class PreviewApp final : private r1ui::core::events::GlobalKeyHandler {
   std::unique_ptr<r1ui::render::WindowTarget> target_;
   std::unique_ptr<GpuTextureFactory> textures_;
   std::unique_ptr<r1ui::widgets::Services> services_;
+  // The brush library's picture textures (the Editor's tiles); destroyed after the Editor that uses them.
+  std::unique_ptr<r1ui::widgets::GpuThumbnailTextures> brushTextures_;
   // This window's share of the glyph atlas: the shell scene, the active context and the direct-drawn
   // modes all draw text in one frame, so one consumer tracks the whole frame.
   std::unique_ptr<r1ui::widgets::AtlasConsumer> windowAtlas_;

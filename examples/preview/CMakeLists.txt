@@ -22,6 +22,8 @@ add_library(r1gui-preview-core STATIC
   DockSandbox.cpp
   DriveStatus.cpp
   editor/EditorApp.cpp
+  editor/EditorBrushes.cpp
+  editor/EditorBrushLibrary.cpp
   editor/EditorCommands.cpp
   editor/EditorCustomMenus.cpp
   editor/EditorLayouts.cpp

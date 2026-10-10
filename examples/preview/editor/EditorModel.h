@@ -103,6 +103,10 @@ class EditorModel {
   bool showGrid = true;
   bool showLights = true;
   bool wireframe = false;
+  // The brush the viewport shows (name) and the size of its cursor ring in logical pixels (Ctrl + wheel over
+  // the viewport changes it). The brush library sets the name.
+  std::string brushName;
+  double brushSize = 48.0;
   // The world point at the centre of the viewport (Frame selection moves it).
   double viewX = 0.0;
   double viewY = 0.0;

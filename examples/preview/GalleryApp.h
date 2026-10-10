@@ -1,13 +1,13 @@
 // Copyright (c) 2026 R1GUI. All rights reserved. Proprietary.
 // Owns: GalleryApp, the Gallery mode: a page list at the left (a list-style TreeView) and the
 //   selected page of the widget library's galleries (Buttons, Fields, Containers, Overlays,
-//   Editors, Docking, Commands, Properties, Customize, Actions, Hotkeys, CustomMenus, Creator) mounted inside a ScrollArea on the right. Each page shows every widget of its groups in
+//   Editors, Docking, Commands, Properties, Customize, Actions, Hotkeys, CustomMenus, Creator, Brushes) mounted inside a ScrollArea on the right. Each page shows every widget of its groups in
 //   every state with captions, built by the widget library's own gallery functions.
 // Why: slice 4.17, a state matrix of the whole toolkit that is live (hover, click, type, open the
 //   popups) in the real window, next to the composed screen of the Widgets mode.
 // Callers: PreviewApp, tests/preview. Calls: buildGalleryButtons, buildGalleryFields,
 //   buildGalleryContainers, buildGalleryOverlays, buildGalleryEditors, buildGalleryDock,
-//   buildGalleryCommands, buildGalleryProps, buildGalleryCustomize, buildGalleryActions, buildGalleryHotkeys, buildGalleryCustomMenus, buildGalleryCreator.
+//   buildGalleryCommands, buildGalleryProps, buildGalleryCustomize, buildGalleryActions, buildGalleryHotkeys, buildGalleryCustomMenus, buildGalleryCreator, buildGalleryBrushes.
 // Lifetime: only the selected page exists; switching destroys the old page (its overlays are closed
 //   first) and builds the new one, so a page always starts in its initial state.
 #pragma once
@@ -21,7 +21,7 @@ namespace preview {
 
 class GalleryApp {
  public:
-  static constexpr size_t kPageCount = 13;
+  static constexpr size_t kPageCount = 14;
   static const char* pageName(size_t index);
 
   // Builds the page list and page `first` as a child of `parent` (a flex container filling the window

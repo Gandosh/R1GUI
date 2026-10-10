@@ -96,6 +96,8 @@ EditorApp::EditorApp(rw::UiContext& ui, WidgetId parent, rw::IFloatingBackend& b
       controller_(ui, services(), sync_, customization_),
       keyStore_(host_.dataRoot / "keybindings.json"),
       keys_(ui, services()),
+      brushStore_(host_.dataRoot / "brushes.json"),
+      brushStorage_(brushModel_, brushStore_),
       menuStore_(host_.dataRoot / "custom-menus.json"),
       menuStorage_(menuSet_, menuStore_),
       creator_(menuSet_),
@@ -110,6 +112,7 @@ EditorApp::EditorApp(rw::UiContext& ui, WidgetId parent, rw::IFloatingBackend& b
 
   registerPanels();
   registerCommands();
+  startBrushLibrary();  // registers brush.library: before the key bindings load, so a rebinding of it applies
   startCustomMenus();  // before the key bindings and customization load: they refer to its commands
 
   const rc::ImportReport keys = rc::loadOverrides(keyStore_, registry_, overrides_);
@@ -124,7 +127,8 @@ EditorApp::EditorApp(rw::UiContext& ui, WidgetId parent, rw::IFloatingBackend& b
   router_.setPendingObserver([this](const rc::PendingState& state) { pendingText_ = state.active ? state.text : std::string(); });
   undoListener_ = model_.context().undo().addListener([this](const r1ui::props::UndoEvent&) { registry_.touch(); });
   mainKeys_ = std::make_unique<MainKeys>(keys_, [this] { cancelPies(); });
-  ui_.setGlobalKeyHandler(mainKeys_.get());
+  mainTap_ = brushController_->tapKeys(ui_, mainKeys_.get());
+  ui_.setGlobalKeyHandler(mainTap_.get());
 
   buildUi(parent);
   ui_.frame();  // the dock needs a rectangle before a stored layout is applied
@@ -235,7 +239,8 @@ void EditorApp::refreshStatus() {
   if (rw::Label* label = ui_.objectAs<rw::Label>(statusLabel_); label != nullptr && label->text() != left) label->setText(left);
   const std::string name = activeName_;
   const r1ui::props::UndoStack& undo = model_.context().undo();
-  const std::string right = "Layout: " + (name.empty() ? std::string("custom") : name) + "     Undo: " + (undo.canUndo() ? undo.undoLabel() : std::string("nothing"));
+  const std::string right = "Brush: " + (model_.brushName.empty() ? std::string("none") : model_.brushName) + "     Layout: " + (name.empty() ? std::string("custom") : name) +
+                            "     Undo: " + (undo.canUndo() ? undo.undoLabel() : std::string("nothing"));
   if (rw::Label* label = ui_.objectAs<rw::Label>(layoutLabel_); label != nullptr && label->text() != right) label->setText(right);
 }
 
@@ -255,7 +260,8 @@ void EditorApp::saveAll() {
   saveUserFiles();
   if (!customizationStorage_.save()) model_.log(LogLevel::Error, "customization.json not saved: " + customizationStorage_.lastError());
   if (!menuStorage_.save()) model_.log(LogLevel::Error, "custom-menus.json not saved: " + menuStorage_.lastError());
-  setStatus("Saved the layout, shortcuts, customization and custom menus");
+  if (!brushStorage_.save()) model_.log(LogLevel::Error, "brushes.json not saved: " + brushStorage_.lastError());
+  setStatus("Saved the layout, shortcuts, customization, custom menus and brush favourites");
 }
 
 // Application exit and tests: the layout and every user file now.
@@ -267,14 +273,18 @@ bool EditorApp::run(std::string_view commandId) {
 }
 
 void EditorApp::installKeyForwarder(rw::UiContext& ui) {
-  for (auto& [owner, handler] : floatKeys_) {
-    if (owner == &ui) {
-      ui.setGlobalKeyHandler(handler.get());
+  for (FloatKeyEntry& entry : floatKeys_) {
+    if (entry.ui == &ui) {
+      ui.setGlobalKeyHandler(entry.tap.get());
       return;
     }
   }
-  floatKeys_.emplace_back(&ui, std::make_unique<FloatKeys>(ui, services(), [this] { cancelPies(); }));
-  ui.setGlobalKeyHandler(floatKeys_.back().second.get());
+  FloatKeyEntry entry;
+  entry.ui = &ui;
+  entry.keys = std::make_unique<FloatKeys>(ui, services(), [this] { cancelPies(); });
+  entry.tap = brushController_->tapKeys(ui, entry.keys.get());  // the brush library opens in the window the key was pressed in
+  ui.setGlobalKeyHandler(entry.tap.get());
+  floatKeys_.push_back(std::move(entry));
 }
 
 }  // namespace preview::editor

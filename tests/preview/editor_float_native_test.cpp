@@ -140,6 +140,44 @@ int main() {
       e.reset();
     }
   }
+  // 3b. The brush library in a native floating window: B pressed in that window's own context opens the library
+  // there (bounded by that window), one letter picks Inflate (the only brush starting with I), a window that
+  // is destroyed while the library is open takes it along, and the main window opens it afterwards.
+  {
+    note("scenario: brush library in a floating window");
+    auto& library = app.brushLibrary();
+    showPanel(e, ed::panel::kOutliner);
+    e.press(*e.rig.ui, letter('F'), kCtrlAlt);
+    e.pump(6);
+    UiContext* inside = e.contextOf(ed::panel::kOutliner);
+    check(inside != nullptr && inside != e.rig.ui.get(), "brush library: the outliner floats");
+    if (inside != nullptr && inside != e.rig.ui.get()) {
+      e.press(*inside, letter('B'), 0);
+      e.pump(4);
+      check(library.isOpen() && library.window() == inside, "brush library: B opens it in the floating window");
+      if (library.window() == inside && library.popup() != nullptr) {
+        const auto popup = inside->absRect(library.popup()->id());
+        check(popup.x >= 0 && popup.y >= 0 && popup.w > 0 && popup.h > 0, "brush library: the popup has a place in the floating window");
+      }
+      inside->setTime(inside->now() + 50);
+      inside->keyDown(letter('I'), 0);
+      inside->textInput(U'i', 0);
+      inside->keyUp(letter('I'), 0);
+      e.pump(4);
+      check(!library.isOpen() && app.model().brushName == "Inflate", "brush library: one letter picked Inflate");
+      e.press(*inside, letter('B'), 0);
+      e.pump(4);
+      check(library.isOpen(), "brush library: open again before the window goes");
+      e.reset();  // the window is destroyed while the library is open in it
+      check(!library.isOpen(), "brush library: it went with its window");
+    }
+    e.press(*e.rig.ui, letter('B'), 0);
+    e.pump(4);
+    check(library.isOpen() && library.window() == e.rig.ui.get(), "brush library: the main window opens it");
+    e.press(*e.rig.ui, events::Key::Escape, 0);
+    e.pump(4);
+    check(!library.isOpen(), "brush library: Escape closes it");
+  }
   // 4. A fixed pseudo-random mix of everything above: chords pressed in random contexts (main or any floating
   // window) with the focus on a random widget, panels opened, closed and activated, loop steps skipped or
   // repeated, the layout reset. The state is checked as it goes (a window per floating area, every docked
